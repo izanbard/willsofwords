@@ -1,0 +1,23 @@
+[project]
+name = "wills_of_words"
+description = "a word serach puzzle creation tool"
+version = "0.0.1"
+dependencies = [
+    "numpy>2.3.4",
+]
+requires-python = ">=3.12"
+readme = ".github/README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.12.1",
+    "flake8>=7.3.0",
+    "pip-tools>=7.5.2",
+    "pre-commit>=4.5.0",
+]
+
+[tool.black]
+line-length = 127
+target-version = ["py312"]
