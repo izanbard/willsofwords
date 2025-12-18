@@ -1,63 +1,52 @@
-from .direction import DirectionEnum
+from PIL import Image, ImageDraw, ImageFont
+from pydantic import BaseModel, Field
+
+from src.models import DirectionEnum
 
 
-class Cell:
-    def __init__(self):
-        self._value: str | None = None
-        self.is_answer: bool = False
-        self._direction: dict[str, bool] = dict.fromkeys(
-            [DirectionEnum.NS, DirectionEnum.EW, DirectionEnum.NESW, DirectionEnum.NWSE], False
+class Cell(BaseModel):
+    loc_x: int = Field(description="The x position of the cell", ge=0)
+    loc_y: int = Field(description="The y position of the cell", ge=0)
+    value: str = Field(default=".", description="The letter of the cell", max_length=1, min_length=1)
+    is_answer: bool = Field(default=False, description="Whether the cell is part of an answer")
+    direction: dict[DirectionEnum, bool] = Field(
+        default_factory=lambda: dict.fromkeys(list(DirectionEnum), False),
+        description="The direction of any answers passing through the cell",
+    )
+
+    def set_answer(self, value: str, direction: DirectionEnum) -> None:
+        self.value = value
+        self.is_answer = True
+        self.direction[direction] = True
+
+    def create_puzzle_tile_image(self, size_in_pixels: int):
+        base = Image.new("LA", (size_in_pixels, size_in_pixels), color=(255, 0))
+        draw = ImageDraw.Draw(base)
+        draw.text(
+            (size_in_pixels / 2, size_in_pixels / 2),
+            text=self.value,
+            fill=(0, 255),
+            font=ImageFont.truetype("src/assets/verdana.ttf", size=size_in_pixels / 2),
+            anchor="mm",
         )
+        return base
 
-    @property
-    def value(self) -> str:
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        if len(value) != 1:
-            raise ValueError("Cell value must be exactly one char")
-        self._value = value
-
-    @property
-    def direction(self) -> dict[str, bool]:
-        return self._direction
-
-    @direction.setter
-    def direction(self, key):
-        self._direction[key] = True
-
-    def direction_to_char(self) -> str:
-        composite_direction = 0
+    def create_solution_tile_image(self, size_in_pixels: int):
+        base = self.create_puzzle_tile_image(size_in_pixels)
+        draw = ImageDraw.Draw(base)
         if self.direction[DirectionEnum.NS]:
-            composite_direction += 1
+            draw.line(
+                ((size_in_pixels / 2, 0), (size_in_pixels / 2, size_in_pixels)), fill=(0, 255), width=int(size_in_pixels / 10)
+            )
         if self.direction[DirectionEnum.EW]:
-            composite_direction += 2
+            draw.line(
+                ((0, size_in_pixels / 2), (size_in_pixels, size_in_pixels / 2)), fill=(0, 255), width=int(size_in_pixels / 10)
+            )
         if self.direction[DirectionEnum.NESW]:
-            composite_direction += 4
+            draw.line(((0, size_in_pixels), (size_in_pixels, 0)), fill=(0, 255), width=int(size_in_pixels / 10))
         if self.direction[DirectionEnum.NWSE]:
-            composite_direction += 8
-        direction_char_lookup = {
-            0: ".",
-            1: "|",
-            2: "-",
-            3: "+",
-            4: "/",
-            5: "|\u0337",
-            6: "\u233f",
-            7: "+\u0337",
-            8: "\\",
-            9: "|\u20e5",
-            10: "\u2340",
-            11: "",
-            12: "X",
-            13: "X\u20d2",
-            14: "X\u0336",
-            15: "*",
-        }
-        return direction_char_lookup[composite_direction]
+            draw.line(((0, 0), (size_in_pixels, size_in_pixels)), fill=(0, 255), width=int(size_in_pixels / 10))
+        return base
 
     def __str__(self):
-        if self.value is not None:
-            return self.value
-        return self.direction_to_char()
+        return self.value

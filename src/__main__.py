@@ -1,7 +1,15 @@
-from src.models.puzzle import Puzzle
+from pathlib import Path
 
+from src.models import BookData
 
-words = ["ADVENTURE", "DESTINATION", "PASSPORT", "EXPLORE", "TOURIST", "JOURNEY", "FLIGHT", "CRUISE", "LUGGAGE", "TICKET"]
-my_puzzle = Puzzle(13, 13, 10)
-my_puzzle.populate_puzzle(words)
-my_puzzle.display_puzzle()
+with open(Path("testbook_out.json")) as fd:
+    book = BookData.model_validate_json(fd.read())
+
+for stats in [
+    (
+        f"{b.puzzle_title}, {len(b.puzzle_word_list)} words out of {len(b.input_word_list)}, "
+        f"size {b.width}x{b.height} with a density of {b.density}"
+    )
+    for b in book.puzzles
+]:
+    print(stats)
