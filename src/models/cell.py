@@ -20,7 +20,7 @@ class Cell(BaseModel):
         self.direction[direction] = True
 
     def create_puzzle_tile_image(self, size_in_pixels: int):
-        base = Image.new("LA", (size_in_pixels, size_in_pixels), color=(255, 0))
+        base = Image.new("LA", (size_in_pixels, size_in_pixels), color=(255, 255))
         draw = ImageDraw.Draw(base)
         draw.text(
             (size_in_pixels / 2, size_in_pixels / 2),
