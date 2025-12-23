@@ -12,3 +12,8 @@ class SizeEnum(StrEnum):
     SMALL = "SMALL"
     MEDIUM = "MEDIUM"
     LARGE = "LARGE"
+
+
+class BoardImageEnum(StrEnum):
+    PUZZLE = "PUZZLE"
+    SOLUTION = "SOLUTION"

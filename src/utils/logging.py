@@ -40,7 +40,7 @@ class Logger:
 
     def __init__(self) -> None:
         self.logger = logging.getLogger("Wordsworth")
-        self.logger.setLevel(Config.LOG_LEVEL)
+        self.logger.setLevel(Config.APP_LOG_LEVEL)
         self.log_format = CustomFormatter(fmt=self.FORMAT, datefmt="%H:%M:%S", style="{")
         console = logging.StreamHandler(sys.stdout)
         console.setFormatter(self.log_format)

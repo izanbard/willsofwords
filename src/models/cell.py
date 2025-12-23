@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from pydantic import BaseModel, Field
 
 from src.models import DirectionEnum
+from src.models.config import Config
 
 
 class Cell(BaseModel):
@@ -23,10 +24,10 @@ class Cell(BaseModel):
         base = Image.new("LA", (size_in_pixels, size_in_pixels), color=(255, 255))
         draw = ImageDraw.Draw(base)
         draw.text(
-            (size_in_pixels / 2, size_in_pixels / 2),
+            xy=(size_in_pixels / 2, size_in_pixels / 2),
             text=self.value,
             fill=(0, 255),
-            font=ImageFont.truetype("src/assets/verdana.ttf", size=size_in_pixels / 2),
+            font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_CELL_FONT_SIZE_PIXELS),
             anchor="mm",
         )
         return base

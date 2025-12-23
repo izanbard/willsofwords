@@ -6,3 +6,5 @@ exclude =
     reports
     .pytest_cache
     venv
+    .venv
+extend-ignore = E203, E501, W503, E701
