@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+
+from PIL import Image, ImageDraw, ImageFont, ImageText, ImageOps
 from pydantic import BaseModel, Field
 
 from src.models import Size, Puzzle, Wordlist, Category
 from src.models.config import Config
-from src.models.enums import BoardImageEnum
 from src.utils import Logger
 
 
@@ -40,31 +40,36 @@ class BookData(BaseModel):
 
         puzzle_pages: list[Image.Image] = []
         solution_images: list[Image.Image] = []
-        puzzle_pages.append(self.create_front_page(len(puzzle_pages) % 2 == 0))
+        puzzle_pages.append(self.create_front_page(len(puzzle_pages) + 1))
         solution_images.append(self.create_solution_front_image())
 
         solutions_cache: list[Image.Image] = []
         for puzzle_size_tuple in content_sizes:
             for image in self.puzzles[puzzle_size_tuple[0]].create_page_content():
-                puzzle_pages.append(self.create_page(image, len(puzzle_pages) % 2 == 0))
+                puzzle_pages.append(self.create_page(image, len(puzzle_pages) + 1))
             Logger.get_logger().info(f"{self.puzzles[puzzle_size_tuple[0]].puzzle_title:<25} -> pages created")
-            solutions_cache.append(self.puzzles[puzzle_size_tuple[0]].create_board_image(BoardImageEnum.SOLUTION))
-            if len(solutions_cache) == 4:
-                solution_images.append(self.create_solutions_image(solutions_cache))
+            solutions_cache.append(self.puzzles[puzzle_size_tuple[0]].create_solution_page_content())
+            if len(solutions_cache) == Config.PRINT_SOLUTION_PER_PAGE:
+                solution_images.append(self.create_solutions_content(solutions_cache))
                 solutions_cache = []
-        del content_sizes
         if len(solutions_cache) > 0:
-            solution_images.append(self.create_solutions_image(solutions_cache))
-        del solutions_cache
+            solution_images.append(self.create_solutions_content(solutions_cache))
         if len(puzzle_pages) % 2 != 0:
-            puzzle_pages.append(self.create_blank_page())
+            puzzle_pages.append(self.create_blank_page(len(puzzle_pages) + 1))
         Logger.get_logger().info("Creating solutions pages...")
         for solution_image in solution_images:
-            puzzle_pages.append(self.create_page(solution_image, len(puzzle_pages) % 2 == 0))
-        del solution_images
+            puzzle_pages.append(self.create_page(solution_image, len(puzzle_pages) + 1))
         if len(puzzle_pages) % 2 != 0:
-            puzzle_pages.append(self.create_blank_page())
+            puzzle_pages.append(self.create_blank_page(len(puzzle_pages) + 1))
         Logger.get_logger().info("Wrapping it all up in a bow...")
+        self.save_pdf(filename, puzzle_pages)
+        Logger.get_logger().info(
+            f"Pages complete, {len(self.puzzles):02g} puzzles and solutions " f"in {len(puzzle_pages):03g} pages"
+        )
+
+    def save_pdf(self, filename: Path, puzzle_pages: list[Image.Image]):
+        if Config.PRINT_DEBUG:
+            filename = filename.with_stem(filename.stem + "_PRINT_DEBUG")
         puzzle_pages[0].save(
             filename,
             format="PDF",
@@ -73,13 +78,9 @@ class BookData(BaseModel):
             resolution=Config.PRINT_DPI,
             title=self.book_title,
         )
-        Logger.get_logger().info(
-            f"Pages complete, {len(self.puzzles):02g} puzzles and solutions "
-            f"in {len(puzzle_pages):03g} pages saved to {filename}"
-        )
-        del puzzle_pages
+        Logger.get_logger().info(f"Saved to {filename}")
 
-    def create_front_page(self, is_even: bool) -> Image.Image:
+    def create_front_page(self, page_number: int) -> Image.Image:
         content = Image.new(
             mode="LA", size=(Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_CONTENT_HEIGHT_PIXELS), color=(0, 0)
         )
@@ -92,7 +93,7 @@ class BookData(BaseModel):
             anchor="mm",
             align="centre",
         )
-        return self.create_page(content, is_even)
+        return self.create_page(content, page_number)
 
     @staticmethod
     def create_solution_front_image() -> Image.Image:
@@ -110,42 +111,139 @@ class BookData(BaseModel):
         )
         return content
 
-    @staticmethod
-    def create_blank_page() -> Image.Image:
-        full_size_blank_page = Image.new(
-            mode="L",
+    def create_blank_page(self, page_number: int) -> Image.Image:
+        blank_content = Image.new(
+            mode="LA",
+            size=(
+                Config.PRINT_CONTENT_WIDTH_PIXELS,
+                Config.PRINT_CONTENT_HEIGHT_PIXELS,
+            ),
+            color=255,
+        )
+
+        return self.create_page(blank_content, page_number)
+
+    def create_page_number_image(self, page_number: str) -> Image.Image:
+        text = ImageText.Text(
+            text=page_number, font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_CELL_FONT_SIZE_PIXELS)
+        )
+        page_number = Image.new("LA", [int(x) for x in text.get_bbox()[2:]], color=(0, 0))
+        draw = ImageDraw.Draw(page_number)
+        draw.text((page_number.width // 2, page_number.height // 2), text, anchor="mm", fill=(0, 255))
+        return page_number
+
+    def create_page(self, content: Image.Image, page_number: int) -> Image.Image:
+        is_even = page_number % 2 == 0
+        page = Image.new(
+            mode="LA",
             size=(
                 Config.PRINT_PAGE_WIDTH_PIXELS,
                 Config.PRINT_PAGE_HEIGHT_PIXELS,
             ),
             color=255,
         )
-        return full_size_blank_page
-
-    def create_page(self, content: Image.Image, is_even: bool) -> Image.Image:
-        blank = self.create_blank_page()
         if is_even:
-            x_coord = Config.PRINT_OUTER_MARGIN_PIXELS
+            left_margin_x_coord = Config.PRINT_OUTER_MARGIN_PIXELS
+            right_margin_x_coord = Config.PRINT_PAGE_WIDTH_PIXELS - Config.PRINT_INNER_MARGIN_PIXELS
         else:
-            x_coord = Config.PRINT_INNER_MARGIN_PIXELS
+            left_margin_x_coord = Config.PRINT_INNER_MARGIN_PIXELS
+            right_margin_x_coord = Config.PRINT_PAGE_WIDTH_PIXELS - Config.PRINT_OUTER_MARGIN_PIXELS
         y_coord = Config.PRINT_TOP_MARGIN_PIXELS
-        blank.paste(content, (x_coord, y_coord), content)
-        return blank.convert("L")
+        page.paste(content, (left_margin_x_coord, y_coord), content)
+        if page_number > 1:
+            page_number = self.create_page_number_image(str(page_number))
+            page.paste(
+                page_number,
+                (
+                    left_margin_x_coord if is_even else (right_margin_x_coord - page_number.width),
+                    Config.PRINT_PAGE_HEIGHT_PIXELS - Config.PRINT_BOTTOM_MARGIN_PIXELS - page_number.height,
+                ),
+                page_number,
+            )
+        if Config.PRINT_DEBUG:
+            page = page.convert("RGB")
+            draw = ImageDraw.Draw(page)
+            draw.line([(left_margin_x_coord, 0), (left_margin_x_coord, page.height)], fill=(255, 0, 0), width=2)
+            draw.line([(right_margin_x_coord, 0), (right_margin_x_coord, page.height)], fill=(255, 0, 0), width=2)
+            draw.line([(0, y_coord), (page.width, y_coord)], fill=(255, 0, 0), width=2)
+            draw.line(
+                [
+                    (0, Config.PRINT_PAGE_HEIGHT_PIXELS - Config.PRINT_BOTTOM_MARGIN_PIXELS),
+                    (page.width, Config.PRINT_PAGE_HEIGHT_PIXELS - Config.PRINT_BOTTOM_MARGIN_PIXELS),
+                ],
+                fill=(255, 0, 0),
+                width=2,
+            )
 
-    def create_solutions_image(self, cache: list[Image.Image]) -> Image.Image:
-        if len(cache) > 4:
+            draw.line(
+                [
+                    (left_margin_x_coord, Config.PRINT_TOP_MARGIN_PIXELS + Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                    (right_margin_x_coord, Config.PRINT_TOP_MARGIN_PIXELS + Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                ],
+                fill=(0, 255, 0),
+                width=2,
+            )
+            draw.line(
+                [
+                    (
+                        left_margin_x_coord,
+                        Config.PRINT_CONTENT_HEIGHT_PIXELS
+                        + Config.PRINT_TOP_MARGIN_PIXELS
+                        - Config.PRINT_WORDLIST_BOX_HEIGHT_PIXELS,
+                    ),
+                    (
+                        right_margin_x_coord,
+                        Config.PRINT_CONTENT_HEIGHT_PIXELS
+                        + Config.PRINT_TOP_MARGIN_PIXELS
+                        - Config.PRINT_WORDLIST_BOX_HEIGHT_PIXELS,
+                    ),
+                ],
+                fill=(0, 255, 0),
+                width=2,
+            )
+            draw.line(
+                [
+                    (
+                        left_margin_x_coord,
+                        ((Config.PRINT_CONTENT_HEIGHT_PIXELS - Config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2)
+                        + (Config.PRINT_TOP_MARGIN_PIXELS + Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                    ),
+                    (
+                        right_margin_x_coord,
+                        ((Config.PRINT_CONTENT_HEIGHT_PIXELS - Config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2)
+                        + (Config.PRINT_TOP_MARGIN_PIXELS + Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                    ),
+                ],
+                fill=(255, 153, 51),
+                width=2,
+            )
+
+            return page
+        return page.convert("L")
+
+    def create_solutions_content(self, cache: list[Image.Image]) -> Image.Image:
+        if len(cache) > Config.PRINT_SOLUTION_PER_PAGE:
             raise RuntimeError("too many solutions for page")
         content = Image.new(
             mode="LA", size=(Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_CONTENT_HEIGHT_PIXELS), color=(0, 0)
         )
-        possible_coords = [
-            (0, 0),
-            (Config.PRINT_CONTENT_WIDTH_PIXELS // 2, 0),
-            (0, Config.PRINT_CONTENT_HEIGHT_PIXELS // 2),
-            (Config.PRINT_CONTENT_WIDTH_PIXELS // 2, Config.PRINT_CONTENT_HEIGHT_PIXELS // 2),
-        ]
-        for index, image in enumerate(cache):
-            content.paste(cache[index], possible_coords[index], cache[index])
+
+        col_width = Config.PRINT_CONTENT_WIDTH_PIXELS // Config.PRINT_SOLUTION_PAGE_COLS
+        row_height = Config.PRINT_CONTENT_HEIGHT_PIXELS // Config.PRINT_SOLUTION_PAGE_ROWS
+        n = 0
+        for y in range(Config.PRINT_SOLUTION_PAGE_ROWS):
+            for x in range(Config.PRINT_SOLUTION_PAGE_COLS):
+                if n >= len(cache):
+                    continue
+                sln = ImageOps.contain(
+                    cache[n],
+                    (
+                        Config.PRINT_CONTENT_WIDTH_PIXELS // Config.PRINT_SOLUTION_PAGE_COLS,
+                        Config.PRINT_CONTENT_HEIGHT_PIXELS // Config.PRINT_SOLUTION_PAGE_ROWS,
+                    ),
+                )
+                content.paste(sln, ((x * col_width) + (col_width // 2) - (sln.width // 2), y * row_height), sln)
+                n += 1
         return content
 
     def _add_a_puzzle(self, category: Category) -> None:

@@ -4,7 +4,7 @@ import string
 from math import ceil
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageText
 from pydantic import BaseModel, Field
 from profanity_check import predict_prob
 from .config import Config
@@ -199,7 +199,7 @@ class Puzzle(BaseModel):
             (title.width // 2, title.height // 2),
             self.puzzle_title,
             fill=(0, 255),
-            font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_TITLE_FONT_SIZE),
+            font=ImageFont.truetype("src/assets/verdana-bold.ttf", size=Config.PRINT_TITLE_FONT_SIZE),
             anchor="mm",
         )
         return title
@@ -218,44 +218,86 @@ class Puzzle(BaseModel):
             wordlist = Image.new(
                 "LA", (Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_WORDLIST_BOX_HEIGHT_PIXELS), color=(0, 0)
             )
-        font = ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_WORDLIST_FONT_SIZE)
+        font_size = Config.PRINT_WORDLIST_FONT_SIZE - 1
+        exceeds_size = [True]
         draw = ImageDraw.Draw(wordlist)
-        t, _, _, b = draw.textbbox(
-            xy=(0, 0),
-            text=self.puzzle_word_list[0],
-            font=font,
-        )
-        line_height = b - t
-        max_sublist_length = int(wordlist.height / (line_height + Config.PRINT_WORDLIST_LINE_SPACING_PIXELS))
-        number_of_groups = max(ceil(len(self.puzzle_word_list) / max_sublist_length), 3)
-        chunk_size = ceil(len(self.puzzle_word_list) / number_of_groups)
-        chunk_image_list = []
-        for n in range(0, len(self.puzzle_word_list), chunk_size):
-            chunk_dimensions = draw.multiline_textbbox(
-                xy=(0, 0), text="\n".join(self.puzzle_word_list[n : n + chunk_size]), font=font
-            )
-            chunk = Image.new("LA", (ceil(chunk_dimensions[2]), ceil(chunk_dimensions[3])), color=(0, 0))
-            draw2 = ImageDraw.Draw(chunk)
-            draw2.multiline_text(
-                xy=(0, 0),
-                text="\n".join(self.puzzle_word_list[n : n + chunk_size]),
-                font=font,
+        while any(exceeds_size):
+            font_size -= 1
+            font = ImageFont.truetype("src/assets/verdana.ttf", size=font_size)
+            line_height_calculate_text = ImageText.Text(text=self.puzzle_word_list[0], font=font)
+            line_height = int(line_height_calculate_text.get_bbox()[3])
+            max_sublist_length = int(wordlist.height / (line_height + Config.PRINT_WORDLIST_LINE_SPACING_PIXELS))
+            number_of_groups = max(ceil(len(self.puzzle_word_list) / max_sublist_length), 3)
+            chunk_size = ceil(len(self.puzzle_word_list) / number_of_groups)
+            group_width = Config.PRINT_CONTENT_WIDTH_PIXELS / number_of_groups
+            texts: list[ImageText.Text] = []
+            for group_number in range(number_of_groups):
+                text = ImageText.Text(
+                    "\n".join(self.puzzle_word_list[group_number * chunk_size : (group_number * chunk_size) + chunk_size]),
+                    font=font,
+                )
+                texts.append(text)
+            exceeds_size = [x.get_bbox()[2] > group_width for x in texts]
+        for group_number in range(number_of_groups):
+            draw.multiline_text(
+                xy=(int(group_number * group_width) + (group_width // 2), 0),
+                text=texts[group_number],
                 align="center",
+                anchor="ma",
                 fill=(0, 255),
+                spacing=Config.PRINT_WORDLIST_LINE_SPACING_PIXELS,
             )
-            chunk_image_list.append(chunk)
-        if number_of_groups % 2 == 1:
-            middle = len(chunk_image_list) // 2
-            left_edge = wordlist.width // 2 - chunk_image_list[middle].width // 2
-            right_edge = wordlist.width // 2 + chunk_image_list[middle].width // 2
-            wordlist.paste(chunk_image_list[middle], (left_edge, 0), chunk_image_list[middle])
-            for n in range(middle - 1, -1, -1):
-                left_edge = left_edge - chunk_image_list[n].width
-                wordlist.paste(chunk_image_list[n], (left_edge, 0), chunk_image_list[n])
-            for n in range(middle + 1, len(chunk_image_list), 1):
-                wordlist.paste(chunk_image_list[n], (right_edge, 0), chunk_image_list[n])
-                right_edge = right_edge + chunk_image_list[n].width
+        if Config.PRINT_DEBUG:
+            wordlist = wordlist.convert("RGBA")
+            draw = ImageDraw.Draw(wordlist)
+            for group_number in range(1, number_of_groups):
+                draw.line(
+                    [(int(group_number * group_width), 0), (int(group_number * group_width), wordlist.height)],
+                    fill=(51, 153, 255, 255),
+                    width=2,
+                )
         return wordlist
+
+    def create_did_you_know(self):
+        did_you_know = Image.new(
+            "LA",
+            (
+                Config.PRINT_CONTENT_WIDTH_PIXELS,
+                (Config.PRINT_CONTENT_HEIGHT_PIXELS - Config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2,
+            ),
+            color=(0, 0),
+        )
+        draw = ImageDraw.Draw(did_you_know)
+        title = ImageText.Text(
+            text="Did you know?",
+            font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_CELL_FONT_SIZE_PIXELS * 2),
+        )
+        draw.text((0, 0), text=title, fill=(0, 255))
+        placeholder_lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu."
+        split_list = []
+        temp_list = []
+        for word in placeholder_lorem.split():
+            line = ImageText.Text(
+                text=" ".join(temp_list + [word]),
+                font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_CELL_FONT_SIZE_PIXELS),
+            )
+            if line.get_length() < Config.PRINT_CONTENT_WIDTH_PIXELS:
+                temp_list.append(word)
+            else:
+                split_list.append(temp_list)
+                temp_list = [word]
+        paragraph = ImageText.Text(
+            "\n".join([" ".join(x) for x in split_list]),
+            font=ImageFont.truetype("src/assets/verdana.ttf", size=Config.PRINT_CELL_FONT_SIZE_PIXELS),
+        )
+        draw.text(
+            (0, int(title.get_bbox()[3])),
+            paragraph,
+            fill=(0, 255),
+            align="left",
+            spacing=Config.PRINT_WORDLIST_LINE_SPACING_PIXELS,
+        )
+        return did_you_know
 
     def create_page_content(self) -> list[Image.Image]:
         content = Image.new("LA", (Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_CONTENT_HEIGHT_PIXELS), color=(0, 0))
@@ -271,6 +313,16 @@ class Puzzle(BaseModel):
             content2.paste(
                 wordlist, (content2.width // 2 - wordlist.width // 2, Config.PRINT_TITLE_BOX_HEIGHT_PIXELS), wordlist
             )
+            did_you_know = self.create_did_you_know()
+            content2.paste(
+                did_you_know,
+                (
+                    0,
+                    ((Config.PRINT_CONTENT_HEIGHT_PIXELS - Config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2)
+                    + (Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                ),
+                did_you_know,
+            )
         else:
             wordlist = self.create_wordlist_image()
             content.paste(
@@ -279,6 +331,14 @@ class Puzzle(BaseModel):
                 wordlist,
             )
         return [i for i in [content, content2] if i is not None]
+
+    def create_solution_page_content(self):
+        title = self._create_title_block()
+        board = self.create_board_image(BoardImageEnum.SOLUTION)
+        content = Image.new("LA", (Config.PRINT_CONTENT_WIDTH_PIXELS + 10, title.height + board.height + 10), color=(0, 0))
+        content.paste(title, (5, 5), title)
+        content.paste(board, ((content.width // 2 - board.width // 2) + 5, Config.PRINT_TITLE_BOX_HEIGHT_PIXELS + 5), board)
+        return content
 
     def create_board_image(self, image_type: BoardImageEnum = BoardImageEnum.PUZZLE) -> Image.Image:
         cell_size = self._calculate_cells_size()
@@ -291,12 +351,14 @@ class Puzzle(BaseModel):
                     tile_image = cell.create_solution_tile_image(cell_size)
                 else:
                     raise ValueError(f"Unknown type {image_type}")
-                grid.paste(tile_image, ((cell.loc_x * cell_size), (cell.loc_y * cell_size)))
+                grid.paste(tile_image, ((cell.loc_x * cell_size), (cell.loc_y * cell_size)), tile_image)
         board = Image.new(
             "LA",
             (
-                grid.width + Config.PRINT_GRID_MARGIN_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_PAD_PIXELS,
-                grid.height + Config.PRINT_GRID_MARGIN_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_PAD_PIXELS,
+                grid.width
+                + 2 * (Config.PRINT_GRID_MARGIN_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_PAD_PIXELS),
+                grid.height
+                + 2 * (Config.PRINT_GRID_MARGIN_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_PAD_PIXELS),
             ),
             color=(0, 0),
         )
@@ -312,6 +374,141 @@ class Puzzle(BaseModel):
             width=Config.PRINT_GRID_BORDER_PIXELS,
         )
         board.paste(grid, (((board.width // 2) - grid.width // 2), ((board.height // 2) - grid.height // 2)), grid)
+        if Config.PRINT_DEBUG:
+            board = board.convert("RGBA")
+            draw = ImageDraw.Draw(board)
+            draw.line(
+                [(0, Config.PRINT_GRID_PAD_PIXELS), (board.width, Config.PRINT_GRID_PAD_PIXELS)],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [(0, board.height - Config.PRINT_GRID_PAD_PIXELS), (board.width, board.height - Config.PRINT_GRID_PAD_PIXELS)],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+
+            draw.line(
+                [
+                    (0, Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS),
+                    (board.width, Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [
+                    (0, board.height - Config.PRINT_GRID_PAD_PIXELS - Config.PRINT_GRID_BORDER_PIXELS),
+                    (board.width, board.height - Config.PRINT_GRID_PAD_PIXELS - Config.PRINT_GRID_BORDER_PIXELS),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+
+            draw.line(
+                [
+                    (0, Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_MARGIN_PIXELS),
+                    (
+                        board.width,
+                        Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_MARGIN_PIXELS,
+                    ),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [
+                    (
+                        0,
+                        board.height
+                        - Config.PRINT_GRID_PAD_PIXELS
+                        - Config.PRINT_GRID_BORDER_PIXELS
+                        - Config.PRINT_GRID_MARGIN_PIXELS,
+                    ),
+                    (
+                        board.width,
+                        board.height
+                        - Config.PRINT_GRID_PAD_PIXELS
+                        - Config.PRINT_GRID_BORDER_PIXELS
+                        - Config.PRINT_GRID_MARGIN_PIXELS,
+                    ),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+
+            draw.line(
+                [(Config.PRINT_GRID_PAD_PIXELS, 0), (Config.PRINT_GRID_PAD_PIXELS, board.height)],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [(board.width - Config.PRINT_GRID_PAD_PIXELS, 0), (board.width - Config.PRINT_GRID_PAD_PIXELS, board.height)],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+
+            draw.line(
+                [
+                    (Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS, 0),
+                    (Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS, board.height),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [
+                    (board.width - Config.PRINT_GRID_PAD_PIXELS - Config.PRINT_GRID_BORDER_PIXELS, 0),
+                    (board.width - Config.PRINT_GRID_PAD_PIXELS - Config.PRINT_GRID_BORDER_PIXELS, board.height),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+
+            draw.line(
+                [
+                    (Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_MARGIN_PIXELS, 0),
+                    (
+                        Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_MARGIN_PIXELS,
+                        board.height,
+                    ),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            draw.line(
+                [
+                    (
+                        board.width
+                        - Config.PRINT_GRID_PAD_PIXELS
+                        - Config.PRINT_GRID_BORDER_PIXELS
+                        - Config.PRINT_GRID_MARGIN_PIXELS,
+                        0,
+                    ),
+                    (
+                        board.width
+                        - Config.PRINT_GRID_PAD_PIXELS
+                        - Config.PRINT_GRID_BORDER_PIXELS
+                        - Config.PRINT_GRID_MARGIN_PIXELS,
+                        board.height,
+                    ),
+                ],
+                fill=(51, 153, 255, 255),
+                width=2,
+            )
+            offset = Config.PRINT_GRID_PAD_PIXELS + Config.PRINT_GRID_BORDER_PIXELS + Config.PRINT_GRID_MARGIN_PIXELS
+            for n in range(1, self.columns):
+                draw.line(
+                    [(offset + (n * cell_size), 0), (offset + (n * cell_size), board.height)],
+                    fill=(153, 204, 255, 255),
+                    width=1,
+                )
+            for n in range(1, self.rows):
+                draw.line(
+                    [(0, offset + (n * cell_size)), (board.width, offset + (n * cell_size))],
+                    fill=(153, 204, 255, 255),
+                    width=1,
+                )
         return board
 
     def check_for_inadvertent_profanity(self):
