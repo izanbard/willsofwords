@@ -6,7 +6,6 @@ from math import ceil
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageText
 from pydantic import BaseModel, Field
-from profanity_check import predict_prob
 from .config import Config
 from src.models import DirectionEnum, Cell
 from .enums import BoardImageEnum
@@ -24,7 +23,7 @@ class Puzzle(BaseModel):
     )
     puzzle_word_list: list[str] = Field(default_factory=list, description="the words used in this puzzle")
     density: float = Field(default=0.0, description="the density of words in the puzzle")
-    profanity: dict[str, int] = Field(
+    profanity: dict[str, list[str]] = Field(
         default_factory=dict, description="the profanity of scores for rows/cols/diags in puzzle"
     )
 
@@ -515,14 +514,21 @@ class Puzzle(BaseModel):
         grid_strings: dict[str, str] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
             grid_string_substrings_forward = [
-                grid_string[i:j] for i in range(len(grid_string)) for j in range(i + 1, len(grid_string) + 1)
+                grid_string[i:j]
+                for i in range(len(grid_string))
+                for j in range(i + 1, len(grid_string) + 1)
+                if grid_string[i:j] in Config.PROFANITY_LIST
             ]
             gird_string_substrings_backward = [
-                grid_string[-j:-i:-1] for i in range(1, len(grid_string) + 1) for j in range(i + 1, len(grid_string) + 2)
+                grid_string[-j:-i:-1]
+                for i in range(1, len(grid_string) + 1)
+                for j in range(i + 1, len(grid_string) + 2)
+                if grid_string[i:j] in Config.PROFANITY_LIST
             ]
-            predictions = predict_prob(grid_string_substrings_forward + gird_string_substrings_backward)
-            max_prediction = max(predictions)
-            self.profanity[name] = max_prediction
+            bad_words = grid_string_substrings_forward + gird_string_substrings_backward
+            if len(bad_words) > 0:
+                Logger.get_logger().warn(f"Profanity found {bad_words}")
+                self.profanity[name] = bad_words
 
     def _get_grid_strings(self) -> dict[str, str]:
         return_strings: dict[str, str] = {}
