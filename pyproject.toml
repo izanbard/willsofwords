@@ -3,7 +3,6 @@ name = "wills_of_words"
 description = "a word serach puzzle creation tool"
 version = "0.0.1"
 dependencies = [
-    "alt-profanity-check>=1.7.2",
     "numpy>2.3.4",
     "ollama>=0.6.1",
     "pillow>=12.0.0",
