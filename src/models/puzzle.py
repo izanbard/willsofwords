@@ -50,7 +50,7 @@ class Puzzle(BaseModel):
             and self.density < Config.PUZZLE_MAX_DENSITY
             and len(self.puzzle_word_list) < len(self.input_word_list)
         ):
-            word: str = random.choice(list(set(self.input_word_list) - set(self.puzzle_word_list)))
+            word: str = random.choice(list(set(self.input_word_list) - set(self.puzzle_word_list))).upper()
             Logger.get_logger().debug(f"placing word {word}")
             if word in self.puzzle_word_list:
                 continue
@@ -167,6 +167,8 @@ class Puzzle(BaseModel):
         return count
 
     def _calculate_cells_size(self) -> int:
+        if not Config.PRINT_VARIABLE_CELL_SIZE:
+            return Config.PRINT_MIN_CELL_SIZE
         cell_size_by_width = int(Config.PRINT_GRID_WIDTH / self.columns)
         cell_size_by_height = int(Config.PRINT_GRID_HEIGHT / self.rows)
         if cell_size_by_width < Config.PRINT_MIN_CELL_SIZE:
@@ -191,12 +193,12 @@ class Puzzle(BaseModel):
             return 2
         raise ValueError("You fucked this, wills, you moron")
 
-    def _create_title_block(self) -> Image.Image:
+    def _create_title_block(self, puzzle_number: int) -> Image.Image:
         title = Image.new("LA", (Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_TITLE_BOX_HEIGHT_PIXELS), color=(0, 0))
         draw = ImageDraw.Draw(title)
         draw.text(
             (title.width // 2, title.height // 2),
-            self.puzzle_title,
+            str(puzzle_number) + ". " + self.puzzle_title,
             fill=(0, 255),
             font=ImageFont.truetype("src/assets/verdana-bold.ttf", size=Config.PRINT_TITLE_FONT_SIZE),
             anchor="mm",
@@ -241,7 +243,7 @@ class Puzzle(BaseModel):
             draw.multiline_text(
                 xy=(int(group_number * group_width) + (group_width // 2), 0),
                 text=texts[group_number],
-                align="center",
+                align="left",
                 anchor="ma",
                 fill=(0, 255),
                 spacing=Config.PRINT_WORDLIST_LINE_SPACING_PIXELS,
@@ -298,9 +300,9 @@ class Puzzle(BaseModel):
         )
         return did_you_know
 
-    def create_page_content(self) -> list[Image.Image]:
+    def create_page_content(self, puzzle_number: int) -> list[Image.Image]:
         content = Image.new("LA", (Config.PRINT_CONTENT_WIDTH_PIXELS, Config.PRINT_CONTENT_HEIGHT_PIXELS), color=(0, 0))
-        title = self._create_title_block()
+        title = self._create_title_block(puzzle_number)
         board = self.create_board_image(BoardImageEnum.PUZZLE)
         content.paste(title, (0, 0), title)
         content.paste(board, (content.width // 2 - board.width // 2, Config.PRINT_TITLE_BOX_HEIGHT_PIXELS), board)
@@ -318,7 +320,7 @@ class Puzzle(BaseModel):
                 (
                     0,
                     ((Config.PRINT_CONTENT_HEIGHT_PIXELS - Config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2)
-                    + (Config.PRINT_TITLE_BOX_HEIGHT_PIXELS),
+                    + Config.PRINT_TITLE_BOX_HEIGHT_PIXELS,
                 ),
                 did_you_know,
             )
@@ -331,8 +333,8 @@ class Puzzle(BaseModel):
             )
         return [i for i in [content, content2] if i is not None]
 
-    def create_solution_page_content(self):
-        title = self._create_title_block()
+    def create_solution_page_content(self, puzzle_number: int):
+        title = self._create_title_block(puzzle_number)
         board = self.create_board_image(BoardImageEnum.SOLUTION)
         content = Image.new("LA", (Config.PRINT_CONTENT_WIDTH_PIXELS + 10, title.height + board.height + 10), color=(0, 0))
         content.paste(title, (5, 5), title)
@@ -367,7 +369,7 @@ class Puzzle(BaseModel):
                 (0 + Config.PRINT_GRID_PAD_PIXELS, 0 + Config.PRINT_GRID_PAD_PIXELS),
                 (board.width - Config.PRINT_GRID_PAD_PIXELS, board.height - Config.PRINT_GRID_PAD_PIXELS),
             ],
-            radius=Config.PRINT_GRID_BORDER_RADIUS,
+            radius=Config.PRINT_GRID_BORDER_RADIUS_PIXELS,
             fill=(0, 0),
             outline=(0, 255),
             width=Config.PRINT_GRID_BORDER_PIXELS,

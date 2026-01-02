@@ -17,7 +17,7 @@ class Size:
             return
 
         target = sqrt(target_size)
-        if target.is_integer():
+        if target.is_integer() and target <= Config.PUZZLE_MAX_COLUMNS and target <= Config.PUZZLE_MAX_ROWS:
             self.rows = int(target)
             self.columns = int(target)
             return

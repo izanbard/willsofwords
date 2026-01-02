@@ -44,11 +44,11 @@ class BookData(BaseModel):
         solution_images.append(self.create_solution_front_image())
 
         solutions_cache: list[Image.Image] = []
-        for puzzle_size_tuple in content_sizes:
-            for image in self.puzzles[puzzle_size_tuple[0]].create_page_content():
+        for puzzle_number, puzzle_size_tuple in enumerate(content_sizes, 1):
+            for image in self.puzzles[puzzle_size_tuple[0]].create_page_content(puzzle_number):
                 puzzle_pages.append(self.create_page(image, len(puzzle_pages) + 1))
             Logger.get_logger().info(f"{self.puzzles[puzzle_size_tuple[0]].puzzle_title:<25} -> pages created")
-            solutions_cache.append(self.puzzles[puzzle_size_tuple[0]].create_solution_page_content())
+            solutions_cache.append(self.puzzles[puzzle_size_tuple[0]].create_solution_page_content(puzzle_number))
             if len(solutions_cache) == Config.PRINT_SOLUTION_PER_PAGE:
                 solution_images.append(self.create_solutions_content(solutions_cache))
                 solutions_cache = []
@@ -236,8 +236,8 @@ class BookData(BaseModel):
                 if n >= len(cache):
                     continue
                 sln = ImageOps.contain(
-                    cache[n],
-                    (
+                    image=cache[n],
+                    size=(
                         Config.PRINT_CONTENT_WIDTH_PIXELS // Config.PRINT_SOLUTION_PAGE_COLS,
                         Config.PRINT_CONTENT_HEIGHT_PIXELS // Config.PRINT_SOLUTION_PAGE_ROWS,
                     ),
