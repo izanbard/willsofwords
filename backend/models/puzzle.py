@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from .config import Config
 from .cell import Cell
 from .enums import LayoutEnum, DirectionEnum
-from src.utils import Logger, get_profanity_list
+from backend.utils import Logger, get_profanity_list
 
 
 class Puzzle(BaseModel):

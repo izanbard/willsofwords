@@ -1,6 +1,6 @@
 from PIL import ImageFont, Image
 
-from src.models.config import Config
+from backend.models.config import Config
 
 
 class PrintParams:
@@ -26,19 +26,19 @@ class PrintParams:
             }
 
         self.fonts: dict[str, ImageFont.FreeTypeFont] = {
-            "TITLE_FONT": ImageFont.truetype("src/assets/verdana.ttf", size=self.config.PRINT_TITLE_FONT_SIZE_PIXELS),
+            "TITLE_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.PRINT_TITLE_FONT_SIZE_PIXELS),
             "HEADING_FONT": ImageFont.truetype(
-                "src/assets/verdana.ttf", size=self.config.PRINT_LONG_FACT_HEADING_FONT_SIZE_PIXELS
+                "backend/assets/verdana.ttf", size=self.config.PRINT_LONG_FACT_HEADING_FONT_SIZE_PIXELS
             ),
             "CONTENT_FONT": ImageFont.truetype(
-                "src/assets/verdana.ttf", size=self.config.PRINT_LONG_FACT_CONTENT_FONT_SIZE_PIXELS
+                "backend/assets/verdana.ttf", size=self.config.PRINT_LONG_FACT_CONTENT_FONT_SIZE_PIXELS
             ),
-            "CELL_FONT": ImageFont.truetype("src/assets/verdana.ttf", size=self.config.PRINT_CELL_FONT_SIZE_PIXELS),
+            "CELL_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.PRINT_CELL_FONT_SIZE_PIXELS),
             "SEARCH_LIST_FONT": ImageFont.truetype(
-                "src/assets/verdana.ttf", size=self.config.PRINT_WORDLIST_FONT_SIZE_PIXELS + 1
+                "backend/assets/verdana.ttf", size=self.config.PRINT_WORDLIST_FONT_SIZE_PIXELS + 1
             ),
             "PAGE_NUMBER_FONT": ImageFont.truetype(
-                "src/assets/verdana.ttf", size=self.config.PRINT_PAGE_NUMBER_FONT_SIZE_PIXELS
+                "backend/assets/verdana.ttf", size=self.config.PRINT_PAGE_NUMBER_FONT_SIZE_PIXELS
             ),
         }
 

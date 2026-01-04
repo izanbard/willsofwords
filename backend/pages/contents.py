@@ -2,7 +2,7 @@ from abc import abstractmethod
 
 from PIL import ImageText, ImageDraw, Image, ImageOps
 
-from src.models import TitlePageEnum, Puzzle, LayoutEnum, BoardImageEnum
+from backend.models import TitlePageEnum, Puzzle, LayoutEnum, BoardImageEnum
 from .print_params import PrintParams
 from .sub_contents import SubContentsHeader, SubContentsSearchList, SubContentsGrid, SubContentsLongFact
 

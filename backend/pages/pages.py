@@ -2,8 +2,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from src.models import BookData, TitlePageEnum, PageTypeEnum, LayoutEnum
-from src.utils import Logger
+from backend.models import BookData, TitlePageEnum, PageTypeEnum, LayoutEnum
+from backend.utils import Logger
 from .contents import ContentsFront, ContentsBlank, ContentsPuzzleGrid, ContentsPuzzleWordlist, ContentsSolution
 from .print_params import PrintParams
 from .sub_contents import SubContentsPageNumber

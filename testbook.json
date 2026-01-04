@@ -26,52 +26,10 @@
         "Spynie Palace",
         "Stirling Castle",
         "Tantallon Castle",
-        "Threave Castle",
-        "DELETE AFTER ME",
-        "Bacon",
-        "Baked Beans",
-        "Bangers",
-        "Black Pudding",
-        "Butter",
-        "Clootie Dumpling",
-        "Eggs",
-        "Haggis",
-        "Honey",
-        "Kippers",
-        "Link Sausage",
-        "Lorne sausage",
-        "Milk",
-        "Mushrooms",
-        "Orange Marmalade",
-        "Porridge",
-        "Quaker Oats",
-        "Tattie Scone",
-        "Tea",
-        "Toast",
-        "Tomato",
-        "Arthurs Seat",
-        "Castle Rock",
-        "Edinburgh Zoo",
-        "Festival Fringe",
-        "Grassmarket",
-        "Hogmanay",
-        "Holyrood Park",
-        "Lothian",
-        "Military Tattoo",
-        "Nor Loch",
-        "Old Smoky",
-        "Princes Street Gardens",
-        "Royal Mile",
-        "Royal Scottish Academy",
-        "Royal Yacht Britannia",
-        "Scottish Parliament",
-        "Seven Hills",
-        "The Scotsman",
-        "Trams",
-        "Water of Leith",
-        "Waverley Station",
-        "Writers Museum"
-      ]
+        "Threave Castle"
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Edinburgh",
@@ -98,7 +56,9 @@
         "Water of Leith",
         "Waverley Station",
         "Writers Museum"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Breakfast",
@@ -124,7 +84,9 @@
         "Tea",
         "Toast",
         "Tomato"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Whisky",
@@ -150,7 +112,9 @@
         "Old Pulteney Seventeen",
         "Springbank Ten",
         "Tomatin Twelve"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Islands",
@@ -178,7 +142,9 @@
         "Tiree",
         "Unst",
         "Yell"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Rivers",
@@ -218,7 +184,9 @@
         "Tweed",
         "Tyne",
         "Whiteadder"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Food",
@@ -252,7 +220,9 @@
         "Stovies",
         "Tatties",
         "Wild Trout"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Lochs",
@@ -289,7 +259,9 @@
         "Tay",
         "Tummel",
         "Voil"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Christian Names",
@@ -315,7 +287,9 @@
         "Rob",
         "Tomas",
         "Una"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Surnames",
@@ -360,7 +334,9 @@
         "Rowan",
         "Sinclair",
         "Wallace"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Kings and Queens",
@@ -373,17 +349,21 @@
         "Donald",
         "Duncan",
         "Edgar",
-        "James I, James II",
+        "James I",
+        "James II",
         "James III",
         "James IV",
-        "James V, James VI",
+        "James V",
+        "James VI",
         "Malcolm",
         "Mary Queen of Scots",
         "Robert III",
         "Robert II",
         "Robert the Bruce",
         "William the Lion"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Battlefields",
@@ -427,7 +407,9 @@
         "Skirmish Hill",
         "Stirling Bridge",
         "Tippermuir"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Munros",
@@ -456,7 +438,9 @@
         "Stob Dearg",
         "Stuc a Chroin",
         "The Cairnwell"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Towns",
@@ -496,7 +480,9 @@
         "Bishopbriggs",
         "Bathgate",
         "Renfrew"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Tartan",
@@ -533,7 +519,9 @@
         "Scott",
         "Stewart",
         "Weir"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Football Teams",
@@ -560,7 +548,9 @@
         "Ross County",
         "St Johnstone",
         "St Mirren"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Famous Scottish People",
@@ -595,7 +585,9 @@
         "Ronnie Corbett",
         "Sean Connery",
         "William Wallace"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Glens",
@@ -630,7 +622,9 @@
         "Shira",
         "Tanar",
         "Trool"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "The Corbetts",
@@ -665,7 +659,9 @@
         "Gairbeinn",
         "Ruadh stac Beag",
         "Creag Mhor"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Highland Games",
@@ -692,7 +688,9 @@
         "Stone Put",
         "Weight For Distance",
         "Weight For Height"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Gaelic",
@@ -724,7 +722,9 @@
         "Tha",
         "Toilet",
         "Treana"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Glasgow",
@@ -754,7 +754,9 @@
         "Squinty Bridge",
         "The Barras",
         "University of Strathclyde"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Inventions",
@@ -794,7 +796,9 @@
         "Typhoid Vaccine",
         "Vacuum Flask",
         "Wire Rope"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Scottish Saints",
@@ -829,7 +833,9 @@
         "Teneu",
         "Wendelin of Trier",
         "William of Perth"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Hogmanay",
@@ -855,7 +861,9 @@
         "Shortbread",
         "Torchlight",
         "Whisky"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Balmoral Castle",
@@ -883,7 +891,9 @@
         "Royal Family",
         "Royal Residence",
         "William Smith"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Highland Estates",
@@ -927,7 +937,9 @@
         "Achnahannet",
         "Achnacarry",
         "Aberchalder"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Resevoirs",
@@ -964,7 +976,9 @@
         "Treig",
         "Turret",
         "Whittliemuir Midton"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "category": "Clans",
@@ -998,7 +1012,9 @@
         "Strachan",
         "Tweedie",
         "Wood"
-      ]
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     }
   ]
 }

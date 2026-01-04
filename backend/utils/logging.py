@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from src.models.config import Config
+from backend.models.config import Config
 
 
 class CustomFormatter(logging.Formatter):

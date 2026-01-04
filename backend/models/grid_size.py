@@ -1,6 +1,6 @@
 from math import ceil, sqrt, floor
 
-from src.models.config import Config
+from backend.models.config import Config
 
 
 class GridSize:

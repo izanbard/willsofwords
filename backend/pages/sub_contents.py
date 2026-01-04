@@ -5,7 +5,7 @@ from math import ceil
 from PIL import ImageDraw, ImageText, Image
 
 
-from src.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum
+from backend.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum
 from .print_params import PrintParams
 
 

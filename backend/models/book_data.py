@@ -2,12 +2,12 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from src.models.config import Config
+from backend.models.config import Config
 from .enums import LayoutEnum
 from .grid_size import GridSize
 from .puzzle import Puzzle
 from .wordlist import Wordlist, Category
-from src.utils import Logger
+from backend.utils import Logger
 
 
 class BookData(BaseModel):

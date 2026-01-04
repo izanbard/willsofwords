@@ -96,5 +96,5 @@ class Config:
     AI_MODEL = "gemma3:12b"
     AI_HOST = "http://localhost:11434/"
 
-    with open("src/assets/profanity.txt", "r") as fd:
+    with open("backend/assets/profanity.txt", "r") as fd:
         PROFANITY_LIST = [x.strip() for x in fd.readlines()]

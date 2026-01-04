@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from src.models import BookData, Wordlist  # noqa: F401
-from src.models.config import Config
-from src.pages import Pages
-from src.utils import Logger
+from backend.models import BookData, Wordlist  # noqa: F401
+from backend.models.config import Config
+from backend.pages import Pages
+from backend.utils import Logger
 
 
 with open(Path("testbook_out.json")) as fd:
