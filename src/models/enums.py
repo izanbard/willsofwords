@@ -17,3 +17,18 @@ class SizeEnum(StrEnum):
 class BoardImageEnum(StrEnum):
     PUZZLE = "PUZZLE"
     SOLUTION = "SOLUTION"
+
+
+class TitlePageEnum(StrEnum):
+    PUZZLE = "PUZZLE"
+    SOLUTION = "SOLUTION"
+
+
+class LayoutEnum(StrEnum):
+    SINGLE = "SINGLE"
+    DOUBLE = "DOUBLE"
+
+
+class PageTypeEnum(StrEnum):
+    RECTO = "RECTO"
+    VERSO = "VERSO"

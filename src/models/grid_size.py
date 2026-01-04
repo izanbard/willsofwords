@@ -3,7 +3,7 @@ from math import ceil, sqrt, floor
 from src.models.config import Config
 
 
-class Size:
+class GridSize:
     def __init__(self, len_words: int, max_desnity: float):
         target_size: int = ceil(len_words / max_desnity)
         self.rows = None

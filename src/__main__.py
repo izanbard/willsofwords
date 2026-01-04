@@ -1,6 +1,8 @@
 from pathlib import Path
 
 from src.models import BookData, Wordlist  # noqa: F401
+from src.models.config import Config
+from src.pages import Pages
 from src.utils import Logger
 
 
@@ -16,4 +18,12 @@ with open(Path("testbook_out.json")) as fd:
 # book.create_puzzles()
 # book.save_data(Path("testbook_out.json"))
 
-book.create_pages(Path("testbook_pages.pdf"))
+pages = Pages(book=book, filename=Path("testbook.pdf"))
+pages.create_pages()
+pages.save_pdf()
+
+
+if not Config.PUZZLE_ENABLE_PROFANITY_FILTER:
+    Logger.get_logger().warn("Profanity filter is off, seriously?")
+if Config.PRINT_DEBUG:
+    Logger.get_logger().warn("PDF output has printing guides on it - NOT SUITABLE FOR PRODUCTION")
