@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from .config import Config
 from .cell import Cell
 from .enums import LayoutEnum, DirectionEnum
-from src.utils import Logger
+from src.utils import Logger, get_profanity_list
 
 
 class Puzzle(BaseModel):
@@ -198,22 +198,21 @@ class Puzzle(BaseModel):
     def check_for_inadvertent_profanity(self):
         grid_strings: dict[str, str] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
-            grid_string_substrings_forward = [
-                grid_string[i:j]
-                for i in range(len(grid_string))
-                for j in range(i + 1, len(grid_string) + 1)
-                if grid_string[i:j] in Config.PROFANITY_LIST
-            ]
-            gird_string_substrings_backward = [
-                grid_string[-j:-i:-1]
-                for i in range(1, len(grid_string) + 1)
-                for j in range(i + 1, len(grid_string) + 2)
-                if grid_string[i:j] in Config.PROFANITY_LIST
-            ]
+            grid_string_substrings_forward = self._check_grid_string(grid_string)
+            gird_string_substrings_backward = self._check_grid_string(grid_string[::-1])
             bad_words = grid_string_substrings_forward + gird_string_substrings_backward
             if len(bad_words) > 0:
-                Logger.get_logger().warn(f"Profanity found {bad_words}")
+                Logger.get_logger().warn(f"Profanity found in {name}, {bad_words}")
                 self.profanity[name] = bad_words
+
+    @staticmethod
+    def _check_grid_string(grid_string: str) -> list[str]:
+        return [
+            grid_string[i:j]
+            for i in range(len(grid_string))
+            for j in range(i + 1, len(grid_string) + 1)
+            if grid_string[i:j] in get_profanity_list()
+        ]
 
     def _get_grid_strings(self) -> dict[str, str]:
         return_strings: dict[str, str] = {}
