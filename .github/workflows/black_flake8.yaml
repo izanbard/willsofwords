@@ -31,3 +31,23 @@ jobs:
           checkName: 'flake8'   # NOTE: this needs to be the same as the job name
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  bandit:
+    needs: black
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.12" ]
+    permissions:
+      # required for all workflows
+      security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+    steps:
+      - name: Perform Bandit Analysis
+        uses: PyCQA/bandit-action@v1
+        with:
+          skips: "B311"
+          python-version: ${{ matrix.python-version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

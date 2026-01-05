@@ -20,8 +20,12 @@ dev = [
     "flake8>=7.3.0",
     "pip-tools>=7.5.2",
     "pre-commit>=4.5.0",
+    "bandit>=1.9.2"
 ]
 
 [tool.black]
 line-length = 127
 target-version = ["py312"]
+
+[tool.bandit]
+skips = ["B311"]
