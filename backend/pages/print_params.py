@@ -34,6 +34,9 @@ class PrintParams:
                 "backend/assets/verdana.ttf", size=self.config.PRINT_LONG_FACT_CONTENT_FONT_SIZE_PIXELS
             ),
             "CELL_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.PRINT_CELL_FONT_SIZE_PIXELS),
+            "CELL_DEBUG_FONT": ImageFont.truetype(
+                "backend/assets/verdana.ttf", size=self.config.PRINT_CELL_FONT_SIZE_PIXELS // 2
+            ),
             "SEARCH_LIST_FONT": ImageFont.truetype(
                 "backend/assets/verdana.ttf", size=self.config.PRINT_WORDLIST_FONT_SIZE_PIXELS + 1
             ),

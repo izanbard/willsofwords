@@ -1,0 +1,35 @@
+{
+  "title": "Scotland",
+  "category_prompt": "",
+  "wordlist_prompt": "",
+  "category_list": [
+    {
+      "category": "Castles & Places",
+      "word_list": [
+        "Alnwick Castle",
+        "Balmoral Castle",
+        "Blair Castle",
+        "Carlisle Castle",
+        "Craigievar Castle",
+        "Dunnottar Castle",
+        "Dunrobin Castle",
+        "Duntulm Castle",
+        "Dunvegan Castle",
+        "Edinburgh Castle",
+        "Falkland Palace",
+        "Fyvie Castle",
+        "Glamis Castle",
+        "Inverness Castle",
+        "Kenmure Castle",
+        "Linlithgow Palace",
+        "Muness Castle",
+        "Spynie Palace",
+        "Stirling Castle",
+        "Tantallon Castle",
+        "Threave Castle"
+      ],
+      "long_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut lacinia diam. Nunc lacus est, vulputate euismod eros eget, accumsan tempor lectus. Nam feugiat massa mi, vitae dictum nisl porta vitae. Vestibulum quis sapien at orci placerat posuere. Praesent in magna auctor, convallis lectus nec, vestibulum ligula. Integer aliquet odio turpis, quis efficitur tellus finibus at. Mauris non auctor mi. Suspendisse bibendum sit amet elit ut dapibus. Phasellus commodo, ex sed rutrum rutrum, nunc nibh scelerisque massa, eu pretium nisi nunc id nibh. Suspendisse potenti. Donec eu vulputate mauris. Integer et molestie arcu.",
+      "short_fact": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    }
+  ]
+}

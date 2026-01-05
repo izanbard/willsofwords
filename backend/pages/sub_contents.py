@@ -211,6 +211,23 @@ class SubContentsGrid(SubContents):
             width=self.config.PRINT_GRID_BORDER_PIXELS,
         )
         if self.config.PRINT_DEBUG:
+            for r in range(self.rows):
+                char = ImageText.Text(text=str(r), font=self.fonts["CELL_DEBUG_FONT"])
+                self.draw.text(
+                    text=char,
+                    fill=self.colours["DEBUG_BLUE"],
+                    xy=(self.offset // 2, self.offset + self.cell_size // 2 + (r * self.cell_size)),
+                    anchor="mm",
+                )
+            for c in range(self.cols):
+                char = ImageText.Text(text=str(c), font=self.fonts["CELL_DEBUG_FONT"])
+                self.draw.text(
+                    text=char,
+                    fill=self.colours["DEBUG_BLUE"],
+                    xy=(self.offset + self.cell_size // 2 + (c * self.cell_size), self.offset // 2),
+                    anchor="mm",
+                )
+
             self.draw.line(
                 [(0, self.config.PRINT_GRID_PAD_PIXELS), (self.base_image.width - 1, self.config.PRINT_GRID_PAD_PIXELS)],
                 fill=self.colours["DEBUG_BLUE"],

@@ -1,6 +1,5 @@
 import bisect
 import random
-import string
 
 import numpy as np
 
@@ -25,7 +24,7 @@ class Puzzle(BaseModel):
     )
     puzzle_search_list: list[str] = Field(default_factory=list, description="the words used in this puzzle")
     density: float = Field(default=0.0, description="the density of words in the puzzle")
-    profanity: dict[str, list[str]] = Field(
+    profanity: dict[str, list[tuple[str, tuple[int, int, str]]]] = Field(
         default_factory=dict, description="the profanity of scores for rows/cols/diags in puzzle"
     )
 
@@ -154,11 +153,48 @@ class Puzzle(BaseModel):
             possible_directions.remove(DirectionEnum.EW)
         return possible_directions
 
+    def get_random_letters(self):
+        weighted_letters = {
+            "E": 12.7,
+            "T": 9.1,
+            "A": 8.2,
+            "O": 7.5,
+            "I": 7.0,
+            "N": 6.7,
+            "S": 6.3,
+            "H": 6.1,
+            "R": 6.0,
+            "D": 4.3,
+            "L": 4.0,
+            "C": 2.8,
+            "U": 2.8,
+            "M": 2.4,
+            "W": 2.4,
+            "F": 2.2,
+            "G": 2.0,
+            "Y": 2.0,
+            "P": 1.9,
+            "B": 1.5,
+            "V": 0.98,
+            "K": 0.77,
+            "J": 0.16,
+            "X": 0.15,
+            "Q": 0.12,
+            "Z": 0.074,
+        }
+        total_cells = self.rows * self.columns
+        occupied = self._occupied_cell_count()
+        random_list = random.choices(
+            population=list(weighted_letters.keys()), weights=list(weighted_letters.values()), k=total_cells - occupied
+        )
+        return random_list
+
     def _fill_empty_cells(self):
+        random_list = self.get_random_letters()
         for row in self.cells:
             for cell in row:
                 if not cell.is_answer:
-                    cell.value = random.choice(string.ascii_uppercase)
+                    cell.value = random_list.pop()
 
     def _occupied_cell_count(self):
         count = 0
@@ -199,16 +235,16 @@ class Puzzle(BaseModel):
         grid_strings: dict[str, str] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
             grid_string_substrings_forward = self._check_grid_string(grid_string)
-            gird_string_substrings_backward = self._check_grid_string(grid_string[::-1])
+            gird_string_substrings_backward = self._check_grid_string(grid_string[::-1], "R")
             bad_words = grid_string_substrings_forward + gird_string_substrings_backward
             if len(bad_words) > 0:
                 Logger.get_logger().warn(f"Profanity found in {name}, {bad_words}")
                 self.profanity[name] = bad_words
 
     @staticmethod
-    def _check_grid_string(grid_string: str) -> list[str]:
+    def _check_grid_string(grid_string: str, dir: str = "F") -> list[tuple[str, tuple[int, int, str]]]:
         return [
-            grid_string[i:j]
+            (grid_string[i:j], (i, j, dir))
             for i in range(len(grid_string))
             for j in range(i + 1, len(grid_string) + 1)
             if grid_string[i:j] in get_profanity_list()
@@ -225,8 +261,14 @@ class Puzzle(BaseModel):
         for x in range(self.columns):
             return_strings["col" + str(x)] = "".join(lattice[:, x])
         for j in range(-self.rows + 1, self.columns):
-            return_strings["nwse" + str(j)] = "".join(lattice.diagonal(j))
-            return_strings["nesw" + str(j)] = "".join(np.flipud(lattice).diagonal(j))
+            if j <= 0:
+                nwse_cords = f"0-{-j}"
+                nesw_cords = f"0-{self.rows + j}"
+            else:
+                nwse_cords = f"{j}-0"
+                nesw_cords = f"{j}-{self.rows}"
+            return_strings["nwse" + nwse_cords] = "".join(lattice.diagonal(j))
+            return_strings["swne" + nesw_cords] = "".join(np.flipud(lattice).diagonal(j))
         return return_strings
 
     @staticmethod

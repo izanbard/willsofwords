@@ -4,7 +4,7 @@ import logging
 class Config:
     APP_LOG_LEVEL = logging.INFO
 
-    PRINT_DEBUG = False
+    PRINT_DEBUG = True
     PRINT_DPI = 800
     PRINT_PAGE_HEIGHT_INCHES = 9.61
     PRINT_PAGE_WIDTH_INCHES = 6.69
@@ -95,6 +95,3 @@ class Config:
 
     AI_MODEL = "gemma3:12b"
     AI_HOST = "http://localhost:11434/"
-
-    with open("backend/assets/profanity.txt", "r") as fd:
-        PROFANITY_LIST = [x.strip() for x in fd.readlines()]

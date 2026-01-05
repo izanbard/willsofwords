@@ -16,5 +16,6 @@ repos:
     rev: 1.9.2
     hooks:
       - id: bandit
+        args: ["-c", "pyproject.toml"]
 default_language_version:
   python: python3.12
