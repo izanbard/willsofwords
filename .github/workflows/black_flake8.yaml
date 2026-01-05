@@ -45,7 +45,7 @@ jobs:
       contents: read
     steps:
       - name: Perform Bandit Analysis
-        uses: PyCQA/bandit-action@v1
+        uses: PyCQA/bandit-action@main
         with:
           skips: "B311"
           python-version: ${{ matrix.python-version }}
