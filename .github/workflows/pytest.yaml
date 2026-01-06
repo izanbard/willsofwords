@@ -20,10 +20,31 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements-dev.txt
       - name: Test with pytest
+        id: pytest
         uses: pavelzw/pytest-action@v2
         with:
-          verbose: false
+          verbose: true
           emoji: true
           job-summary: true
-          click-to-expand: true
+          click-to-expand: false
           report-title: 'Wordsworth Testing'
+      - name: Create Awesome Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: e530f17b6f8744b1a720db17ebda376d
+          filename: build.json
+          label: Tests
+          message: ${{ steps.pytest.outcome }}
+          color: green
+      - name: Create Awesome Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GITHUB_TOKEN }}
+          gistID: e530f17b6f8744b1a720db17ebda376d
+          filename: coverage.json
+          label: Coverage
+          message: ${{ env.COVERAGE }}
+          valColorRange: ${{ env.COVERAGE }}
+          maxColorRange: 90
+          minColorRange: 50
