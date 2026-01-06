@@ -107,6 +107,33 @@ class SubContentsSearchList(SubContents):
 
 
 class SubContentsCell(SubContents):
+    """
+    Representation of a subcontent cell with additional rendering capabilities.
+
+    The SubContentsCell class extends the functionality of the SubContents class
+    to create a visual representation of a cell, with options for rendering
+    specific grid types (e.g., puzzle or solution grids). It prepares a base image
+    and provides methods to add rendered content to it, taking into account
+    directions and visual styles specific to the grid type.
+
+    :ivar cell: The cell object containing information about the cell, such as its
+        value and directional properties.
+    :type cell: Cell
+    :ivar solution_line_width: The width of the lines used to represent directional
+        paths in the solution grid.
+    :type solution_line_width: int
+    :ivar size: The dimensions of the cell. This depends on the specified grid
+        type and cell size.
+    :type size: tuple[int, int]
+    :ivar grid_type: The type of grid (e.g., puzzle or solution) to render for
+        the cell.
+    :type grid_type: BoardImageEnum
+    :ivar base_image: The base image on which the cell and its contents are drawn.
+    :type base_image: Image.Image
+    :ivar draw: The drawing object used to render visuals on the base image.
+    :type draw: ImageDraw.ImageDraw
+    """
+
     def __init__(self, cell: Cell, cell_size: int, grid_type: BoardImageEnum = BoardImageEnum.PUZZLE):
         super().__init__()
         self.cell: Cell = cell
@@ -123,6 +150,21 @@ class SubContentsCell(SubContents):
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
 
     def get_content_image(self) -> Image.Image:
+        """
+        Generates and returns a content image with text and optional grid or line decorations based
+        on the cell's current state and grid type.
+
+        The method renders the text from the specified cell and font onto the base image
+        and optionally draws directional lines based on the cell's directional properties.
+        Directional lines are added if the `grid_type` matches the solution board type and
+        the corresponding directions are enabled.
+
+        :raises KeyError: If a required key is missing in the `fonts` or `colours` dictionaries or
+                          the necessary directions are not present in the cell's directional properties.
+
+        :return: An `Image.Image` object that contains the rendered content.
+        :rtype: PIL.Image.Image
+        """
         text: ImageText.Text = ImageText.Text(text=self.cell.value, font=self.fonts["CELL_FONT"])
 
         self.draw.text(

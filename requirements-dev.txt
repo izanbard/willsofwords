@@ -24,6 +24,8 @@ click==8.3.1
     # via
     #   black
     #   pip-tools
+coverage==7.13.1
+    # via pytest-cov
 distlib==0.4.0
     # via virtualenv
 filelock==3.20.1
@@ -42,12 +44,16 @@ idna==3.11
     # via
     #   anyio
     #   httpx
+iniconfig==2.3.0
+    # via pytest
 markdown-it-py==4.0.0
     # via rich
 mccabe==0.7.0
     # via flake8
 mdurl==0.1.2
     # via markdown-it-py
+mock==5.2.0
+    # via wills_of_words (pyproject.toml)
 mypy-extensions==1.1.0
     # via black
 nodeenv==1.9.1
@@ -60,6 +66,7 @@ packaging==25.0
     # via
     #   black
     #   build
+    #   pytest
 pathspec==0.12.1
     # via black
 pillow==12.0.0
@@ -70,6 +77,10 @@ platformdirs==4.5.1
     # via
     #   black
     #   virtualenv
+pluggy==1.6.0
+    # via
+    #   pytest
+    #   pytest-cov
 pre-commit==4.5.1
     # via wills_of_words (pyproject.toml)
 pycodestyle==2.14.0
@@ -83,11 +94,28 @@ pydantic-core==2.41.5
 pyflakes==3.4.0
     # via flake8
 pygments==2.19.2
-    # via rich
+    # via
+    #   pytest
+    #   rich
 pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
+pytest==9.0.2
+    # via
+    #   pytest-cov
+    #   pytest-emoji
+    #   pytest-md
+    #   pytest-mock
+    #   wills_of_words (pyproject.toml)
+pytest-cov==7.0.0
+    # via wills_of_words (pyproject.toml)
+pytest-emoji==0.2.0
+    # via wills_of_words (pyproject.toml)
+pytest-md==0.2.0
+    # via wills_of_words (pyproject.toml)
+pytest-mock==3.15.1
+    # via wills_of_words (pyproject.toml)
 pytokens==0.3.0
     # via black
 pyyaml==6.0.3

@@ -1,3 +1,13 @@
+***
+
+[![Quality: Black](https://img.shields.io/badge/quality-black-%23000000.svg?style=for-the-badge&logo=black&logoColor=white&logoSize=auto)](https://github.com/psf/black)
+[![Quality: Flake8](https://img.shields.io/badge/quality-flake8-%23201B44.svg?style=for-the-badge&logo=pycqa&logoColor=white&logoSize=auto)](https://github.com/psf/black)
+[![Security: Bandit](https://img.shields.io/badge/security-bandit-yellow.svg?style=for-the-badge&logo=pycqa&logoColor=white&logoSize=auto)](https://github.com/PyCQA/bandit)
+
+---
+
+***
+
 # Wills of Words Application
 
 An application for creating word search books
@@ -18,7 +28,7 @@ This project is under dev and not suitable for use of any kind
 It is strongly recommended that you use a separate python environment for this work. These instructions assume the use of venv
 on linux, other envs and OSes are available, and if you prefer them, then please amend the instructions as required:
 
-##### Checkout the code
+##### Check out the code
 
 ```shell
 $ git clone git@github.com:<<Repo>>
@@ -34,7 +44,7 @@ $ source venv/bin/activate
 ```
 
 A requirements.txt is committed with this repo and can be used, but it is recommended to recompile the requirements.txt file from
-the pyproject.toml - especially if developing on windows (you monster).
+the pyproject.toml – especially if developing on Windows (you monster).
 
 ```shell
 (venv) $ pip install pip-tools
