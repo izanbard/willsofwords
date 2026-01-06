@@ -29,11 +29,15 @@ jobs:
           click-to-expand: false
           report-title: 'Wordsworth Testing'
       - name: Grab Coverage number
+        if: ${{ always() }}
         run: |
-          echo ${{ env.GITHUB_OUTPUT }}
+          myjson=$(cat .cov/coverage.json)
+          percent=$(echo $myjson | jq -r .totals.percent_statements_covered_display)
+          echo ${{ steps.pytest.outputs }}
           coverage_percentage=$(echo "${{ steps.pytest.outputs.summary }}" | awk -F'%' '{print $1}')
-          echo "COVERAGE_PERCENTAGE=${coverage_percentage}" >> $GITHUB_ENV
+          echo "COVERAGE_PERCENTAGE=${percent}" >> $GITHUB_ENV
       - name: Create Awesome Badge
+        if: ${{ always() }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST2_SECRET }}
@@ -43,6 +47,7 @@ jobs:
           message: ${{ steps.pytest.outcome }}
           color: ${{ steps.pytest.outcome == 'success' && 'green' || 'red' }}
       - name: Create Awesome Badge
+        if: ${{ always() }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
