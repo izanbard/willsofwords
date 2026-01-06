@@ -30,7 +30,7 @@ jobs:
           report-title: 'Wordsworth Testing'
       - name: Grab Coverage number
         run: |
-          echo $GITHUB_OUTPUTS
+          echo ${{ steps.pytest }}
           coverage_percentage=$(echo "${{ steps.pytest.outputs.summary }}" | awk -F'%' '{print $1}')
           echo "COVERAGE_PERCENTAGE=${coverage_percentage}" >> $GITHUB_ENV
       - name: Create Awesome Badge
@@ -42,14 +42,14 @@ jobs:
           label: Tests
           message: ${{ steps.pytest.outcome }}
           color: ${{ steps.pytest.outcome == 'success' && 'green' || 'red' }}
-#      - name: Create Awesome Badge
-#        uses: schneegans/dynamic-badges-action@v1.7.0
-#        with:
-#          auth: ${{ secrets.GITHUB_TOKEN }}
-#          gistID: e530f17b6f8744b1a720db17ebda376d
-#          filename: coverage.json
-#          label: Coverage
-#          message: ${{ env.COVERAGE }}
-#          valColorRange: ${{ env.COVERAGE }}
-#          maxColorRange: 90
-#          minColorRange: 50
+      - name: Create Awesome Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: e530f17b6f8744b1a720db17ebda376d
+          filename: coverage.json
+          label: Coverage
+          message: ${{ env.COVERAGE_PERCENTAGE }}%
+          valColorRange: ${{ env.COVERAGE_PERCENTAGE }}
+          maxColorRange: 90
+          minColorRange: 50
