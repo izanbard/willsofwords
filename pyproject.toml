@@ -43,7 +43,7 @@ minversion = "9.0.0"
 testpaths = ["./backend"]
 log_level = "DEBUG"
 mock_use_standalone_module = "true"
-addopts = ["--cov", "--cov-report", "html", "--cov-report","xml", "--cov-report","json","--cov-report","lcov"]
+addopts = ["--cov", "--cov-report", "term", "--cov-report", "html", "--cov-report","xml", "--cov-report","json","--cov-report","lcov"]
 
 [tool.coverage.run]
 data_file = ".cov/.coverage"
