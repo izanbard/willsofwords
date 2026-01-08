@@ -40,8 +40,8 @@ jobs:
         if: ${{ always() }}
         run: |
           myjson=$(cat ${{ runner.temp }}/qodana/results/qodana.sarif.json)
-          total=$(echo $myjson | jq -r .runs[0].properties.qodanaNewResultSummary | if (.total) then .total else 0 end)
-          critical=$(echo $myjson | jq -r .runs[0].properties.qodanaNewResultSummary | if (.critical) then .critical else 0 end)
+          total=$(echo $myjson | jq -r '.runs[0].properties.qodanaNewResultSummary | if (.total) then .total else 0 end')
+          critical=$(echo $myjson | jq -r '.runs[0].properties.qodanaNewResultSummary | if (.critical) then .critical else 0 end')
           echo "ISSUES=${total}(${critical})" >> $GITHUB_ENV
           echo "CRIT=${critical}" >> $GITHUB_ENV
       - name: Create Awesome Badge
