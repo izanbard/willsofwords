@@ -50,7 +50,7 @@ jobs:
       - name: Perform Bandit Analysis
         uses: PyCQA/bandit-action@main
         with:
-          skips: "B311"
           python-version: ${{ matrix.python-version }}
+          configfile: pyproject.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
