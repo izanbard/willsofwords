@@ -10,7 +10,7 @@ services:
       # Allowed values = validate_wordlist, wordlist_to_data, data_to_pdf, wordlist_to_data_to_pdf, data_show_profanity
       # if it is not obvious what these do then I need to rename them!
       - APP__COMMAND=validate_wordlist
-      -
+
       - APP__LOG_LEVEL=INFO
       - APP__INPUT_FILENAME=./data/wordlist.json
       - APP__DATA_FILENAME=./data/puzzledata.json
