@@ -124,7 +124,7 @@ class ContentsPuzzleGrid(Contents):
                     width=2,
                 )
             debug_text = ImageText.Text(
-                text=f"Grid Size: {self.puzzle.rows}x{self.puzzle.columns}\n"
+                text=f"Grid Size: {self.puzzle.columns}x{self.puzzle.rows}\n"
                 f"Density: {self.puzzle.density:.2%}\n"
                 f"Cell Size: {cell_size}px, {cell_size / self.config.dpi:.3f}in\n",
                 font=self.fonts["CELL_DEBUG_FONT"],

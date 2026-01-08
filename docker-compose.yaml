@@ -1,0 +1,56 @@
+services:
+  wordsworth:
+    build:
+      context: .
+      dockerfile: infra/backend.Dockerfile
+    restart: "no"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Allowed values = validate_wordlist, wordlist_to_data, data_to_pdf, wordlist_to_data_to_pdf, data_show_profanity
+      # if it is not obvious what these do then I need to rename them!
+      - APP__COMMAND=validate_wordlist
+      -
+      - APP__LOG_LEVEL=INFO
+      - APP__INPUT_FILENAME=./data/wordlist.json
+      - APP__DATA_FILENAME=./data/puzzledata.json
+      - APP__OUTPUT_FILENAME=./data/manuscript.pdf
+
+      # The page print settings
+      - PRINT__DEBUG=True
+      - PRINT__DPI=800
+      - PRINT__PAGE_HEIGHT_INCHES=9.61
+      - PRINT__PAGE_WIDTH_INCHES=6.69
+      - PRINT__TOP_MARGIN_INCHES=0.25
+      - PRINT__BOTTOM_MARGIN_INCHES=0.25
+      - PRINT__OUTER_MARGIN_INCHES=0.25
+      - PRINT__INNER_MARGIN_INCHES=0.75
+      - PRINT__TITLE_BOX_HEIGHT_INCHES=1.0
+      - PRINT__WORDLIST_BOX_HEIGHT_INCHES=2.0
+      - PRINT__WORDLIST_FONT_SIZE_INCHES=0.14
+      - PRINT__WORDLIST_LINE_SPACING_INCHES=0.02
+      - PRINT__GRID_PAD_INCHES=0.0
+      - PRINT__GRID_BORDER_INCHES=0.05
+      - PRINT__GRID_BORDER_RADIUS_INCHES=0.15
+      - PRINT__GRID_MARGIN_INCHES=0.15
+      - PRINT__CELL_FONT_SIZE_INCHES=0.14
+      - PRINT__MIN_CELL_SIZE_FACTOR=1.5
+      - PRINT__VARIABLE_CELL_SIZE=False
+      - PRINT__MAX_CELL_SIZE_FACTOR=2
+      - PRINT__LONG_FACT_HEADING_FONT_SIZE_INCHES=0.28
+      - PRINT__LONG_FACT_CONTENT_FONT_SIZE_INCHES=0.14
+      - PRINT__LONG_FACT_LINE_SPACING_INCHES=0.02
+      - PRINT__PAGE_NUMBER_FONT_SIZE_INCHES=0.14
+      - PRINT__PAGE_NUMBER_OFFSET_INCHES=0.1
+      - PRINT__SOLUTION_PAGE_COLS=2
+      - PRINT__SOLUTION_PAGE_ROWS=3
+
+      # The puzzle creation settings
+      - PUZZLE__MAX_DENSITY=0.50
+      - PUZZLE__MIN_DENSITY=0.30
+      - PUZZLE__MAX_PLACEMENT_ATTEMPTS=10000
+      - PUZZLE__ENABLE_PROFANITY_FILTER=True
+
+      # Not currently used, but stand by
+      - AI__MODEL=gemma3:12b
+      - AI__HOST=http://localhost:11434/
