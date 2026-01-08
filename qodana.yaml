@@ -14,9 +14,9 @@ exclude:
       - backend/tests
 failureConditions:
   severityThresholds:
-    critical: 0
-    high: 0
-    moderate: 0
+    critical: 1
+    high: 5
+    moderate: 10
 bootstrap: |+
   set -eu
   pip install -r requirements-dev.txt

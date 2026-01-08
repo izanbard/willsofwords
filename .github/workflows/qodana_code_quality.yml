@@ -31,6 +31,26 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_2091917177 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
-      - uses: github/codeql-action/upload-sarif@v4
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
+      - name: Grab Issues Number
+        if: ${{ always() }}
+        run: |
+          myjson=$(cat ${{ runner.temp }}/qodana/results/qodana.sarif.json)
+          total=$(echo $myjson | jq -r .runs[0].properties.qodanaNewResultSummary | if (.total) then .total else 0 end)
+          critical=$(echo $myjson | jq -r .runs[0].properties.qodanaNewResultSummary | if (.critical) then .critical else 0 end)
+          echo "ISSUES=${total}(${critical})" >> $GITHUB_ENV
+          echo "CRIT=${critical}" >> $GITHUB_ENV
+      - name: Create Awesome Badge
+        if: ${{ always() }}
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST2_SECRET }}
+          gistID: e530f17b6f8744b1a720db17ebda376d
+          filename: qodana.json
+          label: Qodana
+          message: ${{ env.ISSUES }}
+          color: ${{ env.CRIT == '0' && 'green' || 'red' }}

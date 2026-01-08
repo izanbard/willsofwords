@@ -36,8 +36,6 @@ jobs:
         run: |
           myjson=$(cat .cov/coverage.json)
           percent=$(echo $myjson | jq -r .totals.percent_statements_covered_display)
-          echo ${{ steps.pytest.outputs }}
-          coverage_percentage=$(echo "${{ steps.pytest.outputs.summary }}" | awk -F'%' '{print $1}')
           echo "COVERAGE_PERCENTAGE=${percent}" >> $GITHUB_ENV
       - name: Create Awesome Badge
         if: ${{ always() }}

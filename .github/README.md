@@ -16,6 +16,7 @@
 
 [![Tests: Status](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/izanbard/e530f17b6f8744b1a720db17ebda376d/raw/build.json&style=for-the-badge)](https://github.com/izanbard/willsofwords/actions)
 [![Coverage: Status](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/izanbard/e530f17b6f8744b1a720db17ebda376d/raw/coverage.json&style=for-the-badge)](https://github.com/izanbard/willsofwords/actions)
+[![Quality: Status](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/izanbard/e530f17b6f8744b1a720db17ebda376d/raw/qodana.json&style=for-the-badge)](https://qodana.cloud/projects/0WLa5/)
 
 ***
 
