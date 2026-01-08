@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from copy import copy
 from math import ceil
 
@@ -10,7 +10,7 @@ from .print_params import PrintParams
 from backend.utils import Logger
 
 
-class SubContents(PrintParams):
+class SubContents(PrintParams, ABC):
     ROOT_TWO_APPX = 1.42
 
     def __init__(self) -> None:

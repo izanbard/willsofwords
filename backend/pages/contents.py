@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from PIL import ImageText, ImageDraw, Image, ImageOps
 
@@ -8,7 +8,7 @@ from .sub_contents import SubContentsHeader, SubContentsSearchList, SubContentsG
 from backend.utils import Logger
 
 
-class Contents(PrintParams):
+class Contents(PrintParams, ABC):
     def __init__(self) -> None:
         super().__init__()
         self.size: tuple[int, int] = (self.content_width_pixels, self.content_height_pixels)

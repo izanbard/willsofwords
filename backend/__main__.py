@@ -81,7 +81,7 @@ def main():
         return 1
     match config.app.command:
         case "validate_wordlist":
-            wordlist = load_and_validate_wordlist(config.app)
+            load_and_validate_wordlist(config.app)
         case "wordlist_to_data":
             wordlist = load_and_validate_wordlist(config.app)
             if not config.puzzle.enable_profanity_filter:

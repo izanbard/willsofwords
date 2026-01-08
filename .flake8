@@ -7,4 +7,5 @@ exclude =
     .pytest_cache
     venv
     .venv
+    frontend
 extend-ignore = E203, E501, W503, E701

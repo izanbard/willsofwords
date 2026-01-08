@@ -8,6 +8,10 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+exclude:
+  - name: All
+    paths:
+      - backend/tests
 bootstrap: |+
   set -eu
   pip install -r requirements-dev.txt
