@@ -3,6 +3,7 @@
 [![Language: Python](https://img.shields.io/badge/language-python-%233776AB.svg?style=for-the-badge&logo=python&logoColor=white&logoSize=auto)](https://www.python.org/)
 [![Language: JS](https://img.shields.io/badge/language-javascript-%23F7DF1E.svg?style=for-the-badge&logo=javascript&logoColor=white&logoSize=auto)](https://www.javascript.com/)
 [![AI: Ollama](https://img.shields.io/badge/ai-ollama-%23000000.svg?style=for-the-badge&logo=ollama&logoColor=white&logoSize=auto)](https://ollama.ai/)
+[![AI: Pydantic AI](https://img.shields.io/badge/ai-pydantic--ai-%23E92063.svg?style=for-the-badge&logo=pydantic&logoColor=white&logoSize=auto)](https://ai.pydantic.dev/)
 [![Framework: FastAPI](https://img.shields.io/badge/framework-fastapi-%23009688.svg?style=for-the-badge&logo=fastapi&logoColor=white&logoSize=auto)](https://fastapi.tiangolo.com/)
 [![Framework: Pydantic](https://img.shields.io/badge/framework-pydantic-%23E92063.svg?style=for-the-badge&logo=pydantic&logoColor=white&logoSize=auto)](https://docs.pydantic.dev/latest/)
 [![Framework: Vue](https://img.shields.io/badge/framework-vue.js-%234FC08D.svg?style=for-the-badge&logo=vue.js&logoColor=white&logoSize=auto)](https://vuejs.org/)
