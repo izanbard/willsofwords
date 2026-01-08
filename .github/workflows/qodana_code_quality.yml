@@ -28,7 +28,7 @@ jobs:
           pr-mode: false
           upload-result: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          args: -v,.cov:/data/coverage
+          args: -v,/.cov:/data/coverage
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_2091917177 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
