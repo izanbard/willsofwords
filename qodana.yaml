@@ -12,6 +12,11 @@ exclude:
   - name: All
     paths:
       - backend/tests
+failureConditions:
+  severityThresholds:
+    critical: 0
+    high: 0
+    moderate: 0
 bootstrap: |+
   set -eu
   pip install -r requirements-dev.txt
