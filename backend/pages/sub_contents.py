@@ -7,9 +7,12 @@ from PIL import ImageDraw, ImageText, Image
 
 from backend.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum
 from .print_params import PrintParams
+from backend.utils import Logger
 
 
 class SubContents(PrintParams):
+    ROOT_TWO_APPX = 1.42
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -21,12 +24,13 @@ class SubContents(PrintParams):
 class SubContentsHeader(SubContents):
     def __init__(self, header_title: str) -> None:
         super().__init__()
-        self.size: tuple[int, int] = (self.config.PRINT_CONTENT_WIDTH_PIXELS, self.config.PRINT_TITLE_BOX_HEIGHT_PIXELS)
+        self.size: tuple[int, int] = (self.content_width_pixels, self.title_box_height_pixels)
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
         self.header_title: str = header_title
 
     def get_content_image(self) -> Image.Image:
+        Logger.get_logger().debug(f"Generating {self.__class__} image for header {self.header_title}")
         text: ImageText.Text = ImageText.Text(text=self.header_title, font=self.fonts["TITLE_FONT"])
         self.draw.text(
             xy=(self.base_image.width // 2, self.base_image.height // 2),
@@ -41,11 +45,11 @@ class SubContentsSearchList(SubContents):
     def __init__(self, wordlist: list[str], layout_type: LayoutEnum = LayoutEnum.SINGLE) -> None:
         super().__init__()
         if layout_type == layout_type.SINGLE:
-            self.size: tuple[int, int] = (self.config.PRINT_CONTENT_WIDTH_PIXELS, self.config.PRINT_WORDLIST_BOX_HEIGHT_PIXELS)
+            self.size: tuple[int, int] = (self.content_width_pixels, self.wordlist_box_height_pixels)
         else:
             self.size: tuple[int, int] = (
-                self.config.PRINT_CONTENT_WIDTH_PIXELS,
-                (self.config.PRINT_CONTENT_HEIGHT_PIXELS - self.config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2,
+                self.content_width_pixels,
+                (self.content_height_pixels - self.title_box_height_pixels) // 2,
             )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
@@ -53,6 +57,9 @@ class SubContentsSearchList(SubContents):
         self.layout_type: LayoutEnum = layout_type
 
     def get_content_image(self) -> Image.Image:
+        Logger.get_logger().debug(
+            f"Generating {self.__class__} image for search list with {len(self.wordlist)} words, layout {self.layout_type} and print debug {self.config.debug}"
+        )
         column_width, columns = self._calculate_font_size()
 
         for column_number in range(len(columns)):
@@ -63,7 +70,7 @@ class SubContentsSearchList(SubContents):
                 anchor="ma",
                 fill=self.colours["SOLID_BLACK"],
             )
-        if self.config.PRINT_DEBUG:
+        if self.config.debug:
             for column_number in range(1, len(columns)):
                 self.draw.line(
                     xy=[
@@ -77,7 +84,7 @@ class SubContentsSearchList(SubContents):
 
     def _calculate_font_size(self) -> tuple[int, list[ImageText.Text]]:
         number_of_words = len(self.wordlist)
-        column_width = self.config.PRINT_CONTENT_WIDTH_PIXELS // 3
+        column_width = self.content_width_pixels // 3
         columns: list[ImageText.Text] = []
         font = copy(self.fonts["SEARCH_LIST_FONT"])
         exceeds_size = True
@@ -86,20 +93,20 @@ class SubContentsSearchList(SubContents):
             if font.size <= 0:
                 raise ValueError("wordlist font too small")
             dummy_text = ImageText.Text(text=self.wordlist[0], font=font)
-            line_height = int(dummy_text.get_bbox()[3]) + self.config.PRINT_WORDLIST_LINE_SPACING_PIXELS
+            line_height = int(dummy_text.get_bbox()[3]) + self.wordlist_line_spacing_pixels
 
             max_sublist_length = int(self.base_image.height / line_height)
             number_of_columns = max(ceil(number_of_words / max_sublist_length), 3)
 
             chunk_size = ceil(number_of_words / number_of_columns)
-            column_width = self.config.PRINT_CONTENT_WIDTH_PIXELS // number_of_columns
+            column_width = self.content_width_pixels // number_of_columns
 
             columns: list[ImageText.Text] = []
             for column_number in range(number_of_columns):
                 text = ImageText.Text(
                     text="\n".join(self.wordlist[column_number * chunk_size : (column_number * chunk_size) + chunk_size]),
                     font=font,
-                    spacing=self.config.PRINT_WORDLIST_LINE_SPACING_PIXELS,
+                    spacing=self.wordlist_line_spacing_pixels,
                 )
                 columns.append(text)
             exceeds_size = any(x.get_bbox()[2] > column_width for x in columns)
@@ -142,8 +149,8 @@ class SubContentsCell(SubContents):
             self.size: tuple[int, int] = (cell_size, cell_size)
         else:
             self.size: tuple[int, int] = (
-                cell_size + ceil(self.solution_line_width / 2 * (2**0.5)),
-                cell_size + ceil(self.solution_line_width / 2 * (2**0.5)),
+                cell_size + ceil(self.solution_line_width / 2 * self.ROOT_TWO_APPX),
+                cell_size + ceil(self.solution_line_width / 2 * self.ROOT_TWO_APPX),
             )
         self.grid_type: BoardImageEnum = grid_type
         self.base_image: Image.Image = self._make_base_image()
@@ -159,12 +166,15 @@ class SubContentsCell(SubContents):
         Directional lines are added if the `grid_type` matches the solution board type and
         the corresponding directions are enabled.
 
-        :raises KeyError: If a required key is missing in the `fonts` or `colours` dictionaries or
+        :raises KeyError: If a required key is missing in the `fonts` or `colours` dictionaries, or
                           the necessary directions are not present in the cell's directional properties.
 
         :return: An `Image.Image` object that contains the rendered content.
         :rtype: PIL.Image.Image
         """
+        Logger.get_logger().debug(
+            f"Generating {self.__class__} image for cell ({self.cell.loc_x},{self.cell.loc_y}) with value {self.cell.value} and grid type {self.grid_type}"
+        )
         text: ImageText.Text = ImageText.Text(text=self.cell.value, font=self.fonts["CELL_FONT"])
 
         self.draw.text(
@@ -211,9 +221,7 @@ class SubContentsGrid(SubContents):
         self.cells: list[list[Cell]] = cells
         self.cell_size = cell_size
         self.grid_type: BoardImageEnum = grid_type
-        self.offset = (
-            self.config.PRINT_GRID_PAD_PIXELS + self.config.PRINT_GRID_BORDER_PIXELS + self.config.PRINT_GRID_MARGIN_PIXELS
-        )
+        self.offset = self.grid_pad_pixels + self.grid_border_pixels + self.grid_margin_pixels
         self.size: tuple[int, int] = (
             self.cols * self.cell_size + 2 * self.offset,
             self.rows * self.cell_size + 2 * self.offset,
@@ -222,13 +230,16 @@ class SubContentsGrid(SubContents):
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
 
     def get_content_image(self) -> Image.Image:
+        Logger.get_logger().debug(
+            f"Generating {self.__class__} image for grid with {self.rows} rows, {self.cols} columns and grid type {self.grid_type}"
+        )
         for row in self.cells:
             for cell in row:
                 tile_image = SubContentsCell(cell, self.cell_size, self.grid_type).get_content_image()
                 if self.grid_type == BoardImageEnum.PUZZLE:
                     box = ((cell.loc_x * self.cell_size) + self.offset, (cell.loc_y * self.cell_size) + self.offset)
                 else:
-                    solution_offset = ceil(int(self.cell_size / 10) / 2 * (2**0.5))
+                    solution_offset = ceil(int(self.cell_size / 10) / 2 * self.ROOT_TWO_APPX)
                     box = (
                         (cell.loc_x * self.cell_size) + self.offset - solution_offset,
                         (cell.loc_y * self.cell_size) + self.offset - solution_offset,
@@ -241,18 +252,18 @@ class SubContentsGrid(SubContents):
 
         self.draw.rounded_rectangle(
             [
-                (self.config.PRINT_GRID_PAD_PIXELS, self.config.PRINT_GRID_PAD_PIXELS),
+                (self.grid_pad_pixels, self.grid_pad_pixels),
                 (
-                    self.base_image.width - self.config.PRINT_GRID_PAD_PIXELS,
-                    self.base_image.height - self.config.PRINT_GRID_PAD_PIXELS,
+                    self.base_image.width - self.grid_pad_pixels,
+                    self.base_image.height - self.grid_pad_pixels,
                 ),
             ],
-            radius=self.config.PRINT_GRID_BORDER_RADIUS_PIXELS,
+            radius=self.grid_border_radius_pixels,
             fill=None,
             outline=self.colours["SOLID_BLACK"],
-            width=self.config.PRINT_GRID_BORDER_PIXELS,
+            width=self.grid_border_pixels,
         )
-        if self.config.PRINT_DEBUG:
+        if self.config.debug:
             for r in range(self.rows):
                 char = ImageText.Text(text=str(r), font=self.fonts["CELL_DEBUG_FONT"])
                 self.draw.text(
@@ -271,14 +282,14 @@ class SubContentsGrid(SubContents):
                 )
 
             self.draw.line(
-                [(0, self.config.PRINT_GRID_PAD_PIXELS), (self.base_image.width - 1, self.config.PRINT_GRID_PAD_PIXELS)],
+                [(0, self.grid_pad_pixels), (self.base_image.width - 1, self.grid_pad_pixels)],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (0, self.base_image.height - self.config.PRINT_GRID_PAD_PIXELS - 1),
-                    (self.base_image.width - 1, self.base_image.height - self.config.PRINT_GRID_PAD_PIXELS - 1),
+                    (0, self.base_image.height - self.grid_pad_pixels - 1),
+                    (self.base_image.width - 1, self.base_image.height - self.grid_pad_pixels - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
@@ -286,18 +297,18 @@ class SubContentsGrid(SubContents):
 
             self.draw.line(
                 [
-                    (0, self.config.PRINT_GRID_PAD_PIXELS + self.config.PRINT_GRID_BORDER_PIXELS),
-                    (self.base_image.width - 1, self.config.PRINT_GRID_PAD_PIXELS + self.config.PRINT_GRID_BORDER_PIXELS),
+                    (0, self.grid_pad_pixels + self.grid_border_pixels),
+                    (self.base_image.width - 1, self.grid_pad_pixels + self.grid_border_pixels),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (0, self.base_image.height - self.config.PRINT_GRID_PAD_PIXELS - self.config.PRINT_GRID_BORDER_PIXELS - 1),
+                    (0, self.base_image.height - self.grid_pad_pixels - self.grid_border_pixels - 1),
                     (
                         self.base_image.width - 1,
-                        self.base_image.height - self.config.PRINT_GRID_PAD_PIXELS - self.config.PRINT_GRID_BORDER_PIXELS - 1,
+                        self.base_image.height - self.grid_pad_pixels - self.grid_border_pixels - 1,
                     ),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
@@ -308,15 +319,11 @@ class SubContentsGrid(SubContents):
                 [
                     (
                         0,
-                        self.config.PRINT_GRID_PAD_PIXELS
-                        + self.config.PRINT_GRID_BORDER_PIXELS
-                        + self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.offset,
                     ),
                     (
                         self.base_image.width - 1,
-                        self.config.PRINT_GRID_PAD_PIXELS
-                        + self.config.PRINT_GRID_BORDER_PIXELS
-                        + self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.offset,
                     ),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
@@ -326,19 +333,11 @@ class SubContentsGrid(SubContents):
                 [
                     (
                         0,
-                        self.base_image.height
-                        - 1
-                        - self.config.PRINT_GRID_PAD_PIXELS
-                        - self.config.PRINT_GRID_BORDER_PIXELS
-                        - self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.base_image.height - 1 - self.offset,
                     ),
                     (
                         self.base_image.width - 1,
-                        self.base_image.height
-                        - 1
-                        - self.config.PRINT_GRID_PAD_PIXELS
-                        - self.config.PRINT_GRID_BORDER_PIXELS
-                        - self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.base_image.height - 1 - self.offset,
                     ),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
@@ -346,14 +345,14 @@ class SubContentsGrid(SubContents):
             )
 
             self.draw.line(
-                [(self.config.PRINT_GRID_PAD_PIXELS, 0), (self.config.PRINT_GRID_PAD_PIXELS, self.base_image.height - 1)],
+                [(self.grid_pad_pixels, 0), (self.grid_pad_pixels, self.base_image.height - 1)],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (self.base_image.width - self.config.PRINT_GRID_PAD_PIXELS - 1, 0),
-                    (self.base_image.width - self.config.PRINT_GRID_PAD_PIXELS - 1, self.base_image.height - 1),
+                    (self.base_image.width - self.grid_pad_pixels - 1, 0),
+                    (self.base_image.width - self.grid_pad_pixels - 1, self.base_image.height - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
@@ -361,17 +360,17 @@ class SubContentsGrid(SubContents):
 
             self.draw.line(
                 [
-                    (self.config.PRINT_GRID_PAD_PIXELS + self.config.PRINT_GRID_BORDER_PIXELS, 0),
-                    (self.config.PRINT_GRID_PAD_PIXELS + self.config.PRINT_GRID_BORDER_PIXELS, self.base_image.height - 1),
+                    (self.grid_pad_pixels + self.grid_border_pixels, 0),
+                    (self.grid_pad_pixels + self.grid_border_pixels, self.base_image.height - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (self.base_image.width - self.config.PRINT_GRID_PAD_PIXELS - self.config.PRINT_GRID_BORDER_PIXELS - 1, 0),
+                    (self.base_image.width - self.grid_pad_pixels - self.grid_border_pixels - 1, 0),
                     (
-                        self.base_image.width - self.config.PRINT_GRID_PAD_PIXELS - self.config.PRINT_GRID_BORDER_PIXELS - 1,
+                        self.base_image.width - self.grid_pad_pixels - self.grid_border_pixels - 1,
                         self.base_image.height - 1,
                     ),
                 ],
@@ -382,15 +381,11 @@ class SubContentsGrid(SubContents):
             self.draw.line(
                 [
                     (
-                        self.config.PRINT_GRID_PAD_PIXELS
-                        + self.config.PRINT_GRID_BORDER_PIXELS
-                        + self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.offset,
                         0,
                     ),
                     (
-                        self.config.PRINT_GRID_PAD_PIXELS
-                        + self.config.PRINT_GRID_BORDER_PIXELS
-                        + self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.offset,
                         self.base_image.height - 1,
                     ),
                 ],
@@ -400,19 +395,11 @@ class SubContentsGrid(SubContents):
             self.draw.line(
                 [
                     (
-                        self.base_image.width
-                        - 1
-                        - self.config.PRINT_GRID_PAD_PIXELS
-                        - self.config.PRINT_GRID_BORDER_PIXELS
-                        - self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.base_image.width - 1 - self.offset,
                         0,
                     ),
                     (
-                        self.base_image.width
-                        - 1
-                        - self.config.PRINT_GRID_PAD_PIXELS
-                        - self.config.PRINT_GRID_BORDER_PIXELS
-                        - self.config.PRINT_GRID_MARGIN_PIXELS,
+                        self.base_image.width - 1 - self.offset,
                         self.base_image.height - 1,
                     ),
                 ],
@@ -440,14 +427,15 @@ class SubContentsLongFact(SubContents):
     def __init__(self, long_fact: str):
         super().__init__()
         self.size: tuple[int, int] = (
-            self.config.PRINT_CONTENT_WIDTH_PIXELS,
-            (self.config.PRINT_CONTENT_HEIGHT_PIXELS - self.config.PRINT_TITLE_BOX_HEIGHT_PIXELS) // 2,
+            self.content_width_pixels,
+            (self.content_height_pixels - self.title_box_height_pixels) // 2,
         )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
         self.long_fact = long_fact
 
     def get_content_image(self) -> Image.Image:
+        Logger.get_logger().debug(f"Generating {self.__class__} image for long fact: {self.long_fact[:50]}")
         title: ImageText.Text = ImageText.Text(text="Did you know?", font=self.fonts["HEADING_FONT"])
         self.draw.text(
             xy=(0, 0),
@@ -460,7 +448,7 @@ class SubContentsLongFact(SubContents):
             text=paragraph,
             fill=self.colours["SOLID_BLACK"],
             align="left",
-            spacing=self.config.PRINT_LONG_FACT_LINE_SPACING_PIXELS,
+            spacing=self.long_fact_line_spacing_pixels,
         )
         return self.base_image
 
@@ -472,7 +460,7 @@ class SubContentsLongFact(SubContents):
                 text=" ".join(temp_list + [word]),
                 font=self.fonts["CONTENT_FONT"],
             )
-            if line.get_length() < self.config.PRINT_CONTENT_WIDTH_PIXELS:
+            if line.get_length() < self.content_width_pixels:
                 temp_list.append(word)
             else:
                 split_list.append(temp_list)
@@ -488,14 +476,15 @@ class SubContentsPageNumber(SubContents):
     def __init__(self, page_number: str):
         super().__init__()
         self.size: tuple[int, int] = (
-            self.config.PRINT_PAGE_NUMBER_FONT_SIZE_PIXELS + self.config.PRINT_PAGE_NUMBER_OFFSET_PIXELS,
-            self.config.PRINT_PAGE_NUMBER_FONT_SIZE_PIXELS + self.config.PRINT_PAGE_NUMBER_OFFSET_PIXELS,
+            self.page_number_font_size_pixels + self.page_number_offset_pixels,
+            self.page_number_font_size_pixels + self.page_number_offset_pixels,
         )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
         self.page_number = page_number
 
     def get_content_image(self) -> Image.Image:
+        Logger.get_logger().debug(f"Generating {self.__class__} image for page number: {self.page_number}")
         text = ImageText.Text(text=self.page_number, font=self.fonts["PAGE_NUMBER_FONT"])
         self.draw.text(
             xy=(self.base_image.width // 2, self.base_image.height // 2),
@@ -503,7 +492,7 @@ class SubContentsPageNumber(SubContents):
             anchor="mm",
             fill=self.colours["SOLID_BLACK"],
         )
-        if self.config.PRINT_DEBUG:
+        if self.config.debug:
             self.draw.rectangle(
                 xy=[(0, 0), (self.base_image.width - 1, self.base_image.height - 1)],
                 fill=None,

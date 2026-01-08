@@ -4,13 +4,13 @@ import random
 import numpy as np
 
 from pydantic import BaseModel, Field
-from .config import Config
 from .cell import Cell
 from .enums import LayoutEnum, DirectionEnum
-from backend.utils import Logger, get_profanity_list
+from backend.utils import Logger, get_profanity_list, PuzzleConfig
 
 
 class Puzzle(BaseModel):
+    puzzle_config: PuzzleConfig = Field(..., description="Configuration for puzzle generation")
     puzzle_title: str = Field(..., description="the title of the puzzle")
     display_title: str = Field(default="", description="the display title of the puzzle")
     input_word_list: list[str] = Field(..., description="the words supplied to this puzzle for creation")
@@ -24,7 +24,7 @@ class Puzzle(BaseModel):
     )
     puzzle_search_list: list[str] = Field(default_factory=list, description="the words used in this puzzle")
     density: float = Field(default=0.0, description="the density of words in the puzzle")
-    profanity: dict[str, list[tuple[str, tuple[int, int, str]]]] = Field(
+    profanity: dict[str, list[tuple[str, tuple[str, int, int]]]] = Field(
         default_factory=dict, description="the profanity of scores for rows/cols/diags in puzzle"
     )
 
@@ -47,15 +47,15 @@ class Puzzle(BaseModel):
     def populate_puzzle(self):
         attempts = 0
         while (
-            attempts < Config.PUZZLE_MAX_PLACEMENT_ATTEMPTS
-            and self.density < Config.PUZZLE_MAX_DENSITY
+            attempts < self.puzzle_config.max_placement_attempts
+            and self.density < self.puzzle_config.max_density
             and len(self.puzzle_search_list) < len(self.input_word_list)
         ):
             word: str = random.choice(list(set(self.input_word_list) - set(self.puzzle_search_list))).upper()
             Logger.get_logger().debug(f"placing word {word}")
             if word in self.puzzle_search_list:
                 continue
-            if self.place_a_word(word.replace(" ", "").upper()):
+            if self.place_a_word(word.replace(" ", "").replace("-", "").upper()):
                 Logger.get_logger().debug(f"successfully placed {word}")
                 bisect.insort_left(self.puzzle_search_list, word)
                 self._get_density()
@@ -64,8 +64,6 @@ class Puzzle(BaseModel):
             attempts += 1
         self._fill_empty_cells()
         Logger.get_logger().debug("Puzzle made, checking for profanity")
-        if Config.PUZZLE_ENABLE_PROFANITY_FILTER:
-            self.check_for_inadvertent_profanity()
 
     def place_a_word(self, word: str) -> bool:
         direction = self._get_direction(word)
@@ -204,30 +202,10 @@ class Puzzle(BaseModel):
                     count += 1
         return count
 
-    def calculate_cells_size(self) -> int:
-        if not Config.PRINT_VARIABLE_CELL_SIZE:
-            return Config.PRINT_MIN_CELL_SIZE
-        cell_size_by_width = int(Config.PRINT_GRID_WIDTH / self.columns)
-        cell_size_by_height = int(Config.PRINT_GRID_HEIGHT / self.rows)
-        if cell_size_by_width < Config.PRINT_MIN_CELL_SIZE:
-            return Config.PRINT_MIN_CELL_SIZE
-        if cell_size_by_width > Config.PRINT_MAX_CELL_SIZE:
-            if cell_size_by_height < Config.PRINT_MIN_CELL_SIZE:
-                return Config.PRINT_MIN_CELL_SIZE
-            if cell_size_by_height > Config.PRINT_MAX_CELL_SIZE:
-                return Config.PRINT_MAX_CELL_SIZE
-            return cell_size_by_height
-        if cell_size_by_height < Config.PRINT_MIN_CELL_SIZE:
-            return cell_size_by_width
-        if cell_size_by_height > Config.PRINT_MAX_CELL_SIZE:
-            return cell_size_by_width
-        return min(cell_size_by_height, cell_size_by_width)
-
     def get_puzzle_layout(self) -> LayoutEnum:
-        cell_size = self.calculate_cells_size()
-        if cell_size * self.rows <= Config.PRINT_GRID_HEIGHT:
+        if 0 < self.rows <= self.puzzle_config.medium_rows:
             return LayoutEnum.SINGLE
-        if cell_size * self.rows < Config.PRINT_GRID_HEIGHT_TWO_PAGE:
+        if self.puzzle_config.medium_rows < self.rows <= self.puzzle_config.max_rows:
             return LayoutEnum.DOUBLE
         raise ValueError("You fucked this, wills, you moron")
 
@@ -238,17 +216,19 @@ class Puzzle(BaseModel):
             gird_string_substrings_backward = self._check_grid_string(grid_string[::-1], "R")
             bad_words = grid_string_substrings_forward + gird_string_substrings_backward
             if len(bad_words) > 0:
-                Logger.get_logger().warn(f"Profanity found in {name}, {bad_words}")
                 self.profanity[name] = bad_words
 
-    @staticmethod
-    def _check_grid_string(grid_string: str, dir: str = "F") -> list[tuple[str, tuple[int, int, str]]]:
+    def _check_grid_string(self, grid_string: str, direction: str = "F") -> list[tuple[str, tuple[str, int, int]]]:
         return [
-            (grid_string[i:j], (i, j, dir))
+            (grid_string[i:j], (direction, i, j))
             for i in range(len(grid_string))
             for j in range(i + 1, len(grid_string) + 1)
-            if grid_string[i:j] in get_profanity_list()
+            if self._check_a_word_against_profanity_list(grid_string[i:j])
         ]
+
+    @staticmethod
+    def _check_a_word_against_profanity_list(word: str) -> bool:
+        return word in get_profanity_list()
 
     def _get_grid_strings(self) -> dict[str, str]:
         return_strings: dict[str, str] = {}
@@ -257,18 +237,14 @@ class Puzzle(BaseModel):
             for cell in row:
                 lattice[cell.loc_y, cell.loc_x] = cell.value
         for y in range(self.rows):
-            return_strings["row" + str(y)] = "".join(lattice[y, :])
+            return_strings[f"row{y}"] = "".join(lattice[y, :])
         for x in range(self.columns):
-            return_strings["col" + str(x)] = "".join(lattice[:, x])
+            return_strings[f"col{x}"] = "".join(lattice[:, x])
         for j in range(-self.rows + 1, self.columns):
-            if j <= 0:
-                nwse_cords = f"0-{-j}"
-                nesw_cords = f"0-{self.rows + j}"
-            else:
-                nwse_cords = f"{j}-0"
-                nesw_cords = f"{j}-{self.rows}"
-            return_strings["nwse" + nwse_cords] = "".join(lattice.diagonal(j))
-            return_strings["swne" + nesw_cords] = "".join(np.flipud(lattice).diagonal(j))
+            nwse_cords = f"0-{-j}" if j <= 0 else f"{j}-0"
+            nesw_cords = f"0-{self.rows + j}" if j <= 0 else f"{j}-{self.rows}"
+            return_strings[f"nwse{nwse_cords}"] = "".join(lattice.diagonal(j))
+            return_strings[f"swne{nesw_cords}"] = "".join(np.flipud(lattice).diagonal(j))
         return return_strings
 
     @staticmethod

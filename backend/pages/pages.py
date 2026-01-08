@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from backend.models import BookData, TitlePageEnum, PageTypeEnum, LayoutEnum
+from backend.models import PuzzleData, TitlePageEnum, PageTypeEnum, LayoutEnum
 from backend.utils import Logger
 from .contents import ContentsFront, ContentsBlank, ContentsPuzzleGrid, ContentsPuzzleWordlist, ContentsSolution
 from .print_params import PrintParams
@@ -15,37 +15,37 @@ class Page(PrintParams):
         self.content: Image.Image = content
         self.page_number: int = page_number
         self.page_type: PageTypeEnum = PageTypeEnum.RECTO if self.page_number % 2 == 1 else PageTypeEnum.VERSO
-        self.size = (self.config.PRINT_PAGE_WIDTH_PIXELS, self.config.PRINT_PAGE_HEIGHT_PIXELS)
+        self.size = (self.page_width_pixels, self.page_height_pixels)
         self.base_image: Image.Image = self._make_base_image("SOLID_WHITE")
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
 
     def get_page_image(self) -> Image.Image:
         if self.page_type == PageTypeEnum.VERSO:
-            left_margin_x_coord = self.config.PRINT_OUTER_MARGIN_PIXELS
-            right_margin_x_coord = self.config.PRINT_PAGE_WIDTH_PIXELS - self.config.PRINT_INNER_MARGIN_PIXELS
+            left_margin_x_coord = self.outer_margin_pixels
+            right_margin_x_coord = self.page_width_pixels - self.inner_margin_pixels
         else:
-            left_margin_x_coord = self.config.PRINT_INNER_MARGIN_PIXELS
-            right_margin_x_coord = self.config.PRINT_PAGE_WIDTH_PIXELS - self.config.PRINT_OUTER_MARGIN_PIXELS
-        y_coord = self.config.PRINT_TOP_MARGIN_PIXELS
+            left_margin_x_coord = self.inner_margin_pixels
+            right_margin_x_coord = self.page_width_pixels - self.outer_margin_pixels
+        y_coord = self.top_margin_pixels
         self.base_image.paste(im=self.content, box=(left_margin_x_coord, y_coord), mask=self.content)
         if self.page_number > 1:
             page_number_image = SubContentsPageNumber(str(self.page_number)).get_content_image()
             if self.page_type == PageTypeEnum.RECTO:
                 page_number_location = (
                     right_margin_x_coord - page_number_image.width,
-                    self.config.PRINT_PAGE_HEIGHT_PIXELS - self.config.PRINT_BOTTOM_MARGIN_PIXELS - page_number_image.height,
+                    self.page_height_pixels - self.bottom_margin_pixels - page_number_image.height,
                 )
             else:
                 page_number_location = (
                     left_margin_x_coord,
-                    self.config.PRINT_PAGE_HEIGHT_PIXELS - self.config.PRINT_BOTTOM_MARGIN_PIXELS - page_number_image.height,
+                    self.page_height_pixels - self.bottom_margin_pixels - page_number_image.height,
                 )
             self.base_image.paste(
                 im=page_number_image,
                 box=page_number_location,
                 mask=page_number_image,
             )
-        if self.config.PRINT_DEBUG:
+        if self.config.debug:
             self.draw.line(
                 [(left_margin_x_coord, 0), (left_margin_x_coord, self.base_image.height)],
                 fill=self.colours["DEBUG_RED"],
@@ -59,8 +59,8 @@ class Page(PrintParams):
             self.draw.line([(0, y_coord), (self.base_image.width, y_coord)], fill=self.colours["DEBUG_RED"], width=2)
             self.draw.line(
                 [
-                    (0, self.config.PRINT_PAGE_HEIGHT_PIXELS - self.config.PRINT_BOTTOM_MARGIN_PIXELS),
-                    (self.base_image.width, self.config.PRINT_PAGE_HEIGHT_PIXELS - self.config.PRINT_BOTTOM_MARGIN_PIXELS),
+                    (0, self.page_height_pixels - self.bottom_margin_pixels),
+                    (self.base_image.width, self.page_height_pixels - self.bottom_margin_pixels),
                 ],
                 fill=self.colours["DEBUG_RED"],
                 width=2,
@@ -70,15 +70,15 @@ class Page(PrintParams):
 
 
 class Pages(PrintParams):
-    def __init__(self, book: BookData, filename: Path):
+    def __init__(self, word_search_data: PuzzleData, filename: Path):
         super().__init__()
-        self.book = book
-        self.filename: Path = filename if not self.config.PRINT_DEBUG else filename.with_stem(filename.stem + "_PRINT_DEBUG")
+        self.word_search_data = word_search_data
+        self.filename: Path = filename if not self.config.debug else filename.with_stem(filename.stem + "_PRINT_DEBUG")
         self.puzzle_pages: list[Image.Image] = []
 
     def create_pages(self):
         Logger.get_logger().info("Creating pages...")
-        if len(self.book.puzzles) == 0:
+        if len(self.word_search_data.puzzles) == 0:
             Logger.get_logger().warn("no puzzles in to make in to pages")
             raise ValueError("No puzzles in to make in to pages")
         self._add_front_page()
@@ -91,11 +91,12 @@ class Pages(PrintParams):
             self._add_blank_page()
 
     def _add_solution_pages(self):
-        for n in range(0, len(self.book.puzzles), self.config.PRINT_SOLUTION_PER_PAGE):
+        for n in range(0, len(self.word_search_data.puzzles), self.solution_per_page):
+            Logger.get_logger().info(f"Adding solution page for {n + 1} to {n + self.solution_per_page}")
             self.puzzle_pages.append(
                 Page(
                     content=ContentsSolution(
-                        self.book.puzzles[n : n + self.config.PRINT_SOLUTION_PER_PAGE]
+                        self.word_search_data.puzzles[n : n + self.solution_per_page]
                     ).get_content_image(),
                     page_number=len(self.puzzle_pages) + 1,
                 ).get_page_image()
@@ -107,7 +108,8 @@ class Pages(PrintParams):
         )
 
     def _add_puzzle_pages(self):
-        for puzzle in self.book.puzzles:
+        for puzzle in self.word_search_data.puzzles:
+            Logger.get_logger().info(f"Adding puzzle page for {puzzle.display_title}")
             layout = puzzle.get_puzzle_layout()
             self.puzzle_pages.append(
                 Page(
@@ -122,6 +124,7 @@ class Pages(PrintParams):
                         page_number=len(self.puzzle_pages) + 1,
                     ).get_page_image()
                 )
+            Logger.get_logger().debug(f"Added puzzle page for {puzzle.display_title}")
 
     def _add_front_page(self, front_page_type: TitlePageEnum = TitlePageEnum.PUZZLE):
         self.puzzle_pages.append(
@@ -139,7 +142,7 @@ class Pages(PrintParams):
             format="PDF",
             save_all=True,
             append_images=self.puzzle_pages[1:],
-            resolution=self.config.PRINT_DPI,
-            title=self.book.book_title,
+            resolution=self.config.dpi,
+            title=self.word_search_data.book_title,
         )
         Logger.get_logger().info(f"Saved to {self.filename}")

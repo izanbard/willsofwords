@@ -31,9 +31,14 @@ pillow==12.0.0
 pydantic==2.12.5
     # via
     #   ollama
+    #   pydantic-settings
     #   wills_of_words (pyproject.toml)
 pydantic-core==2.41.5
     # via pydantic
+pydantic-settings==2.12.0
+    # via wills_of_words (pyproject.toml)
+python-dotenv==1.2.1
+    # via pydantic-settings
 typing-extensions==4.15.0
     # via
     #   anyio
@@ -41,4 +46,6 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   typing-inspection
 typing-inspection==0.4.2
-    # via pydantic
+    # via
+    #   pydantic
+    #   pydantic-settings

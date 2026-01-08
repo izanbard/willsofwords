@@ -119,7 +119,7 @@ $ python -m venv venv
 $ source venv/bin/activate
 (venv) $ pip install -U pip
 ```
-
+##### Compile the requirements
 A requirements-dev.txt is committed with this repo and can be used, but it is recommended to recompile the
 requirements-dev.txt file from
 the pyproject.toml – especially if developing on Windows (you monster).
@@ -129,7 +129,7 @@ the pyproject.toml – especially if developing on Windows (you monster).
 (venv) $ pip-compile --extra dev --strip-extras -q -o requirements-dev.txt pyproject.toml 
 ```
 
-Install the requirements
+##### Install the requirements
 
 ```shell
 (venv) $ pip install -r requirements-dev.txt
@@ -147,7 +147,7 @@ The pre-commit hooks:
 * `flake8` (using the rules in `.flake8`)
 * `bandit` (using the rules in `.pyproject.toml`)
 
-#### Run the tests
+##### Run the tests
 
 `pytest` settings are in `pyproject.toml`
 
@@ -159,7 +159,7 @@ The pre-commit hooks:
 
 #### Prepare
 
-Ensure you are using the correct versions of `node` and `npm`.  `nvm` is reccomnded for this.
+Ensure you are using the correct versions of `node` and `npm`.  `nvm` is recommended for this.
 
 ```shell
 $ nvm use v25.2.1

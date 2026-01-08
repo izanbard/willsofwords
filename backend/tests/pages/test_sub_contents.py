@@ -45,8 +45,8 @@ class TestSubContentsCell:
     @pytest.fixture
     def solution_cell_size(self, cell_size):
         return (
-            cell_size + ceil((cell_size / 10) / 2 * (2**0.5)),
-            cell_size + ceil((cell_size / 10) / 2 * (2**0.5)),
+            cell_size + ceil((cell_size / 10) / 2 * 1.42),
+            cell_size + ceil((cell_size / 10) / 2 * 1.42),
         )
 
     def test_initialization_puzzle(self, instance_puzzle, cell_size):
