@@ -1,11 +1,11 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from datetime import datetime
 from pydantic import BaseModel, Field
 
 from backend.utils import get_profanity_list, Logger
 
 
-class WordlistBase(BaseModel, ABC):
+class WordlistBase(BaseModel):
     @abstractmethod
     def check_profanity(self):
         raise NotImplementedError("This method must be implemented by subclasses")
