@@ -1,9 +1,10 @@
 import pytest
 from backend.models.cell import Cell
 from backend.models.enums import DirectionEnum
+from ..test_utils import TestUtils
 
 
-class TestCell:
+class TestCell(TestUtils):
     @pytest.fixture(autouse=True)
     def setup(self):
         self.direction = DirectionEnum.EW
