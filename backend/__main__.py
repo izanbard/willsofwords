@@ -3,7 +3,7 @@ from pathlib import Path
 
 from backend.models import PuzzleData, Wordlist  # noqa: F401
 from backend.pages import Pages, PrintParams
-from backend.utils import Logger, Config, get_config, AppConfig, PuzzleConfig
+from backend.utils import Logger, Config, get_config, AppConfig, PuzzleConfig, create_env_file_if_not_exists
 
 
 def fix_puzzle_config(config: Config):
@@ -19,6 +19,7 @@ def fix_puzzle_config(config: Config):
 
 
 def initialise():
+    create_env_file_if_not_exists()
     config = get_config()
     fix_puzzle_config(config)
     Logger(config.app)
