@@ -8,6 +8,13 @@ profanity_list = None
 config: Config | None = None
 
 
+def get_logger() -> Logger:
+    logger = Logger.get_logger()
+    if logger is not None:
+        return logger
+    raise RuntimeError("Logger not initialised")
+
+
 def create_env_file_if_not_exists():
     env_path = Path(".env")
     env_dist_path = Path(".env.dist")
@@ -17,7 +24,7 @@ def create_env_file_if_not_exists():
                 fd.write(ed_fd.read())
 
 
-def get_profanity_list():
+def get_profanity_list() -> list[str]:
     global profanity_list
     if profanity_list is None:
         with open("backend/assets/profanity.txt", "r") as fd:
@@ -25,20 +32,24 @@ def get_profanity_list():
     return profanity_list
 
 
-def get_config():
+def get_config() -> Config:
     global config
     if config is None:
         config = Config()
     return config
 
 
-def get_print_config():
+def get_app_config() -> AppConfig:
+    return get_config().app
+
+
+def get_print_config() -> PrintConfig:
     return get_config().print
 
 
-def get_ai_config():
+def get_ai_config() -> AIConfig:
     return get_config().ai
 
 
-def get_puzzle_config():
+def get_puzzle_config() -> PuzzleConfig:
     return get_config().puzzle
