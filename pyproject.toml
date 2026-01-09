@@ -3,12 +3,16 @@ name = "wills_of_words"
 description = "a word serach puzzle creation tool"
 version = "0.0.1"
 dependencies = [
-    "numpy>2.3.4",
+    "fastapi>=0.128.0",
+    "httptools>=0.7.1",
+    "httpx>=0.28.1",
+    "numpy>2.3.5",
     "ollama>=0.6.1",
-    "pillow>=12.0.0",
+    "pillow>=12.1.0",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",
-    "pillow>=12.0.0"
+    "uvicorn>=0.40.0",
+    "uvloop>=0.22.1",
 ]
 requires-python = ">=3.12"
 readme = ".github/README.md"
@@ -17,11 +21,11 @@ license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
-    "black>=23.12.1",
+    "black>=25.12.0",
     "flake8>=7.3.0",
     "mock>=5.2.0",
     "pip-tools>=7.5.2",
-    "pre-commit>=4.5.0",
+    "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
