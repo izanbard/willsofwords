@@ -6,6 +6,15 @@ from backend.pages import Pages, PrintParams
 from backend.utils import Logger, Config, get_config, AppConfig, PuzzleConfig
 
 
+def create_env_file_if_not_exists():
+    env_path = Path(".env")
+    env_dist_path = Path(".env.dist")
+    if not env_path.exists():
+        with open(env_dist_path, "r") as ed_fd:
+            with open(env_path, "w") as fd:
+                fd.write(ed_fd.read())
+
+
 def fix_puzzle_config(config: Config):
     if config.puzzle.max_columns == 0:
         print_params = PrintParams()
@@ -19,6 +28,7 @@ def fix_puzzle_config(config: Config):
 
 
 def initialise():
+    create_env_file_if_not_exists()
     config = get_config()
     fix_puzzle_config(config)
     Logger(config.app)
