@@ -37,15 +37,15 @@ jobs:
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
       - name: Grab Issues Number
-        if: ${{ always() }}
+        if: ${{ (success() || failure()) && contains(github.ref, 'main') }}
         run: |
           myjson=$(cat ${{ runner.temp }}/qodana/results/qodana.sarif.json)
           total=$(echo $myjson | jq -r '.runs[0].properties.qodanaNewResultSummary | if (.total) then .total else 0 end')
           critical=$(echo $myjson | jq -r '.runs[0].properties.qodanaNewResultSummary | if (.critical) then .critical else 0 end')
           echo "ISSUES=${total}(${critical})" >> $GITHUB_ENV
           echo "CRIT=${critical}" >> $GITHUB_ENV
-      - name: Create Awesome Badge
-        if: ${{ always() }}
+      - name: Create Awesome Qodana Badge
+        if: ${{ (success() || failure()) && contains(github.ref, 'main') }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST2_SECRET }}
