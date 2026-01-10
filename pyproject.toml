@@ -53,6 +53,9 @@ omit = ["test_*"]
 
 [tool.coverage.report]
 skip_empty = true
+exclude_also = [
+    "raise NotImplementedError",
+]
 
 [tool.coverage.html]
 directory = ".cov/coverage_html_report"
