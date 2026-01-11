@@ -6,9 +6,9 @@ class AppConfig(BaseModel):
     """Configuration settings for the backend application."""
 
     log_level: str = Field(default="INFO", description="The log level for the application.")
-    input_filename: str = Field(default="testbook.json", description="The input file for the application.")
-    data_filename: str = Field(default="testdata.json", description="The data file for the application.")
-    output_filename: str = Field(default="testbook.pdf", description="The output file for the application.")
+    input_filename: str = Field(default="wordlist.json", description="The input file for the application.")
+    data_filename: str = Field(default="puzzledata.json", description="The data file for the application.")
+    output_filename: str = Field(default="manuscript.pdf", description="The output file for the application.")
     command: str = Field(default="validate_wordlist", description="The command for the application.")
 
 

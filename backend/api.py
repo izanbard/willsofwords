@@ -12,6 +12,7 @@ from backend.utils import Logger, create_env_file_if_not_exists, get_config, Con
 from backend.pages import PrintParams
 
 from .commands import execute_command
+from .routers.settings_router import SettingsRouter
 
 
 def fix_puzzle_config(config: Config):
@@ -41,6 +42,8 @@ async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]
     if config.app.command != "api":
         sys.exit(execute_command(config.app, config.puzzle, config.print, command=config.app.command))
     app.state.config = config
+    with open("version.txt") as f:
+        app.state.version = f.readline().strip()
     # yield to the app
     yield
     # after the app shuts down
@@ -65,6 +68,7 @@ def create_api() -> FastAPI:
     )
 
     api.include_router(ProjectRouter)
+    api.include_router(SettingsRouter)
 
     @api.get(
         "/openapi.yaml",

@@ -1,3 +1,4 @@
+import string
 from pathlib import Path
 
 from .config import Config, AppConfig, PrintConfig, AIConfig, PuzzleConfig  # noqa: F401
@@ -26,10 +27,27 @@ def create_env_file_if_not_exists():
 
 def get_profanity_list() -> list[str]:
     global profanity_list
+    profanity_path = Path("backend/assets/profanity.txt")
+    profanity_dist_path = Path("backend/assets/profanity.txt.dist")
     if profanity_list is None:
-        with open("backend/assets/profanity.txt", "r") as fd:
-            profanity_list = [x.strip() for x in fd.readlines()]
+        if not profanity_path.exists():
+            with open(profanity_dist_path, "r") as ed_fd:
+                with open(profanity_path, "w") as fd:
+                    fd.write(ed_fd.read())
+        with open(profanity_path, "r") as fd:
+            profanity_list = [
+                x.strip().upper().translate({ord(c): None for c in string.whitespace + string.digits + string.punctuation})
+                for x in fd.readlines()
+            ]
+        profanity_list.sort()
     return profanity_list
+
+
+def save_profanity_list(new_list: list[str]):
+    global profanity_list
+    profanity_list = sorted(list(set(new_list)))
+    with open("backend/assets/profanity.txt", "w") as fd:
+        fd.write("\n".join(profanity_list))
 
 
 def get_config() -> Config:

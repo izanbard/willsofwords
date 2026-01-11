@@ -141,6 +141,7 @@ pyyaml==6.0.3
     # via
     #   bandit
     #   pre-commit
+    #   wills_of_words (pyproject.toml)
 rich==14.2.0
     # via bandit
 starlette==0.50.0

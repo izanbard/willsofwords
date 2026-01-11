@@ -1,15 +1,23 @@
 services:
   wordsworth:
-    build:
-      context: .
-      dockerfile: infra/backend.Dockerfile
+    container_name: wordsworth
+    image: python:latest
+#    build:
+#      context: .
+#      dockerfile: infra/backend.Dockerfile
     restart: "no"
+#    pull_policy: build
     volumes:
-      - ./data:/app/data
+#      - ./data:/app/data
+      - .:/app
+    ports:
+      - "5000:5000"
+    working_dir: /app
+    command: "/bin/sh -c 'pip install -U pip; pip install -r requirements.txt; python -u -m backend'"
     environment:
       # Allowed values = validate_wordlist, wordlist_to_data, data_to_pdf, wordlist_to_data_to_pdf, data_show_profanity
       # if it is not obvious what these do then I need to rename them!
-      - APP__COMMAND=validate_wordlist
+      - APP__COMMAND=api
 
       - APP__LOG_LEVEL=INFO
       - APP__INPUT_FILENAME=./data/wordlist.json

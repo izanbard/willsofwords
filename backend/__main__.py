@@ -5,7 +5,7 @@ import uvicorn
 from . import create_api
 
 SERVER_PORT = 5000
-SERVER = "127.0.0.1"
+SERVER = "0.0.0.0"  # nosec: B104
 LOG_LEVEL = "debug"
 
 

@@ -54,6 +54,8 @@ pydantic-settings==2.12.0
     # via wills_of_words (pyproject.toml)
 python-dotenv==1.2.1
     # via pydantic-settings
+pyyaml==6.0.3
+    # via wills_of_words (pyproject.toml)
 starlette==0.50.0
     # via fastapi
 typing-extensions==4.15.0

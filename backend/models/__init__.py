@@ -4,3 +4,4 @@ from .grid_size import GridSize  # noqa: F401
 from .cell import Cell  # noqa: F401
 from .puzzle import Puzzle  # noqa: F401
 from .puzzle_data import PuzzleData  # noqa: F401
+from .profanity import ProfanityList  # noqa: F401
