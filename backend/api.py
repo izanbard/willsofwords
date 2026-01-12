@@ -1,4 +1,3 @@
-import sys
 from contextlib import asynccontextmanager
 from io import StringIO
 from typing import AsyncIterator
@@ -8,42 +7,16 @@ from fastapi.responses import JSONResponse
 from yaml import dump as yaml_dump
 
 from backend.routers import ProjectRouter
-from backend.utils import Logger, create_env_file_if_not_exists, get_config, Config
-from backend.pages import PrintParams
+from backend.utils import Logger, Config
 
-from .commands import execute_command
 from .routers.settings_router import SettingsRouter
-
-
-def fix_puzzle_config(config: Config):
-    if config.puzzle.max_columns == 0:
-        print_params = PrintParams()
-        config.puzzle.calculate_column_count(print_params.grid_width, print_params.min_cell_size)
-    if config.puzzle.max_rows == 0:
-        print_params = PrintParams()
-        config.puzzle.calculate_max_row_count(print_params.grid_height_two_page, print_params.min_cell_size)
-    if config.puzzle.medium_rows == 0:
-        print_params = PrintParams()
-        config.puzzle.calculate_medium_row_count(print_params.grid_height, print_params.min_cell_size)
-
-
-def initialise():
-    create_env_file_if_not_exists()
-    config = get_config()
-    fix_puzzle_config(config)
-    Logger(config.app)
-    return config
 
 
 @asynccontextmanager
 async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]:
     # before app is created
-    config = initialise()
-    if config.app.command != "api":
-        sys.exit(execute_command(config.app, config.puzzle, config.print, command=config.app.command))
-    app.state.config = config
-    with open("version.txt") as f:
-        app.state.version = f.readline().strip()
+    app.state.config = Config()
+    app.state.logger = Logger(app.state.config.app).get_logger()
     # yield to the app
     yield
     # after the app shuts down

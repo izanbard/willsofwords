@@ -5,7 +5,7 @@ from math import ceil
 from PIL import ImageDraw, ImageText, Image
 
 
-from backend.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum
+from backend.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum, ProjectConfig
 from .print_params import PrintParams
 from backend.utils import Logger
 
@@ -13,8 +13,8 @@ from backend.utils import Logger
 class SubContents(PrintParams, ABC):
     ROOT_TWO_APPX = 1.42
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *, project_config: ProjectConfig) -> None:
+        super().__init__(project_config=project_config)
 
     @abstractmethod
     def get_content_image(self) -> Image.Image:
@@ -22,9 +22,9 @@ class SubContents(PrintParams, ABC):
 
 
 class SubContentsHeader(SubContents):
-    def __init__(self, header_title: str) -> None:
-        super().__init__()
-        self.size: tuple[int, int] = (self.content_width_pixels, self.title_box_height_pixels)
+    def __init__(self, header_title: str, project_config: ProjectConfig) -> None:
+        super().__init__(project_config=project_config)
+        self.size: tuple[int, int] = (self.config.content_width_pixels, self.config.title_box_height_pixels)
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
         self.header_title: str = header_title
@@ -42,14 +42,16 @@ class SubContentsHeader(SubContents):
 
 
 class SubContentsSearchList(SubContents):
-    def __init__(self, wordlist: list[str], layout_type: LayoutEnum = LayoutEnum.SINGLE) -> None:
-        super().__init__()
+    def __init__(
+        self, wordlist: list[str], project_config: ProjectConfig, layout_type: LayoutEnum = LayoutEnum.SINGLE
+    ) -> None:
+        super().__init__(project_config=project_config)
         if layout_type == layout_type.SINGLE:
-            self.size: tuple[int, int] = (self.content_width_pixels, self.wordlist_box_height_pixels)
+            self.size: tuple[int, int] = (self.config.content_width_pixels, self.config.wordlist_box_height_pixels)
         else:
             self.size: tuple[int, int] = (
-                self.content_width_pixels,
-                (self.content_height_pixels - self.title_box_height_pixels) // 2,
+                self.config.content_width_pixels,
+                (self.config.content_height_pixels - self.config.title_box_height_pixels) // 2,
             )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
@@ -84,7 +86,7 @@ class SubContentsSearchList(SubContents):
 
     def _calculate_font_size(self) -> tuple[int, list[ImageText.Text]]:
         number_of_words = len(self.wordlist)
-        column_width = self.content_width_pixels // 3
+        column_width = self.config.content_width_pixels // 3
         columns: list[ImageText.Text] = []
         font = copy(self.fonts["SEARCH_LIST_FONT"])
         exceeds_size = True
@@ -93,20 +95,20 @@ class SubContentsSearchList(SubContents):
             if font.size <= 0:
                 raise ValueError("wordlist font too small")
             dummy_text = ImageText.Text(text=self.wordlist[0], font=font)
-            line_height = int(dummy_text.get_bbox()[3]) + self.wordlist_line_spacing_pixels
+            line_height = int(dummy_text.get_bbox()[3]) + self.config.wordlist_line_spacing_pixels
 
             max_sublist_length = int(self.base_image.height / line_height)
             number_of_columns = max(ceil(number_of_words / max_sublist_length), 3)
 
             chunk_size = ceil(number_of_words / number_of_columns)
-            column_width = self.content_width_pixels // number_of_columns
+            column_width = self.config.content_width_pixels // number_of_columns
 
             columns: list[ImageText.Text] = []
             for column_number in range(number_of_columns):
                 text = ImageText.Text(
                     text="\n".join(self.wordlist[column_number * chunk_size : (column_number * chunk_size) + chunk_size]),
                     font=font,
-                    spacing=self.wordlist_line_spacing_pixels,
+                    spacing=self.config.wordlist_line_spacing_pixels,
                 )
                 columns.append(text)
             exceeds_size = any(x.get_bbox()[2] > column_width for x in columns)
@@ -119,7 +121,7 @@ class SubContentsCell(SubContents):
 
     The SubContentsCell class extends the functionality of the SubContents class
     to create a visual representation of a cell, with options for rendering
-    specific grid types (e.g., puzzle or solution grids). It prepares a base image
+    specific grid types (e.g. puzzle or solution grids). It prepares a base image
     and provides methods to add rendered content to it, taking into account
     directions and visual styles specific to the grid type.
 
@@ -132,7 +134,7 @@ class SubContentsCell(SubContents):
     :ivar size: The dimensions of the cell. This depends on the specified grid
         type and cell size.
     :type size: tuple[int, int]
-    :ivar grid_type: The type of grid (e.g., puzzle or solution) to render for
+    :ivar grid_type: The type of grid (e.g. puzzle or solution) to render for
         the cell.
     :type grid_type: BoardImageEnum
     :ivar base_image: The base image on which the cell and its contents are drawn.
@@ -141,8 +143,10 @@ class SubContentsCell(SubContents):
     :type draw: ImageDraw.ImageDraw
     """
 
-    def __init__(self, cell: Cell, cell_size: int, grid_type: BoardImageEnum = BoardImageEnum.PUZZLE):
-        super().__init__()
+    def __init__(
+        self, cell: Cell, cell_size: int, project_config: ProjectConfig, grid_type: BoardImageEnum = BoardImageEnum.PUZZLE
+    ):
+        super().__init__(project_config=project_config)
         self.cell: Cell = cell
         self.solution_line_width = int(cell_size / 10)
         if grid_type == BoardImageEnum.PUZZLE:
@@ -213,15 +217,21 @@ class SubContentsCell(SubContents):
 
 class SubContentsGrid(SubContents):
     def __init__(
-        self, rows: int, cols: int, cells: list[list[Cell]], cell_size: int, grid_type: BoardImageEnum = BoardImageEnum.PUZZLE
+        self,
+        rows: int,
+        cols: int,
+        cells: list[list[Cell]],
+        cell_size: int,
+        project_config: ProjectConfig,
+        grid_type: BoardImageEnum = BoardImageEnum.PUZZLE,
     ) -> None:
-        super().__init__()
+        super().__init__(project_config=project_config)
         self.rows: int = rows
         self.cols: int = cols
         self.cells: list[list[Cell]] = cells
         self.cell_size = cell_size
         self.grid_type: BoardImageEnum = grid_type
-        self.offset = self.grid_pad_pixels + self.grid_border_pixels + self.grid_margin_pixels
+        self.offset = self.config.grid_pad_pixels + self.config.grid_border_pixels + self.config.grid_margin_pixels
         self.size: tuple[int, int] = (
             self.cols * self.cell_size + 2 * self.offset,
             self.rows * self.cell_size + 2 * self.offset,
@@ -235,7 +245,9 @@ class SubContentsGrid(SubContents):
         )
         for row in self.cells:
             for cell in row:
-                tile_image = SubContentsCell(cell, self.cell_size, self.grid_type).get_content_image()
+                tile_image = SubContentsCell(
+                    cell=cell, cell_size=self.cell_size, grid_type=self.grid_type, project_config=self.config
+                ).get_content_image()
                 if self.grid_type == BoardImageEnum.PUZZLE:
                     box = ((cell.loc_x * self.cell_size) + self.offset, (cell.loc_y * self.cell_size) + self.offset)
                 else:
@@ -252,16 +264,16 @@ class SubContentsGrid(SubContents):
 
         self.draw.rounded_rectangle(
             [
-                (self.grid_pad_pixels, self.grid_pad_pixels),
+                (self.config.grid_pad_pixels, self.config.grid_pad_pixels),
                 (
-                    self.base_image.width - self.grid_pad_pixels,
-                    self.base_image.height - self.grid_pad_pixels,
+                    self.base_image.width - self.config.grid_pad_pixels,
+                    self.base_image.height - self.config.grid_pad_pixels,
                 ),
             ],
-            radius=self.grid_border_radius_pixels,
+            radius=self.config.grid_border_radius_pixels,
             fill=None,
             outline=self.colours["SOLID_BLACK"],
-            width=self.grid_border_pixels,
+            width=self.config.grid_border_pixels,
         )
         if self.config.debug:
             for r in range(self.rows):
@@ -282,14 +294,14 @@ class SubContentsGrid(SubContents):
                 )
 
             self.draw.line(
-                [(0, self.grid_pad_pixels), (self.base_image.width - 1, self.grid_pad_pixels)],
+                [(0, self.config.grid_pad_pixels), (self.base_image.width - 1, self.config.grid_pad_pixels)],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (0, self.base_image.height - self.grid_pad_pixels - 1),
-                    (self.base_image.width - 1, self.base_image.height - self.grid_pad_pixels - 1),
+                    (0, self.base_image.height - self.config.grid_pad_pixels - 1),
+                    (self.base_image.width - 1, self.base_image.height - self.config.grid_pad_pixels - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
@@ -297,18 +309,18 @@ class SubContentsGrid(SubContents):
 
             self.draw.line(
                 [
-                    (0, self.grid_pad_pixels + self.grid_border_pixels),
-                    (self.base_image.width - 1, self.grid_pad_pixels + self.grid_border_pixels),
+                    (0, self.config.grid_pad_pixels + self.config.grid_border_pixels),
+                    (self.base_image.width - 1, self.config.grid_pad_pixels + self.config.grid_border_pixels),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (0, self.base_image.height - self.grid_pad_pixels - self.grid_border_pixels - 1),
+                    (0, self.base_image.height - self.config.grid_pad_pixels - self.config.grid_border_pixels - 1),
                     (
                         self.base_image.width - 1,
-                        self.base_image.height - self.grid_pad_pixels - self.grid_border_pixels - 1,
+                        self.base_image.height - self.config.grid_pad_pixels - self.config.grid_border_pixels - 1,
                     ),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
@@ -345,14 +357,14 @@ class SubContentsGrid(SubContents):
             )
 
             self.draw.line(
-                [(self.grid_pad_pixels, 0), (self.grid_pad_pixels, self.base_image.height - 1)],
+                [(self.config.grid_pad_pixels, 0), (self.config.grid_pad_pixels, self.base_image.height - 1)],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (self.base_image.width - self.grid_pad_pixels - 1, 0),
-                    (self.base_image.width - self.grid_pad_pixels - 1, self.base_image.height - 1),
+                    (self.base_image.width - self.config.grid_pad_pixels - 1, 0),
+                    (self.base_image.width - self.config.grid_pad_pixels - 1, self.base_image.height - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
@@ -360,17 +372,17 @@ class SubContentsGrid(SubContents):
 
             self.draw.line(
                 [
-                    (self.grid_pad_pixels + self.grid_border_pixels, 0),
-                    (self.grid_pad_pixels + self.grid_border_pixels, self.base_image.height - 1),
+                    (self.config.grid_pad_pixels + self.config.grid_border_pixels, 0),
+                    (self.config.grid_pad_pixels + self.config.grid_border_pixels, self.base_image.height - 1),
                 ],
                 fill=self.colours["DEBUG_BLUE"],
                 width=2,
             )
             self.draw.line(
                 [
-                    (self.base_image.width - self.grid_pad_pixels - self.grid_border_pixels - 1, 0),
+                    (self.base_image.width - self.config.grid_pad_pixels - self.config.grid_border_pixels - 1, 0),
                     (
-                        self.base_image.width - self.grid_pad_pixels - self.grid_border_pixels - 1,
+                        self.base_image.width - self.config.grid_pad_pixels - self.config.grid_border_pixels - 1,
                         self.base_image.height - 1,
                     ),
                 ],
@@ -424,11 +436,11 @@ class SubContentsGrid(SubContents):
 
 
 class SubContentsLongFact(SubContents):
-    def __init__(self, long_fact: str):
-        super().__init__()
+    def __init__(self, long_fact: str, project_config: ProjectConfig):
+        super().__init__(project_config=project_config)
         self.size: tuple[int, int] = (
-            self.content_width_pixels,
-            (self.content_height_pixels - self.title_box_height_pixels) // 2,
+            self.config.content_width_pixels,
+            (self.config.content_height_pixels - self.config.title_box_height_pixels) // 2,
         )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
@@ -448,7 +460,7 @@ class SubContentsLongFact(SubContents):
             text=paragraph,
             fill=self.colours["SOLID_BLACK"],
             align="left",
-            spacing=self.long_fact_line_spacing_pixels,
+            spacing=self.config.long_fact_line_spacing_pixels,
         )
         return self.base_image
 
@@ -460,7 +472,7 @@ class SubContentsLongFact(SubContents):
                 text=" ".join(temp_list + [word]),
                 font=self.fonts["CONTENT_FONT"],
             )
-            if line.get_length() < self.content_width_pixels:
+            if line.get_length() < self.config.content_width_pixels:
                 temp_list.append(word)
             else:
                 split_list.append(temp_list)
@@ -473,11 +485,11 @@ class SubContentsLongFact(SubContents):
 
 
 class SubContentsPageNumber(SubContents):
-    def __init__(self, page_number: str):
-        super().__init__()
+    def __init__(self, page_number: str, project_config: ProjectConfig):
+        super().__init__(project_config=project_config)
         self.size: tuple[int, int] = (
-            self.page_number_font_size_pixels + self.page_number_offset_pixels,
-            self.page_number_font_size_pixels + self.page_number_offset_pixels,
+            self.config.page_number_font_size_pixels + self.config.page_number_offset_pixels,
+            self.config.page_number_font_size_pixels + self.config.page_number_offset_pixels,
         )
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)

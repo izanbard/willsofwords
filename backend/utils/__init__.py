@@ -1,12 +1,17 @@
+import json
 import string
 from pathlib import Path
 
-from .config import Config, AppConfig, PrintConfig, AIConfig, PuzzleConfig  # noqa: F401
+from .config import Config, AppConfig, AIConfig  # noqa: F401
 from .logging import Logger  # noqa: F401
 
 
 profanity_list = None
-config: Config | None = None
+dist_file_mapping = {
+    "project_settings": (Path("backend/defaults/project_settings.json.dist"), Path("backend/project_settings.json")),
+    "profanity": (Path("backend/defaults/profanity.txt.dist"), Path("backend/assets/profanity.txt")),
+    "env": (Path(".env.dist"), Path(".env")),
+}
 
 
 def get_logger() -> Logger:
@@ -16,25 +21,10 @@ def get_logger() -> Logger:
     raise RuntimeError("Logger not initialised")
 
 
-def create_env_file_if_not_exists():
-    env_path = Path(".env")
-    env_dist_path = Path(".env.dist")
-    if not env_path.exists():
-        with open(env_dist_path, "r") as ed_fd:
-            with open(env_path, "w") as fd:
-                fd.write(ed_fd.read())
-
-
 def get_profanity_list() -> list[str]:
     global profanity_list
-    profanity_path = Path("backend/assets/profanity.txt")
-    profanity_dist_path = Path("backend/assets/profanity.txt.dist")
     if profanity_list is None:
-        if not profanity_path.exists():
-            with open(profanity_dist_path, "r") as ed_fd:
-                with open(profanity_path, "w") as fd:
-                    fd.write(ed_fd.read())
-        with open(profanity_path, "r") as fd:
+        with open(dist_file_mapping["profanity"][1], "r") as fd:
             profanity_list = [
                 x.strip().upper().translate({ord(c): None for c in string.whitespace + string.digits + string.punctuation})
                 for x in fd.readlines()
@@ -46,28 +36,27 @@ def get_profanity_list() -> list[str]:
 def save_profanity_list(new_list: list[str]):
     global profanity_list
     profanity_list = sorted(list(set(new_list)))
-    with open("backend/assets/profanity.txt", "w") as fd:
+    with open(dist_file_mapping["profanity"][1], "w") as fd:
         fd.write("\n".join(profanity_list))
 
 
-def get_config() -> Config:
-    global config
-    if config is None:
-        config = Config()
-    return config
+def get_project_settings_defaults() -> dict:
+    with open(dist_file_mapping["project_settings"][1], "r") as fd:
+        return json.load(fd)
 
 
-def get_app_config() -> AppConfig:
-    return get_config().app
+def save_project_settings(new_settings: dict):
+    with open(dist_file_mapping["project_settings"][1], "w") as fd:
+        json.dump(new_settings, fd, indent=2)
 
 
-def get_print_config() -> PrintConfig:
-    return get_config().print
+def _creat_dist_file_if_not_exists(dist_path: Path, target_path: Path):
+    if not target_path.exists():
+        with open(dist_path, "r") as fd:
+            with open(target_path, "w") as tfd:
+                tfd.write(fd.read())
 
 
-def get_ai_config() -> AIConfig:
-    return get_config().ai
-
-
-def get_puzzle_config() -> PuzzleConfig:
-    return get_config().puzzle
+def create_default_files():
+    for path_pair in dist_file_mapping.values():
+        _creat_dist_file_if_not_exists(dist_path=path_pair[0], target_path=path_pair[1])

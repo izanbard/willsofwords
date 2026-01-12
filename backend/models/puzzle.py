@@ -6,11 +6,12 @@ import numpy as np
 from pydantic import BaseModel, Field
 from .cell import Cell
 from .enums import LayoutEnum, DirectionEnum
-from backend.utils import Logger, get_profanity_list, PuzzleConfig
+from .project_config import ProjectConfig
+from backend.utils import Logger, get_profanity_list
 
 
 class Puzzle(BaseModel):
-    puzzle_config: PuzzleConfig = Field(..., description="Configuration for puzzle generation")
+    project_config: ProjectConfig = Field(..., description="Configuration for puzzle generation")
     puzzle_title: str = Field(..., description="the title of the puzzle")
     display_title: str = Field(default="", description="the display title of the puzzle")
     input_word_list: list[str] = Field(..., description="the words supplied to this puzzle for creation")
@@ -47,8 +48,8 @@ class Puzzle(BaseModel):
     def populate_puzzle(self):
         attempts = 0
         while (
-            attempts < self.puzzle_config.max_placement_attempts
-            and self.density < self.puzzle_config.max_density
+            attempts < self.project_config.max_placement_attempts
+            and self.density < self.project_config.max_density
             and len(self.puzzle_search_list) < len(self.input_word_list)
         ):
             word: str = random.choice(list(set(self.input_word_list) - set(self.puzzle_search_list))).upper()
@@ -203,9 +204,9 @@ class Puzzle(BaseModel):
         return count
 
     def get_puzzle_layout(self) -> LayoutEnum:
-        if 0 < self.rows <= self.puzzle_config.medium_rows:
+        if 0 < self.rows <= self.project_config.medium_rows:
             return LayoutEnum.SINGLE
-        if self.puzzle_config.medium_rows < self.rows <= self.puzzle_config.max_rows:
+        if self.project_config.medium_rows < self.rows <= self.project_config.max_rows:
             return LayoutEnum.DOUBLE
         raise ValueError("You fucked this, wills, you moron")
 

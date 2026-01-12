@@ -6,11 +6,12 @@ from .enums import LayoutEnum
 from .grid_size import GridSize
 from .puzzle import Puzzle
 from .wordlist import Wordlist, Category
-from backend.utils import Logger, PuzzleConfig
+from .project_config import ProjectConfig
+from backend.utils import Logger
 
 
 class PuzzleData(BaseModel):
-    puzzle_config: PuzzleConfig = Field(..., description="Configuration for puzzle generation")
+    project_config: ProjectConfig = Field(..., description="Configuration for puzzle generation")
     book_title: str = Field(..., description="Title of the book")
     wordlist: Wordlist = Field(..., description="List of words provided from LLM")
     puzzles: list[Puzzle] = Field(default_factory=list, description="List of created Puzzles")
@@ -32,10 +33,10 @@ class PuzzleData(BaseModel):
     def _add_a_puzzle(self, category: Category) -> None:
         Logger.get_logger().debug(f"Creating puzzle: {category.category}")
         len_words = sum(len(word) for word in category.word_list)
-        size = GridSize(self.puzzle_config, len_words, self.puzzle_config.max_density)
+        size = GridSize(self.project_config, len_words, self.project_config.max_density)
         Logger.get_logger().debug(f"Puzzle Target Size: {size.columns}x{size.rows}")
         puzzle = Puzzle(
-            puzzle_config=self.puzzle_config,
+            project_config=self.project_config,
             puzzle_title=category.category,
             input_word_list=category.word_list,
             long_fact=category.long_fact,
@@ -45,7 +46,7 @@ class PuzzleData(BaseModel):
         )
         puzzle.populate_puzzle()
         count = 1
-        while puzzle.density < self.puzzle_config.min_density:
+        while puzzle.density < self.project_config.min_density:
             Logger.get_logger().debug(f"Puzzle failed density check, trying again, actual density: {puzzle.density}")
             if count % 5 == 0:
                 Logger.get_logger().debug("Reducing size of Puzzle before retry")
@@ -57,7 +58,7 @@ class PuzzleData(BaseModel):
                 puzzle.puzzle_reset()
             puzzle.populate_puzzle()
             count += 1
-        if self.puzzle_config.enable_profanity_filter:
+        if self.project_config.enable_profanity_filter:
             puzzle.check_for_inadvertent_profanity()
         if len(puzzle.profanity) > 0:
             for row, words in puzzle.profanity.items():
