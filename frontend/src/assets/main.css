@@ -1,0 +1,31 @@
+@import './base.css';
+
+#app {
+  max-width: 1230px;
+  min-width: 790px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+.card {
+  background-color: var(--color-background-soft);
+  padding: 1rem;
+  border: var(--color-border) solid 2px;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin-bottom: 1rem;
+}
