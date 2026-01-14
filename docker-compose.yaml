@@ -19,6 +19,7 @@ services:
       - APP__INPUT_FILENAME=./data/wordlist.json
       - APP__DATA_FILENAME=./data/puzzledata.json
       - APP__OUTPUT_FILENAME=./data/manuscript.pdf
+      - APP__FRONTEND_HOST_FOR_CORS=http://localhost:5001
 
       # Not currently used, but stand by
       - AI__MODEL=gemma3:12b
@@ -32,4 +33,6 @@ services:
     ports:
       - "5001:5001"
     working_dir: /app/frontend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000
     command: "/bin/sh -c 'npm install; npm run build; npm run serve'"

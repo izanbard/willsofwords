@@ -17,6 +17,7 @@
     "serve": "http-server dist -p 5001 -P http://localhost:5001?"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4",
     "http-server": "^14.1.1"

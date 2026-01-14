@@ -1,10 +1,8 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div id="header" class="card">
-    <img alt="Logo" class="header_image" src="/images/logo.png"/>
+    <img alt="Logo" class="header_image" src="/images/logo.png" />
     <h1>Wordsworth Puzzle Creator</h1>
   </div>
 </template>

@@ -4,6 +4,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI, Response, Request, status
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from yaml import dump as yaml_dump
 
 from backend.routers import ProjectRouter
@@ -13,12 +14,12 @@ from .routers.settings_router import SettingsRouter
 
 
 @asynccontextmanager
-async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]:
+async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[dict]:
     # before the app is created
-    app.state.config = Config()
-    app.state.logger = Logger(app.state.config.app).get_logger()
+    config = Config()
+    logger = Logger(config.app).get_logger()
     # yield to the app
-    yield
+    yield {"config": config, "logger": logger}
     # after the app shuts down
 
 
@@ -29,6 +30,7 @@ def create_api() -> FastAPI:
     tags_metadata = [
         {"name": "Project", "description": "Endpoint Collection for Wordsworth Puzzles"},
         {"name": "Command", "description": "Endpoint Collection for Puzzles"},
+        {"name": "Settings", "description": "Endpoint Collection for Settings"},
     ]
     logger.info(f"Creating the API... version: {version}")
     api = FastAPI(
@@ -38,6 +40,40 @@ def create_api() -> FastAPI:
         openapi_tags=tags_metadata,
         external_docs={"description": "Yaml API Spec", "url": "/openapi.yaml"},
         lifespan=app_lifespan_startup_and_shutdown,
+    )
+
+    api.add_middleware(
+        CORSMiddleware,
+        allow_origins=[Config().app.frontend_host_for_cors],
+        allow_credentials=True,
+        allow_methods=[
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "HEAD",
+            "PATCH",
+            "TRACE",
+            "CONNECT",
+        ],
+        allow_headers=[
+            "Accept",
+            "Accept-Encoding",
+            "Accept-Language",
+            "Connection",
+            "Host",
+            "Origin",
+            "Referer",
+            "Sec-Fetch-Dest",
+            "Sec-Fetch-Mode",
+            "Sec-Fetch-Site",
+            "User-Agent",
+            "sec-ch-ua",
+            "sec-ch-ua-mobile",
+            "sec-ch-ua-platform",
+            "sec-gpc",
+        ],
     )
 
     api.include_router(ProjectRouter)

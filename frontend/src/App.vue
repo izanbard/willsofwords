@@ -5,11 +5,13 @@ import TitleBar from '@/components/TitleBar.vue'
 import NavBar from '@/components/NavBar.vue'
 
 const icon_list: string[] = [
+  'delete',
   'dictionary',
   'sentiment_stressed',
   'cell_merge',
   'settings',
-  'info'
+  'info',
+  'warning', 'error'
 ]
 
 const title: string = 'Wordsworth - Wills of Words'
@@ -37,7 +39,4 @@ onMounted(() => {
   </main>
 </template>
 
-<style scoped>
-
-
-</style>
+<style scoped></style>

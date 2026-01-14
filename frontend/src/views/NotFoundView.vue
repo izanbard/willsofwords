@@ -1,11 +1,7 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
-
-  <img class="card padless" src="/images/404.jpg" alt="404 Not Found"/>
-
+  <img class="card padless" src="/images/404.jpg" alt="404 Not Found" />
 </template>
 
 <style scoped>

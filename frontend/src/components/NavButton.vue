@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NavIcon from "@/components/NavIcon.vue";
+import NavIcon from '@/components/NavIcon.vue'
 
 defineProps<{
   icon: string
@@ -11,7 +11,7 @@ defineProps<{
 <template>
   <RouterLink :to="to" class="nav_link">
     <div class="nav_button">
-      <NavIcon :icon="icon" size="small"/>
+      <NavIcon :icon="icon" size="small" />
       <span class="title">{{ text }}</span>
     </div>
   </RouterLink>
@@ -37,6 +37,8 @@ defineProps<{
 .title {
   font-size: 1rem;
   font-weight: bold;
-  font-family: Verdana Bold, sans-serif;
+  font-family:
+    Verdana Bold,
+    sans-serif;
 }
 </style>
