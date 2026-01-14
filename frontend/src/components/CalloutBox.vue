@@ -5,7 +5,7 @@ defineProps<{
 const icon_lookup = {
   info: 'info',
   warning: 'warning',
-  critical: 'error'
+  critical: 'error',
 }
 </script>
 <template>
@@ -25,7 +25,7 @@ const icon_lookup = {
   display: grid;
   grid-template-columns: 50px auto;
   border-radius: 0.5rem;
-  margin:0.5rem 0;
+  margin: 0.5rem 0;
 }
 .callout_icon {
   display: flex;

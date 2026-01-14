@@ -31,3 +31,7 @@ a,
     0 6px 20px 0 rgba(0, 0, 0, 0.19);
   margin-bottom: 1rem;
 }
+
+.v-toast__item {
+  max-width: 20rem;
+}

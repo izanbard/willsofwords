@@ -1,39 +1,58 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, onBeforeUnmount } from 'vue'
 import TextBlock from '@/components/TextBlock.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ProfanityTile from '@/components/ProfanityTile.vue'
 import CalloutBox from '@/components/CalloutBox.vue'
-import HeadingBlock from "@/components/HeadingBlock.vue";
-import DividerLine from "@/components/DividerLine.vue";
-import ButtonBox from "@/components/ButtonBox.vue";
-import InputBlock from "@/components/InputBlock.vue";
+import HeadingBlock from '@/components/HeadingBlock.vue'
+import DividerLine from '@/components/DividerLine.vue'
+import InputBlock from '@/components/InputBlock.vue'
+import { useToast } from 'vue-toast-notification'
 
 const profanity_list = ref<[string]>([''])
 const new_word = ref<string>('')
-const new_new_word = ref<string>('')
 const loading = ref<boolean>(true)
+const toast = useToast()
 
 const load_list = async () => {
-  await axios.get('/settings/profanity/').then((response) => {
-    profanity_list.value = response.data.word_list
-  })
+  await axios
+    .get('/settings/profanity/')
+    .then((response) => {
+      profanity_list.value = response.data.word_list
+    })
+    .catch((error) => {
+      console.error('Error loading profanity list:', error)
+      loading.value = false
+    })
   loading.value = false
 }
 
 onBeforeMount(async () => {
-    await load_list()
+  await load_list()
 })
 
-
+onBeforeUnmount(() => {
+  toast.clear()
+})
 
 const add_word = async () => {
+  if (new_word.value.length === 0) {
+    toast.warning('Word cannot be empty')
+    return
+  }
   if (profanity_list.value.includes(new_word.value.toUpperCase().replace(/[\s-]/g, ''))) {
+    toast.info('Word already exists in profanity list')
     return
   }
   loading.value = true
-  await axios.put('/settings/profanity/', null, { params: { word: new_word.value } })
+  await axios
+    .put('/settings/profanity/', null, { params: { word: new_word.value } })
+    .catch((error) => {
+      toast.error('Error adding word to profanity list: ' + error.message)
+      console.error('Error loading profanity list:', error)
+      loading.value = false
+    })
   new_word.value = ''
   await load_list()
 }
@@ -59,13 +78,23 @@ const add_word = async () => {
       v-model:text="new_word"
       :withButton="true"
       buttonText="Add Word"
-    description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input.">Add a new word to the list:</InputBlock>
-    <CalloutBox type="warning" v-if="new_word.length > 0 && profanity_list.includes(new_word.toUpperCase().replace(/[\s-]/g, ''))">
+      description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input."
+      >Add a new word to the list:</InputBlock
+    >
+    <CalloutBox
+      type="warning"
+      v-if="
+        new_word.length > 0 && profanity_list.includes(new_word.toUpperCase().replace(/[\s-]/g, ''))
+      "
+    >
       Word is already in the profanity list.
     </CalloutBox>
     <DividerLine />
     <HeadingBlock :level="2">Profanity List</HeadingBlock>
-    <CalloutBox type="critical">Deleting items from the list cannot be undone. They will need to be manually added back in.</CalloutBox>
+    <CalloutBox type="critical"
+      >Deleting items from the list cannot be undone. They will need to be manually added back
+      in.</CalloutBox
+    >
     <div class="profanty_list">
       <div class="profanity_word" v-for="(word, index) in profanity_list" :key="index">
         <ProfanityTile :word="word" @modal="loading = true" @reload="load_list()" />
@@ -75,10 +104,6 @@ const add_word = async () => {
 </template>
 
 <style scoped>
-
-
-
-
 .profanty_list {
   column-width: 250px;
   column-gap: 1rem;

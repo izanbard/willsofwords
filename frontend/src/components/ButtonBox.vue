@@ -1,8 +1,8 @@
 <script setup lang="ts">
 defineEmits(['pressed'])
 defineProps<{
-  text: string,
-  colour: 'red' | 'indigo' | 'green' | 'orange' | 'blue'|'yellow'
+  text: string
+  colour: 'red' | 'indigo' | 'green' | 'orange' | 'blue' | 'yellow'
 }>()
 const colourLookup = {
   red: 'var(--vt-c-red-mute)',
@@ -10,12 +10,12 @@ const colourLookup = {
   green: 'var(--vt-c-green-mute)',
   orange: 'var(--vt-c-orange-mute)',
   blue: 'var(--vt-c-blue-mute)',
-  yellow: 'var(--vt-c-yellow-mute)'
+  yellow: 'var(--vt-c-yellow-mute)',
 }
 </script>
 
 <template>
-<span class="button" @click="$emit('pressed')">{{ text }}</span>
+  <span class="button" @click="$emit('pressed')">{{ text }}</span>
 </template>
 
 <style scoped>

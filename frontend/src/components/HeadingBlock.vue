@@ -5,7 +5,7 @@ defineProps<{
 </script>
 
 <template>
-  <div :class="'h'+level">
+  <div :class="'h' + level">
     <slot></slot>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import { computed } from 'vue'
 
 const props = defineProps<{ thickness?: number }>()
 const size = computed(() => {
@@ -8,7 +8,7 @@ const size = computed(() => {
 </script>
 
 <template>
-<hr/>
+  <hr />
 </template>
 
 <style scoped>

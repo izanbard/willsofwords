@@ -11,7 +11,8 @@ const icon_list: string[] = [
   'cell_merge',
   'settings',
   'info',
-  'warning', 'error'
+  'warning',
+  'error',
 ]
 
 const title: string = 'Wordsworth - Wills of Words'
