@@ -9,22 +9,29 @@
   --vt-c-black-mute: #282828;
 
   --vt-c-indigo: #2c3e50;
+  --vt-c-indigo-mute: #424242;
 
   --vt-c-wow-cream: #f9f3d9;
 
   --vt-c-red: rgba(255, 0, 0, 1);
   --vt-c-red-trans-bkg: rgba(255, 0, 0, 0.2);
-  --vt-c-red-muted: #aa2255;
+  --vt-c-red-mute: #aa2255;
   --vt-c-red-light: #ff6666;
 
   --vt-c-green: rgba(0, 136, 0, 1);
+  --vt-c-green-mute: #2da302;
   --vt-c-green-trans-bkg: rgba(0, 200, 0, 0.2);
 
   --vt-c-yellow: rgba(255, 255, 0, 1);
+  --vt-c-yellow-mute: #ffff00;
   --vt-c-yellow-trans-bkg: rgba(255, 255, 0, 0.2);
 
   --vt-c-orange: rgba(255, 165, 0, 1);
+  --vt-c-orange-mute: #ff9900;
   --vt-c-orange-trans-bkg: rgba(255, 165, 0, 0.2);
+
+  --vt-c-blue: rgba(0, 0, 255, 1);
+  --vt-c-blue-mute: #1a51eb;
 
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
   --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);

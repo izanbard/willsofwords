@@ -32,7 +32,7 @@ const remove_word = async (word: string) => {
 
 .sized {
   font-size: 1.2rem;
-  color: var(--vt-c-red-muted);
+  color: var(--vt-c-red-mute);
   font-variation-settings: 'OPSZ' 25;
   cursor: pointer;
 }

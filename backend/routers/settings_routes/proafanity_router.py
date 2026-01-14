@@ -32,6 +32,8 @@ async def profanity_list() -> ProfanityList:
     status_code=status.HTTP_200_OK,
 )
 async def add_profanity_word(word: str) -> ProfanityList:
+    if len(word) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Word cannot be empty.")
     word_list = get_profanity_list()
     word = word.strip().upper().translate({ord(c): None for c in string.whitespace + string.digits + string.punctuation})
     if word in word_list:
