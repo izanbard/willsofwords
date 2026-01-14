@@ -91,10 +91,6 @@ const add_word = async () => {
     </CalloutBox>
     <DividerLine />
     <HeadingBlock :level="2">Profanity List</HeadingBlock>
-    <CalloutBox type="critical"
-      >Deleting items from the list cannot be undone. They will need to be manually added back
-      in.</CalloutBox
-    >
     <div class="profanty_list">
       <div class="profanity_word" v-for="(word, index) in profanity_list" :key="index">
         <ProfanityTile :word="word" @modal="loading = true" @reload="load_list()" />
