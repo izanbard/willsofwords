@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from backend.models import PuzzleData, Wordlist
+from backend.models import PuzzleData, Wordlist, ProjectConfig
 from backend.pages import Pages
-from backend.utils import Logger, Config, AppConfig, ProjectConfig
+from backend.utils import Logger, Config, AppConfig
 
 
 def load_and_validate_wordlist(app_config: AppConfig):

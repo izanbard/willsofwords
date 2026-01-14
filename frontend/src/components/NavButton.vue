@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Icon from "@/components/Icon.vue";
+import NavIcon from "@/components/NavIcon.vue";
 
-const props = defineProps<{
+defineProps<{
   icon: string
   text: string
   to: string
@@ -11,7 +11,7 @@ const props = defineProps<{
 <template>
   <RouterLink :to="to" class="nav_link">
     <div class="nav_button">
-      <Icon :icon="icon" size="small"/>
+      <NavIcon :icon="icon" size="small"/>
       <span class="title">{{ text }}</span>
     </div>
   </RouterLink>

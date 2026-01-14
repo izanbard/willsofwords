@@ -14,7 +14,7 @@ from .routers.settings_router import SettingsRouter
 
 @asynccontextmanager
 async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[None]:
-    # before app is created
+    # before the app is created
     app.state.config = Config()
     app.state.logger = Logger(app.state.config.app).get_logger()
     # yield to the app

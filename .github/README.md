@@ -34,7 +34,7 @@ book:
   category.
 * **Safety Filtering:** It includes a profanity filter (found in `backend/assets/`) to ensure generated grids don't
   accidentally contain offensive strings in the random filler characters.
-* **PDF Export:** It renders the puzzles, word lists, and facts into a multi-page PDF document suitable for printing.
+* **PDF Export:** It renders the puzzles, word lists, and facts into a multipage PDF document suitable for printing.
 
 There are two primary services involved in the application:
 

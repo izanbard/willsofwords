@@ -7,14 +7,14 @@ labels: 'fixme'
 
 **Describe the bug and how it manifests**
 
-A clear and concise description of what is happening  and _why_ this is important to fix.
+A clear and concise description of what is happening and _why_ this is important to fix.
 
 **Reproduce**
 
-Steps to reproduce the behavior:
+Steps to reproduce the behaviour:
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
+2. Click on '...'
+3. Scroll down to '...'
 4. See error
 
 **Expected behaviour**

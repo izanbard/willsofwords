@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Wordsworth from '@/views/Wordsworth.vue'
-import Profanity from '@/views/Profanity.vue'
-import NotFound from '@/views/NotFound.vue'
-import PrintDefaults from "@/views/PrintDefaults.vue";
-import Settings from "@/views/Settings.vue";
-import About from "@/views/About.vue";
+import ProjectsView from '@/views/ProjectsView.vue'
+import ProfanityView from '@/views/ProfanityView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
+import PrintDefaultsView from "@/views/PrintDefaultsView.vue";
+import SettingsView from "@/views/SettingsView.vue";
+import AboutView from "@/views/AboutView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,32 +12,32 @@ const router = createRouter({
     {
       path: '/',
       name: 'projects',
-      component: Wordsworth
+      component: ProjectsView
     },
     {
       path: '/profanity',
       name: 'profanity',
-      component: Profanity
+      component: ProfanityView
     },
     {
       path: '/print_defaults',
       name: 'print_defaults',
-      component: PrintDefaults
+      component: PrintDefaultsView
     },
     {
       path: '/settings',
       name: 'settings',
-      component: Settings
+      component: SettingsView
     },
     {
       path: '/about',
       name: 'about',
-      component: About
+      component: AboutView
     },
     {
       path: '/:pathMatch(.*)*',
-      name: 'NotFound',
-      component: NotFound
+      name: 'NotFoundView',
+      component: NotFoundView
     }
   ],
 })
