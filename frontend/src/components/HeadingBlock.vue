@@ -12,7 +12,8 @@ defineProps<{
 
 <style scoped>
 .h1,
-.h2, .h3 {
+.h2,
+.h3 {
   margin: 0.5rem 0;
   color: var(--color-heading);
   font-weight: bold;

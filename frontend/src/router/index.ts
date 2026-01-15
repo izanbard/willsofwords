@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ProjectsView from '@/views/ProjectsView.vue'
 import ProfanityView from '@/views/ProfanityView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import PrintDefaultsView from '@/views/PrintDefaultsView.vue'
+import ProjectDefaultsView from '@/views/ProjectDefaultsView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AboutView from '@/views/AboutView.vue'
 
@@ -20,9 +20,9 @@ const router = createRouter({
       component: ProfanityView,
     },
     {
-      path: '/print_defaults',
-      name: 'print_defaults',
-      component: PrintDefaultsView,
+      path: '/project_defaults',
+      name: 'project_defaults',
+      component: ProjectDefaultsView,
     },
     {
       path: '/settings',

@@ -60,9 +60,8 @@ import DividerLine from '@/components/DividerLine.vue'
   flex-wrap: nowrap;
   justify-content: space-evenly;
   align-items: center;
-
 }
-.item{
+.item {
   align-self: center;
   text-align: center;
 }

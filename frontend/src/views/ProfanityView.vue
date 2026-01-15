@@ -75,7 +75,7 @@ const add_word = async () => {
     <InputBlock
       type="gridText"
       @pressed="add_word"
-      v-model:text="new_word"
+      v-model="new_word"
       :withButton="true"
       buttonText="Add Word"
       description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input."

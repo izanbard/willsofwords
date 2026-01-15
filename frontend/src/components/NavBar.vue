@@ -6,7 +6,7 @@ import NavButton from './NavButton.vue'
   <div id="navbar" class="card">
     <NavButton text="Projects" to="/" icon="dictionary" />
     <NavButton text="Profanity" to="/profanity" icon="sentiment_stressed" />
-    <NavButton text="Print Defaults" to="/print_defaults" icon="cell_merge" />
+    <NavButton text="Project Defaults" to="/project_defaults" icon="cell_merge" />
     <NavButton text="Settings" to="/settings" icon="settings" />
     <NavButton text="About" to="/about" icon="info" />
   </div>

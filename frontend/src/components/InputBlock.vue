@@ -1,54 +1,61 @@
 <script setup lang="ts">
 import ButtonBox from '@/components/ButtonBox.vue'
-const emit = defineEmits(['pressed', 'input', 'change'])
-defineProps<{
+
+interface Props {
   type: 'float' | 'int' | 'text' | 'bool' | 'gridText'
+  value?: string | number | boolean
   unit?: string
   description?: string
   withButton?: boolean
   buttonText?: string
-}>()
-const text_content = defineModel<string>('text', { required: false, default: '' })
-const number_content = defineModel<number>('number', { required: false, default: 0 })
+  readonly?: boolean
+}
+
+const emit = defineEmits(['pressed', 'input', 'change'])
+const { readonly = false } = defineProps<Props>()
+const content = defineModel<string | boolean | number>({ required: false, default: null })
 
 const validate_text = () => {
-  if (!/^[A-Za-z\s-]*$/.test(text_content.value)) {
-    text_content.value = text_content.value.replace(/[^A-Za-z\s-]/g, '')
+  if (!/^[A-Za-z\s-]*$/.test(content.value.toString())) {
+    content.value = content.value.toString().replace(/[^A-Za-z\s-]/g, '')
   }
   emit('input')
 }
 
 const validate_integer = () => {
-  if (number_content.value % 1 !== 0) {
-    number_content.value = Math.round(number_content.value)
+  if (parseFloat(content.value.toString()) % 1 !== 0) {
+    content.value = Math.round(parseFloat(content.value.toString()))
   }
   emit('input')
 }
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <span class="label"><slot></slot></span>
     <input
       v-if="type === 'text'"
       type="text"
       class="input"
       @input="$emit('input')"
-      v-model="text_content"
+      v-model="content"
+      :readonly="readonly"
     />
     <input
       v-if="type === 'gridText'"
       type="text"
       class="input"
       @input="validate_text()"
-      v-model="text_content"
+      v-model="content"
+      :readonly="readonly"
     />
     <input
       v-if="type === 'float'"
       type="number"
       class="input"
       @input="$emit('input')"
-      v-model="number_content"
+      v-model="content"
+      :readonly="readonly"
     />
     <input
       v-if="type === 'int'"
@@ -56,28 +63,40 @@ const validate_integer = () => {
       class="input"
       @input="validate_integer()"
       step="1"
-      v-model="number_content"
+      v-model="content"
+      :readonly="readonly"
     />
     <input
       v-if="type === 'bool'"
       type="checkbox"
       class="input"
       @change="$emit('change')"
-      v-model="number_content"
+      v-model="content"
+      :readonly="readonly"
     />
     <span v-if="unit" class="unit">{{ unit }}</span>
     <span v-if="withButton"
       ><ButtonBox colour="green" :text="buttonText || 'Submit'" @pressed="$emit('pressed')"
     /></span>
     <div v-if="description" class="description">
-      <em>{{ description }}</em>
+      <div>
+        <em>{{ description }}</em>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.container {
+  margin: 0.5rem;
+}
 .description {
   font-size: 0.7rem;
+  display: flex;
+}
+.description div {
+  flex-grow: 1;
+  width: 0;
 }
 .input:focus {
   outline: none;
