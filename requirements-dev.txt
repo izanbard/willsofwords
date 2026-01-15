@@ -164,7 +164,7 @@ uvicorn==0.40.0
     # via wills_of_words (pyproject.toml)
 uvloop==0.22.1
     # via wills_of_words (pyproject.toml)
-virtualenv==20.35.4
+virtualenv==20.36.1
     # via pre-commit
 wheel==0.45.1
     # via pip-tools
