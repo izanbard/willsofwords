@@ -4,6 +4,6 @@ from .command_router import CommandRouter
 
 ProjectRouter = APIRouter(
     prefix="/project/{name}",
-    tags=["project"],
+    tags=["Project"],
 )
 ProjectRouter.include_router(CommandRouter)
