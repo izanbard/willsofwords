@@ -7,7 +7,7 @@ from backend.utils import get_profanity_list, save_profanity_list
 
 ProfanityRouter = APIRouter(
     prefix="/profanity",
-    tags=["settings"],
+    tags=["Settings"],
 )
 
 

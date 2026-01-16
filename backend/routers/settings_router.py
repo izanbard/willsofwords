@@ -6,7 +6,7 @@ from .settings_routes.app_config_router import AppConfigRouter
 
 SettingsRouter = APIRouter(
     prefix="/settings",
-    tags=["settings"],
+    tags=["Settings"],
 )
 
 SettingsRouter.include_router(ProfanityRouter)

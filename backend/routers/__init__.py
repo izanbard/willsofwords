@@ -1,1 +1,1 @@
-from .project_router import ProjectRouter  # noqa: F401
+from .projects_router import ProjectsRouter  # noqa: F401

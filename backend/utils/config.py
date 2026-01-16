@@ -6,6 +6,9 @@ class AppConfig(BaseModel):
     """Configuration settings for the backend application."""
 
     log_level: str = Field(default="INFO", description="The log level for the application.")
+    data_folder: str = Field(default="data", description="The data folder for the application.")
+    archive_folder: str = Field(default="archive", description="The archive folder for the application.")
+    project_settings: str = Field(default="project_settings.json", description="The project config file.")
     input_filename: str = Field(default="wordlist.json", description="The input file for the application.")
     data_filename: str = Field(default="puzzledata.json", description="The data file for the application.")
     output_filename: str = Field(default="manuscript.pdf", description="The output file for the application.")

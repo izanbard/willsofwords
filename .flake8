@@ -8,4 +8,10 @@ exclude =
     venv
     .venv
     frontend
+    data
+    .git
+    __pycache__
+    ai-data
+    archive
+    .cov
 extend-ignore = E203, E501, W503, E701

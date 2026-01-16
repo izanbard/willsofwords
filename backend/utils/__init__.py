@@ -45,8 +45,8 @@ def get_project_settings_defaults() -> dict:
         return json.load(fd)
 
 
-def save_project_settings(new_settings: dict):
-    with open(dist_file_mapping["project_settings"][1], "w") as fd:
+def save_project_settings(new_settings: dict, file_path: Path = dist_file_mapping["project_settings"][1]):
+    with open(file_path, "w") as fd:
         json.dump(new_settings, fd, indent=2)
 
 
@@ -60,3 +60,8 @@ def _creat_dist_file_if_not_exists(dist_path: Path, target_path: Path):
 def create_default_files():
     for path_pair in dist_file_mapping.values():
         _creat_dist_file_if_not_exists(dist_path=path_pair[0], target_path=path_pair[1])
+    conf = get_project_settings_defaults()
+    data_dir = Path(conf["app"]["data_folder"])
+    data_dir.mkdir(parents=True, exist_ok=True)
+    archives_dir = Path(conf["app"]["archive_folder"])
+    archives_dir.mkdir(parents=True, exist_ok=True)

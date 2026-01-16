@@ -5,9 +5,10 @@ from typing import AsyncIterator
 from fastapi import FastAPI, Response, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
 from yaml import dump as yaml_dump
 
-from backend.routers import ProjectRouter
+from backend.routers import ProjectsRouter
 from backend.utils import Logger, Config
 
 from .routers.settings_router import SettingsRouter
@@ -22,27 +23,10 @@ async def app_lifespan_startup_and_shutdown(app: FastAPI) -> AsyncIterator[dict]
     # yield to the app
     yield {"config": config, "logger": logger}
     # after the app shuts down
+    logger.info("Application shutdown complete")
 
 
-def create_api() -> FastAPI:
-    logger = Logger.get_logger()
-    with open("version.txt") as f:
-        version = f.readline().strip()
-    tags_metadata = [
-        {"name": "Project", "description": "Endpoint Collection for Wordsworth Puzzles"},
-        {"name": "Command", "description": "Endpoint Collection for Puzzles"},
-        {"name": "Settings", "description": "Endpoint Collection for Settings"},
-    ]
-    logger.info(f"Creating the API... version: {version}")
-    api = FastAPI(
-        title="Wordsworth Puzzles API",
-        openapi_url="/openapi.json",
-        version=version,
-        openapi_tags=tags_metadata,
-        external_docs={"description": "Yaml API Spec", "url": "/openapi.yaml"},
-        lifespan=app_lifespan_startup_and_shutdown,
-    )
-
+def inject_coors_settings(api: FastAPI):
     api.add_middleware(
         CORSMiddleware,
         allow_origins=[Config().app.frontend_host_for_cors],
@@ -77,24 +61,6 @@ def create_api() -> FastAPI:
         ],
     )
 
-    api.include_router(ProjectRouter)
-    api.include_router(SettingsRouter)
-
-    @api.get(
-        "/openapi.yaml",
-        status_code=200,
-        response_class=Response,
-        include_in_schema=False,
-    )
-    async def yaml_spec() -> Response:
-        spec_str = StringIO()
-        yaml_dump(api.openapi(), spec_str, sort_keys=False)
-        return Response(spec_str.getvalue(), media_type="text/yaml")
-
-    api.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)
-    logger.info("API created")
-    return api
-
 
 def internal_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     content = {
@@ -110,3 +76,49 @@ def internal_exception_handler(request: Request, exc: Exception) -> JSONResponse
         status_code=500,
         content=content,
     )
+
+
+def create_api() -> FastAPI:
+    logger = Logger.get_logger()
+    with open("version.txt") as f:
+        version = f.readline().strip()
+    tags_metadata = [
+        {"name": "Project", "description": "Endpoint Collection for Wordsworth Puzzles"},
+        {"name": "Command", "description": "Endpoint Collection for Puzzles"},
+        {"name": "Settings", "description": "Endpoint Collection for Settings"},
+    ]
+    logger.info(f"Creating the API... version: {version}")
+    api = FastAPI(
+        title="Wordsworth Puzzles API",
+        openapi_url="/openapi.json",
+        version=version,
+        openapi_tags=tags_metadata,
+        external_docs={"description": "Yaml API Spec", "url": "/openapi.yaml"},
+        lifespan=app_lifespan_startup_and_shutdown,
+    )
+
+    inject_coors_settings(api)
+    api.include_router(ProjectsRouter)
+    api.include_router(SettingsRouter)
+    api.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)
+
+    @api.get(
+        "/openapi.yaml",
+        status_code=200,
+        response_class=Response,
+        include_in_schema=False,
+        description="YAML API specification",
+    )
+    async def yaml_spec() -> Response:
+        spec_str = StringIO()
+        yaml_dump(api.openapi(), spec_str, sort_keys=False)
+        return Response(spec_str.getvalue(), media_type="text/yaml")
+
+    @api.get(
+        "/", status_code=302, include_in_schema=False, response_class=RedirectResponse, description="Redirect to the API docs"
+    )
+    async def root() -> RedirectResponse:
+        return RedirectResponse("/docs")
+
+    logger.info("API created")
+    return api

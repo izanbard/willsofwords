@@ -5,7 +5,7 @@ from backend.utils import Config
 
 AppConfigRouter = APIRouter(
     prefix="/app-config",
-    tags=["settings"],
+    tags=["Settings"],
 )
 
 

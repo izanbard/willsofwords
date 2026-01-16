@@ -36,3 +36,33 @@ services:
     environment:
       - VITE_API_BASE_URL=http://localhost:5000
     command: "/bin/sh -c 'npm install; npm run build; npm run serve'"
+#  glados:
+#    container_name: glados
+#    image: ollama/ollama
+#    restart: "no"
+#    ports:
+#      - "11434:11434"
+#    volumes:
+#      - ./ai-data/backend:/root/.ollama/
+##    deploy:
+##      resources:
+##        reservations:
+##          devices:
+##            - driver: nvidia
+##              count: all
+##              capabilities: [ gpu ]
+#  holly:
+#    container_name: holly
+#    image: ghcr.io/open-webui/open-webui:main
+#    pull_policy: always
+#    volumes:
+#      - ./ai-data/open-webui:/app/backend/data
+#    depends_on:
+#      - glados
+#    ports:
+#      - 3000:8080
+#    environment:
+#      - 'OLLAMA_BASE_URL=http://glados:11434'
+#    extra_hosts:
+#      - host.docker.internal:host-gateway
+#    restart: unless-stopped

@@ -5,7 +5,7 @@ from backend.utils import get_project_settings_defaults, save_project_settings
 
 ProjectDefaultsRouter = APIRouter(
     prefix="/project-defaults",
-    tags=["settings"],
+    tags=["Settings"],
 )
 
 

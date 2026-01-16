@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 CommandRouter = APIRouter(
     prefix="/command",
-    tags=["command"],
+    tags=["Command"],
 )
 
 

@@ -168,12 +168,10 @@ class ProjectConfig(BaseModel):
     def solution_per_page(self) -> int:
         return self.solution_page_rows * self.solution_page_cols
 
-    max_density: float = Field(default=0.50, description="Maximum density for puzzle generation")
-    min_density: float = Field(default=0.30, description="Minimum density for puzzle generation")
-    max_placement_attempts: int = Field(
-        default=10000, description="Maximum number of placement attempts for puzzle generation"
-    )
-    enable_profanity_filter: bool = Field(default=True, description="Enable profanity filter for puzzle generation")
+    max_density: float = Field(..., description="Maximum density for puzzle generation")
+    min_density: float = Field(..., description="Minimum density for puzzle generation")
+    max_placement_attempts: int = Field(..., description="Maximum number of placement attempts for puzzle generation")
+    enable_profanity_filter: bool = Field(..., description="Enable profanity filter for puzzle generation")
 
     @property
     def max_columns(self) -> int:
@@ -222,3 +220,9 @@ class ProjectConfigUpdate(BaseModel):
     page_number_offset_inches: float | None = Field(default=None, description="Page number offset in inches")
     solution_page_cols: int | None = Field(default=None, description="Number of columns for solution pages")
     solution_page_rows: int | None = Field(default=None, description="Number of rows for solution pages")
+    max_density: float | None = Field(default=None, description="Maximum density for puzzle generation")
+    min_density: float | None = Field(default=None, description="Minimum density for puzzle generation")
+    max_placement_attempts: int | None = Field(
+        default=None, description="Maximum number of placement attempts for puzzle generation"
+    )
+    enable_profanity_filter: bool | None = Field(default=None, description="Enable profanity filter for puzzle generation")
