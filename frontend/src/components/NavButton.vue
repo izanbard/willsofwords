@@ -4,7 +4,7 @@ import NavIcon from '@/components/NavIcon.vue'
 defineProps<{
   icon: string
   text: string
-  to: string
+  to: string | object
 }>()
 </script>
 

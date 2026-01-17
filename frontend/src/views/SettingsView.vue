@@ -8,7 +8,10 @@ import TextBlock from '@/components/TextBlock.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
 import InputBlock from '@/components/InputBlock.vue'
 
-const appConfig = ref<Record<string, Record<string, string|boolean|number>>>( { "app":{}, "ai":{} })
+const appConfig = ref<Record<string, Record<string, string | boolean | number>>>({
+  app: {},
+  ai: {},
+})
 const toast = useToast()
 const loading = ref<boolean>(true)
 
@@ -66,7 +69,6 @@ const descriptions: Record<string, string> = {
     <HeadingBlock :level="2">App Section</HeadingBlock>
     <div class="config" v-if="appConfig.app">
       <InputBlock
-
         v-for="(value, mykey) in appConfig.app"
         :key="mykey"
         :type="typeLookup[typeof value] || 'text'"
@@ -81,7 +83,6 @@ const descriptions: Record<string, string> = {
     <TextBlock>Not currently used.</TextBlock>
     <div class="config" v-if="appConfig.ai">
       <InputBlock
-
         v-for="(value, mykey) in appConfig.ai"
         :key="mykey"
         :type="typeLookup[typeof value] || 'text'"

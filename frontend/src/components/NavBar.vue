@@ -4,11 +4,11 @@ import NavButton from './NavButton.vue'
 
 <template>
   <div id="navbar" class="card">
-    <NavButton text="Projects" to="/" icon="dictionary" />
-    <NavButton text="Profanity" to="/profanity" icon="sentiment_stressed" />
-    <NavButton text="Project Defaults" to="/project_defaults" icon="cell_merge" />
-    <NavButton text="Settings" to="/settings" icon="settings" />
-    <NavButton text="About" to="/about" icon="info" />
+    <NavButton text="Projects" :to="{ name: 'projects' }" icon="dictionary" />
+    <NavButton text="Profanity" :to="{ name: 'profanity' }" icon="sentiment_stressed" />
+    <NavButton text="Project Defaults" :to="{ name: 'project_defaults' }" icon="cell_merge" />
+    <NavButton text="Settings" :to="{ name: 'settings' }" icon="settings" />
+    <NavButton text="About" :to="{ name: 'about' }" icon="info" />
   </div>
 </template>
 

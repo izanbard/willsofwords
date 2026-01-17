@@ -60,8 +60,8 @@ def _creat_dist_file_if_not_exists(dist_path: Path, target_path: Path):
 def create_default_files():
     for path_pair in dist_file_mapping.values():
         _creat_dist_file_if_not_exists(dist_path=path_pair[0], target_path=path_pair[1])
-    conf = get_project_settings_defaults()
-    data_dir = Path(conf["app"]["data_folder"])
+    conf = Config()
+    data_dir = Path(conf.app.data_folder)
     data_dir.mkdir(parents=True, exist_ok=True)
-    archives_dir = Path(conf["app"]["archive_folder"])
+    archives_dir = Path(conf.app.archive_folder)
     archives_dir.mkdir(parents=True, exist_ok=True)

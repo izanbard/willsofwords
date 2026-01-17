@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onBeforeMount, ref, onBeforeUnmount } from 'vue'
+import {onBeforeMount, ref, onBeforeUnmount, onMounted} from 'vue'
 import TextBlock from '@/components/TextBlock.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ProfanityTile from '@/components/ProfanityTile.vue'
@@ -31,7 +31,10 @@ const load_list = async () => {
 onBeforeMount(async () => {
   await load_list()
 })
-
+onMounted(() => {
+  let curse_audio = document.getElementById('curse_audio') as HTMLAudioElement
+  curse_audio.play()
+})
 onBeforeUnmount(() => {
   toast.clear()
 })
@@ -91,16 +94,21 @@ const add_word = async () => {
     </CalloutBox>
     <DividerLine />
     <HeadingBlock :level="2">Profanity List</HeadingBlock>
-    <div class="profanty_list">
+    <div class="profanity_list">
       <div class="profanity_word" v-for="(word, index) in profanity_list" :key="index">
         <ProfanityTile :word="word" @modal="loading = true" @reload="load_list()" />
       </div>
     </div>
   </div>
+  <template>
+    <audio id="curse_audio">
+      <source src="/audio/curses.m4a" type="audio/mp4">
+    </audio>
+  </template>
 </template>
 
 <style scoped>
-.profanty_list {
+.profanity_list {
   column-width: 250px;
   column-gap: 1rem;
   column-rule: 1px solid var(--vt-c-divider-light-1);

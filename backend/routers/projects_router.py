@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -32,6 +33,7 @@ async def get_projects(req: Request) -> ProjectsList:
             for file in project.iterdir()
             if file.is_file()
         ]
+        project_files.sort(key=lambda x: x.name.lower())
         project_folder = ProjectFolder(name=project.name, project_files=project_files)
         projects_list.append(project_folder)
     projects_list.sort(key=lambda x: x.name.lower())
@@ -108,12 +110,13 @@ async def archive_project(name: str, req: Request):
     if name not in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
     archives_dir = Path(req.state.config.app.archive_folder)
-    if name in [proj.stem for proj in archives_dir.iterdir()]:
+    new_name = f"{name}_{uuid.uuid4().hex[:8]}"
+    if new_name in [proj.stem for proj in archives_dir.iterdir()]:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Project {name} already archived, please manually delete old project from archive and try again",
+            detail=f"Project {new_name} already archived, please manually delete old project from archive and try again",
         )
-    (data_dir / name).rename(archives_dir / name)
+    (data_dir / name).rename(archives_dir / new_name)
     return await get_projects(req)
 
 
