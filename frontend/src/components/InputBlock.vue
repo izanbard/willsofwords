@@ -8,6 +8,8 @@ interface Props {
   description?: string
   withButton?: boolean
   buttonText?: string
+  buttonIcon?: string
+  buttonColor?: 'red' | 'indigo' | 'green' | 'orange' | 'blue' | 'yellow'
   readonly?: boolean
 }
 
@@ -32,56 +34,60 @@ const validate_integer = () => {
 
 <template>
   <div class="container">
-    <span class="label"><slot></slot></span>
-    <input
-      v-if="type === 'text'"
-      type="text"
-      class="input"
-      @input="$emit('input')"
-      v-model="content"
-      :readonly="readonly"
-    />
-    <input
-      v-if="type === 'gridText'"
-      type="text"
-      class="input"
-      @input="validate_text()"
-      v-model="content"
-      :readonly="readonly"
-    />
-    <input
-      v-if="type === 'float'"
-      type="number"
-      class="input"
-      @input="$emit('input')"
-      v-model="content"
-      :readonly="readonly"
-    />
-    <input
-      v-if="type === 'int'"
-      type="number"
-      class="input"
-      @input="validate_integer()"
-      step="1"
-      v-model="content"
-      :readonly="readonly"
-    />
-    <input
-      v-if="type === 'bool'"
-      type="checkbox"
-      class="input"
-      @change="$emit('change')"
-      v-model="content"
-      :readonly="readonly"
-    />
-    <span v-if="unit" class="unit">{{ unit }}</span>
-    <span v-if="withButton"
-      ><ButtonBox colour="green" :text="buttonText || 'Submit'" @pressed="$emit('pressed')"
-    /></span>
+    <div class="input_container">
+      <div class="label"><slot></slot></div>
+      <input
+        v-if="type === 'text'"
+        type="text"
+        class="input"
+        @input="$emit('input')"
+        v-model="content"
+        :readonly="readonly"
+      />
+      <input
+        v-if="type === 'gridText'"
+        type="text"
+        class="input"
+        @input="validate_text()"
+        v-model="content"
+        :readonly="readonly"
+      />
+      <input
+        v-if="type === 'float'"
+        type="number"
+        class="input"
+        @input="$emit('input')"
+        v-model="content"
+        :readonly="readonly"
+      />
+      <input
+        v-if="type === 'int'"
+        type="number"
+        class="input"
+        @input="validate_integer()"
+        step="1"
+        v-model="content"
+        :readonly="readonly"
+      />
+      <input
+        v-if="type === 'bool'"
+        type="checkbox"
+        class="input"
+        @change="$emit('change')"
+        v-model="content"
+        :readonly="readonly"
+      />
+      <div v-if="unit" class="unit">{{ unit }}</div>
+      <template v-if="withButton"
+        ><ButtonBox
+          :icon="buttonIcon || ''"
+          :colour="buttonColor || 'green'"
+          :text="buttonText || 'Submit'"
+          @pressed="$emit('pressed')"
+      /></template>
+    </div>
     <div v-if="description" class="description">
-      <div>
-        <em>{{ description }}</em>
-      </div>
+      <em>{{ description }}</em>
     </div>
   </div>
 </template>
@@ -89,15 +95,26 @@ const validate_integer = () => {
 <style scoped>
 .container {
   margin: 0.5rem;
+  display: grid;
+  grid-template-columns: auto;
+  align-items: center;
+  width: min-content;
+}
+.input_container {
+  display: flex;
+  align-items: center;
+  justify-content: left;
 }
 .description {
   font-size: 0.7rem;
-  display: flex;
+  align-self: center;
+  justify-self: left;
+  text-wrap-mode: wrap;
 }
-.description div {
-  flex-grow: 1;
-  width: 0;
+.label {
+  white-space: nowrap;
 }
+
 .input:focus {
   outline: none;
 }
@@ -108,5 +125,6 @@ const validate_integer = () => {
   border-radius: 0.5rem;
   padding: 0.3rem;
   font-size: 1rem;
+  justify-self: left;
 }
 </style>

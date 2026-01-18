@@ -5,7 +5,7 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import ProjectDefaultsView from '@/views/ProjectDefaultsView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AboutView from '@/views/AboutView.vue'
-import CreateProjectView from '@/views/CreateProjectView.vue'
+import ProjectView from '@/views/ProjectView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +24,7 @@ const router = createRouter({
       path: '/project_defaults',
       name: 'project_defaults',
       component: ProjectDefaultsView,
+      props: { create: false },
     },
     {
       path: '/settings',
@@ -38,7 +39,14 @@ const router = createRouter({
     {
       path: '/projects/new',
       name: 'create-project',
-      component: CreateProjectView,
+      component: ProjectDefaultsView,
+      props: { create: true },
+    },
+    {
+      path: '/project/:project_name',
+      name: 'project',
+      component: ProjectView,
+      props: true,
     },
     {
       path: '/:pathMatch(.*)*',

@@ -35,7 +35,7 @@ const load_list = async () => {
       project_list.value = response.data.projects
       loading.value = false
     })
-    .catch((error) => {
+    .catch(() => {
       toast.error('Failed to load project list')
       loading.value = false
     })
@@ -76,7 +76,7 @@ const delete_project = async () => {
       action_target.value = ''
       await load_list()
     })
-    .catch((error) => {
+    .catch(() => {
       toast.error('Failed to delete project')
       loading.value = false
     })
@@ -89,7 +89,7 @@ const confirm_rename = (project_name: string, is_copy: boolean = false) => {
 }
 
 const copy_project = async () => {
-  if (new_name.value.length === 0 || !new_name.value.match(/^[a-zA-Z0-9]+$/)){
+  if (new_name.value.length === 0 || !new_name.value.match(/^[a-zA-Z0-9]+$/)) {
     toast.warning('Invalid New Name, letters and numbers only')
     new_name.value = ''
     return
@@ -106,7 +106,7 @@ const copy_project = async () => {
       new_name.value = ''
       await load_list()
     })
-    .catch((error) => {
+    .catch(() => {
       toast.error('Failed to rename project')
       loading.value = false
     })
@@ -119,20 +119,41 @@ const copy_project = async () => {
     <HeadingBlock :level="1">List of Projects</HeadingBlock>
     <DividerLine />
     <div class="create">
-      <ButtonBox text="New Project" colour="green" @pressed="$router.push({name: 'create-project'})"/>
+      <ButtonBox
+        icon="create_new_folder"
+        text="New Project"
+        colour="green"
+        @pressed="$router.push({ name: 'create-project' })"
+      />
     </div>
     <div class="project_list">
-      <div class="project" v-for="(project, index) in project_list" :key="index">
+      <div
+        class="project"
+        v-for="(project, index) in project_list"
+        :key="index"
+        @click="$router.push({ name: 'project', params: { project_name: project.name } })"
+      >
         <div class="title">
           <HeadingBlock :level="2">{{ project.name }}</HeadingBlock>
           <div class="actions">
-            <ButtonBox text="Rename" colour="blue" @pressed="confirm_rename(project.name, false)" />
             <ButtonBox
+              icon="edit"
+              text="Rename"
+              colour="blue"
+              @pressed="confirm_rename(project.name, false)"
+            />
+            <ButtonBox
+              icon="folder_copy"
               text="Duplicate"
               colour="blue"
               @pressed="confirm_rename(project.name, true)"
             />
-            <ButtonBox text="Delete" colour="red" @pressed="confirm_delete(project.name)" />
+            <ButtonBox
+              icon="delete"
+              text="Delete"
+              colour="red"
+              @pressed="confirm_delete(project.name)"
+            />
           </div>
         </div>
         <div class="subtitle">
@@ -160,8 +181,8 @@ const copy_project = async () => {
     <div class="card modal">
       <HeadingBlock :level="2">Are You Sure?</HeadingBlock>
       <div class="actions">
-        <ButtonBox text="Proceed" colour="red" @pressed="delete_project()" />
-        <ButtonBox text="Cancel" colour="indigo" @pressed="delete_confirm = false" />
+        <ButtonBox icon="delete" text="Proceed" colour="red" @pressed="delete_project()" />
+        <ButtonBox icon="cancel" text="Cancel" colour="indigo" @pressed="delete_confirm = false" />
       </div>
     </div>
   </div>
@@ -173,15 +194,15 @@ const copy_project = async () => {
       <InputBlock type="text" v-model="action_target" :readonly="true">Old Name: </InputBlock>
       <InputBlock type="text" v-model="new_name">New Name: </InputBlock>
       <div class="actions">
-        <ButtonBox text="Proceed" colour="red" @pressed="copy_project()" />
-        <ButtonBox text="Cancel" colour="indigo" @pressed="rename_confirm = false" />
+        <ButtonBox icon="check_circle" text="Proceed" colour="green" @pressed="copy_project()" />
+        <ButtonBox icon="cancel" text="Cancel" colour="indigo" @pressed="rename_confirm = false" />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.create{
+.create {
   margin-bottom: 0.5rem;
   display: flex;
   justify-content: flex-end;
@@ -203,9 +224,11 @@ const copy_project = async () => {
 }
 
 .project {
-  border: 1px solid var(--vt-c-divider-dark-1);
-
+  border: 2px solid var(--vt-c-divider-dark-1);
   margin-bottom: 0.5rem;
+}
+.project:hover {
+  border: 2px solid var(--vt-c-blue-mute);
 }
 .title {
   background-color: var(--vt-c-divider-light-1);
@@ -219,6 +242,7 @@ const copy_project = async () => {
 }
 .actions {
   display: flex;
+  flex-direction: row;
   gap: 0.5rem;
   align-items: center;
 }

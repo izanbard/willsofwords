@@ -5,14 +5,21 @@ import TitleBar from '@/components/TitleBar.vue'
 import NavBar from '@/components/NavBar.vue'
 
 const icon_list: string[] = [
+  'add',
+  'cancel',
+  'cell_merge',
+  'check_circle',
+  'create_new_folder',
   'delete',
   'dictionary',
-  'sentiment_stressed',
-  'cell_merge',
-  'settings',
-  'info',
-  'warning',
+  'edit',
   'error',
+  'folder_copy',
+  'info',
+  'save',
+  'sentiment_stressed',
+  'settings',
+  'warning',
 ]
 
 const title: string = 'Wordsworth - Wills of Words'

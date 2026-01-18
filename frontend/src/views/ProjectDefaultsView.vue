@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { onBeforeMount, onBeforeUnmount, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import TextBlock from '@/components/TextBlock.vue'
@@ -10,9 +11,12 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
 
+defineProps<{ create?: boolean }>()
+const router = useRouter()
 const projectDefaults = ref({})
 const toast = useToast()
 const loading = ref<boolean>(true)
+const project_name = ref<string>('')
 
 const load_defaults = async () => {
   await axios
@@ -34,6 +38,17 @@ const update_defaults = async () => {
     console.error('Error updating default:', error)
   })
   await load_defaults()
+}
+
+const save_new_project = async () => {
+  loading.value = true
+  await axios
+    .post('/projects/', { name: project_name.value, settings: projectDefaults.value })
+    .catch((error) => {
+      toast.error('Error creating project: ' + error.message)
+      console.error('Error creating project:', error)
+    })
+  router.push({ name: 'projects' })
 }
 
 onBeforeMount(async () => {
@@ -105,16 +120,31 @@ const descriptions: Record<string, string> = {
 <template>
   <div class="card">
     <LoadingSpinner :loading="loading" />
-    <HeadingBlock :level="1">Project Defaults</HeadingBlock>
-    <TextBlock>These are the project defaults used to set up a new project.</TextBlock>
-    <CalloutBox type="info">
-      Note changes to this list should be back ported to the repository so they are not lost if
-      re-installation is required.
-    </CalloutBox>
+    <template v-if="create">
+      <HeadingBlock :level="1">Create New Project</HeadingBlock>
+      <InputBlock type="text" v-model="project_name">Project Name: </InputBlock>
+      <ButtonBox icon="folder_copy" text="Create Project" colour="green" @pressed="save_new_project()" />
+    </template>
+    <template v-else>
+      <HeadingBlock :level="1">Project Defaults</HeadingBlock>
+      <TextBlock>These are the project defaults used to set up a new project.</TextBlock>
+      <CalloutBox type="info">
+        Note changes to this list should be back ported to the repository so they are not lost if
+        re-installation is required.
+      </CalloutBox>
+    </template>
     <DividerLine />
-    <HeadingBlock :level="2">Manage Defaults</HeadingBlock>
+    <template v-if="create">
+      <HeadingBlock :level="2">Project Settings</HeadingBlock>
+      <TextBlock
+        >These settgins will be saved in the project folder. They may be changed later.</TextBlock
+      >
+    </template>
+    <template v-else>
+      <HeadingBlock :level="2">Manage Defaults</HeadingBlock>
+      <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
+    </template>
     <div class="project_defaults">
-      <ButtonBox @click="update_defaults()" colour="green" text="Save Changes" />
       <InputBlock
         v-for="(value, mykey) in projectDefaults"
         :key="mykey"
@@ -124,8 +154,13 @@ const descriptions: Record<string, string> = {
       >
         {{ mykey }}:
       </InputBlock>
-      <ButtonBox @click="update_defaults()" colour="green" text="Save Changes" />
     </div>
+    <template v-if="create">
+      <ButtonBox icon="folder_copy" text="Create Project" colour="green" @pressed="save_new_project()" />
+    </template>
+    <template v-else>
+      <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
+    </template>
   </div>
 </template>
 

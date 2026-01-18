@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import {onBeforeMount, ref, onBeforeUnmount, onMounted} from 'vue'
+import { onBeforeMount, ref, onBeforeUnmount, onMounted } from 'vue'
 import TextBlock from '@/components/TextBlock.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ProfanityTile from '@/components/ProfanityTile.vue'
@@ -81,6 +81,7 @@ const add_word = async () => {
       v-model="new_word"
       :withButton="true"
       buttonText="Add Word"
+      buttonIcon="add"
       description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input."
       >Add a new word to the list:</InputBlock
     >
@@ -102,7 +103,7 @@ const add_word = async () => {
   </div>
   <template>
     <audio id="curse_audio">
-      <source src="/audio/curses.m4a" type="audio/mp4">
+      <source src="/audio/curses.m4a" type="audio/mp4" />
     </audio>
   </template>
 </template>
