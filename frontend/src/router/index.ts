@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ProjectsView from '@/views/ProjectsView.vue'
 import ProfanityView from '@/views/ProfanityView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import ProjectDefaultsView from '@/views/ProjectDefaultsView.vue'
+import ProjectSettingsView from '@/views/ProjectSettingsView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AboutView from '@/views/AboutView.vue'
 import ProjectView from '@/views/ProjectView.vue'
@@ -23,8 +23,8 @@ const router = createRouter({
     {
       path: '/project_defaults',
       name: 'project_defaults',
-      component: ProjectDefaultsView,
-      props: { create: false },
+      component: ProjectSettingsView,
+      props: { create: 'defaults' },
     },
     {
       path: '/settings',
@@ -39,14 +39,21 @@ const router = createRouter({
     {
       path: '/projects/new',
       name: 'create-project',
-      component: ProjectDefaultsView,
-      props: { create: true },
+      component: ProjectSettingsView,
+      props: { create: 'new' },
     },
     {
       path: '/project/:project_name',
       name: 'project',
       component: ProjectView,
       props: true,
+      children: [
+        {
+          path: 'settings',
+          name: 'edit-project-settings',
+          component: ProjectSettingsView,
+        },
+      ]
     },
     {
       path: '/:pathMatch(.*)*',

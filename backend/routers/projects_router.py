@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -7,8 +6,9 @@ from starlette import status
 from starlette.requests import Request
 
 from .project_routes.project_router import ProjectRouter
-from backend.models import ProjectConfig, ProjectFolder, ProjectFile, ProjectsList, ProjectCreate
+from backend.models import ProjectConfig, ProjectsList, ProjectCreate
 from backend.utils import get_project_settings_defaults, save_project_settings
+from .project_routes import get_project_files
 
 ProjectsRouter = APIRouter(
     prefix="/projects",
@@ -28,13 +28,7 @@ async def get_projects(req: Request) -> ProjectsList:
     data_dir = Path(req.state.config.app.data_folder)
     projects_list = []
     for project in [project for project in data_dir.iterdir() if project.is_dir()]:
-        project_files = [
-            ProjectFile(name=file.name, modified_date=datetime.fromtimestamp(file.stat().st_mtime))
-            for file in project.iterdir()
-            if file.is_file()
-        ]
-        project_files.sort(key=lambda x: x.name.lower())
-        project_folder = ProjectFolder(name=project.name, project_files=project_files)
+        project_folder = get_project_files(project)
         projects_list.append(project_folder)
     projects_list.sort(key=lambda x: x.name.lower())
     return ProjectsList(projects=projects_list)

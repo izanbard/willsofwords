@@ -12,14 +12,13 @@ import InputBlock from '@/components/InputBlock.vue'
 let reloader: number | undefined
 
 const project_list = ref<
-  Record<
-    string,
-    {
-      name: string
-      project_files: Record<string, { name: string; modified_date: string }>
-    }
-  >
->({})
+  [
+      {
+        name: string
+        project_files: [{ name: string; modified_date: string }]
+      },
+    ]
+  >()
 const loading = ref<boolean>(true)
 const delete_confirm = ref<boolean>(false)
 const rename_confirm = ref<boolean>(false)
@@ -53,12 +52,14 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   toast.clear()
-  if (reloader) clearInterval(reloader)
+  if (reloader) {
+    clearInterval(reloader)
+  }
 })
 
 const date_format = (date: string) => {
-  let mydate = new Date(date)
-  return mydate.toLocaleTimeString() + ' on ' + mydate.toDateString()
+  const date_obj = new Date(date)
+  return date_obj.toLocaleTimeString() + ' on ' + date_obj.toDateString()
 }
 
 const confirm_delete = (project_name: string) => {

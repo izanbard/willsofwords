@@ -32,7 +32,7 @@ onBeforeMount(async () => {
   await load_list()
 })
 onMounted(() => {
-  let curse_audio = document.getElementById('curse_audio') as HTMLAudioElement
+  const curse_audio = document.getElementById('curse_audio') as HTMLAudioElement
   curse_audio.play()
 })
 onBeforeUnmount(() => {
@@ -83,8 +83,7 @@ const add_word = async () => {
       buttonText="Add Word"
       buttonIcon="add"
       description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input."
-      >Add a new word to the list:</InputBlock
-    >
+      >Add a new word to the list:</InputBlock>
     <CalloutBox
       type="warning"
       v-if="

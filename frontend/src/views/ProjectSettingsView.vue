@@ -11,7 +11,7 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
 
-defineProps<{ create?: boolean }>()
+defineProps<{ create: 'defaults' | 'new' | 'edit' }>()
 const router = useRouter()
 const projectDefaults = ref({})
 const toast = useToast()
@@ -120,12 +120,17 @@ const descriptions: Record<string, string> = {
 <template>
   <div class="card">
     <LoadingSpinner :loading="loading" />
-    <template v-if="create">
+    <template v-if="create === 'new'">
       <HeadingBlock :level="1">Create New Project</HeadingBlock>
       <InputBlock type="text" v-model="project_name">Project Name: </InputBlock>
-      <ButtonBox icon="folder_copy" text="Create Project" colour="green" @pressed="save_new_project()" />
+      <ButtonBox
+        icon="folder_copy"
+        text="Create Project"
+        colour="green"
+        @pressed="save_new_project()"
+      />
     </template>
-    <template v-else>
+    <template v-if="create === 'defaults'">
       <HeadingBlock :level="1">Project Defaults</HeadingBlock>
       <TextBlock>These are the project defaults used to set up a new project.</TextBlock>
       <CalloutBox type="info">
@@ -134,13 +139,13 @@ const descriptions: Record<string, string> = {
       </CalloutBox>
     </template>
     <DividerLine />
-    <template v-if="create">
+    <template v-if="create === 'new'">
       <HeadingBlock :level="2">Project Settings</HeadingBlock>
       <TextBlock
         >These settgins will be saved in the project folder. They may be changed later.</TextBlock
       >
     </template>
-    <template v-else>
+    <template v-if="create === 'defaults'">
       <HeadingBlock :level="2">Manage Defaults</HeadingBlock>
       <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
     </template>
@@ -155,10 +160,15 @@ const descriptions: Record<string, string> = {
         {{ mykey }}:
       </InputBlock>
     </div>
-    <template v-if="create">
-      <ButtonBox icon="folder_copy" text="Create Project" colour="green" @pressed="save_new_project()" />
+    <template v-if="create === 'new'">
+      <ButtonBox
+        icon="folder_copy"
+        text="Create Project"
+        colour="green"
+        @pressed="save_new_project()"
+      />
     </template>
-    <template v-else>
+    <template v-if="create === 'defaults'">
       <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
     </template>
   </div>
