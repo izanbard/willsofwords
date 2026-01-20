@@ -3,7 +3,7 @@ import axios from 'axios'
 import { onBeforeMount, ref, onBeforeUnmount, onMounted } from 'vue'
 import TextBlock from '@/components/TextBlock.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
-import ProfanityTile from '@/components/ProfanityTile.vue'
+import WordTile from '@/components/WordTile.vue'
 import CalloutBox from '@/components/CalloutBox.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
 import DividerLine from '@/components/DividerLine.vue'
@@ -59,6 +59,10 @@ const add_word = async () => {
   new_word.value = ''
   await load_list()
 }
+const remove_word = async (word: string) => {
+  await axios.delete('/settings/profanity/', { params: { word: word } })
+  await load_list()
+}
 </script>
 
 <template>
@@ -83,7 +87,9 @@ const add_word = async () => {
       buttonText="Add Word"
       buttonIcon="add"
       description="A new word to add to the profanity list.  Words may only contain alphabetic characters [A-Z] or space ` ` or hyphen `-`.  Numbers and other punctuation are prevented from input."
-      >Add a new word to the list:</InputBlock>
+    >
+      Add a new word to the list:
+    </InputBlock>
     <CalloutBox
       type="warning"
       v-if="
@@ -96,7 +102,7 @@ const add_word = async () => {
     <HeadingBlock :level="2">Profanity List</HeadingBlock>
     <div class="profanity_list">
       <div class="profanity_word" v-for="(word, index) in profanity_list" :key="index">
-        <ProfanityTile :word="word" @modal="loading = true" @reload="load_list()" />
+        <WordTile :word="word" @delete="remove_word" />
       </div>
     </div>
   </div>

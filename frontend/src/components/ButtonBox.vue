@@ -3,7 +3,7 @@ import NavIcon from '@/components/NavIcon.vue'
 
 defineEmits(['pressed'])
 defineProps<{
-  text: string
+  text?: string
   colour: 'red' | 'indigo' | 'green' | 'orange' | 'blue' | 'yellow'
   icon?: string
 }>()

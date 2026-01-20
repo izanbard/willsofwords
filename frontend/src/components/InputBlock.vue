@@ -2,7 +2,7 @@
 import ButtonBox from '@/components/ButtonBox.vue'
 
 interface Props {
-  type: 'float' | 'int' | 'text' | 'bool' | 'gridText'
+  type: 'float' | 'int' | 'text' | 'bool' | 'gridText' | 'textarea'
   value?: string | number | boolean
   unit?: string
   description?: string
@@ -15,17 +15,20 @@ interface Props {
 
 const emit = defineEmits(['pressed', 'input', 'change'])
 const { readonly = false } = defineProps<Props>()
-const content = defineModel<string | boolean | number>({ required: false, default: null })
+const content = defineModel<string | number | readonly string[] | null | undefined>({
+  required: false,
+  default: null,
+})
 
 const validate_text = () => {
-  if (!/^[A-Za-z\s-]*$/.test(content.value.toString())) {
+  if (content.value && !/^[A-Za-z\s-]*$/.test(content.value.toString())) {
     content.value = content.value.toString().replace(/[^A-Za-z\s-]/g, '')
   }
   emit('input')
 }
 
 const validate_integer = () => {
-  if (parseFloat(content.value.toString()) % 1 !== 0) {
+  if (content.value && parseFloat(content.value.toString()) % 1 !== 0) {
     content.value = Math.round(parseFloat(content.value.toString()))
   }
   emit('input')
@@ -36,6 +39,13 @@ const validate_integer = () => {
   <div class="container">
     <div class="input_container">
       <div class="label"><slot></slot></div>
+      <textarea
+        v-if="type === 'textarea'"
+        class="input"
+        @input="$emit('input')"
+        v-model="content"
+        :readonly="readonly"
+      ></textarea>
       <input
         v-if="type === 'text'"
         type="text"
@@ -82,12 +92,14 @@ const validate_integer = () => {
         ><ButtonBox
           :icon="buttonIcon || ''"
           :colour="buttonColor || 'green'"
-          :text="buttonText || 'Submit'"
+          :text="buttonText"
           @pressed="$emit('pressed')"
       /></template>
     </div>
     <div v-if="description" class="description">
-      <em>{{ description }}</em>
+      <div>
+        <em>{{ description }}</em>
+      </div>
     </div>
   </div>
 </template>
@@ -95,21 +107,22 @@ const validate_integer = () => {
 <style scoped>
 .container {
   margin: 0.5rem;
-  display: grid;
-  grid-template-columns: auto;
-  align-items: center;
-  width: min-content;
+  display: inline-block;
 }
 .input_container {
   display: flex;
   align-items: center;
   justify-content: left;
+  gap: 0.5rem;
 }
 .description {
   font-size: 0.7rem;
-  align-self: center;
-  justify-self: left;
-  text-wrap-mode: wrap;
+  display: flex;
+}
+.description div {
+  flex-grow: 1;
+  width: 0;
+  word-break: break-word;
 }
 .label {
   white-space: nowrap;
@@ -125,6 +138,11 @@ const validate_integer = () => {
   border-radius: 0.5rem;
   padding: 0.3rem;
   font-size: 1rem;
-  justify-self: left;
+}
+textarea {
+  resize: both;
+  field-sizing: content;
+  white-space: pre-line;
+  min-width: 10rem;
 }
 </style>

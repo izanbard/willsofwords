@@ -6,6 +6,7 @@ import ProjectSettingsView from '@/views/ProjectSettingsView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import AboutView from '@/views/AboutView.vue'
 import ProjectView from '@/views/ProjectView.vue'
+import WordlistView from '@/views/WordlistView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,7 +25,7 @@ const router = createRouter({
       path: '/project_defaults',
       name: 'project_defaults',
       component: ProjectSettingsView,
-      props: { create: 'defaults' },
+      props: { mode: 'defaults' },
     },
     {
       path: '/settings',
@@ -40,7 +41,7 @@ const router = createRouter({
       path: '/projects/new',
       name: 'create-project',
       component: ProjectSettingsView,
-      props: { create: 'new' },
+      props: { mode: 'new' },
     },
     {
       path: '/project/:project_name',
@@ -52,8 +53,15 @@ const router = createRouter({
           path: 'settings',
           name: 'edit-project-settings',
           component: ProjectSettingsView,
+          props: (route) => ({ project_name: route.params.project_name, mode: 'edit' }),
         },
-      ]
+        {
+          path: 'wordlist',
+          name: 'edit-wordlist',
+          component: WordlistView,
+          props: true,
+        },
+      ],
     },
     {
       path: '/:pathMatch(.*)*',

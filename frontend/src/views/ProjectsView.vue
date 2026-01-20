@@ -13,12 +13,12 @@ let reloader: number | undefined
 
 const project_list = ref<
   [
-      {
-        name: string
-        project_files: [{ name: string; modified_date: string }]
-      },
-    ]
-  >()
+    {
+      name: string
+      project_files: [{ name: string; modified_date: string }]
+    },
+  ]
+>()
 const loading = ref<boolean>(true)
 const delete_confirm = ref<boolean>(false)
 const rename_confirm = ref<boolean>(false)

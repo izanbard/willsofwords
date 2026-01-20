@@ -1,37 +1,52 @@
 <script setup lang="ts">
-import ButtonBox from "@/components/ButtonBox.vue"
-import HeadingBlock from "@/components/HeadingBlock.vue";
+import ButtonBox from '@/components/ButtonBox.vue'
+import HeadingBlock from '@/components/HeadingBlock.vue'
 
 defineProps<{
-  hero_file_title:string
+  hero_file_title: string
   hero_file_name: string
   named_file_state: (number | string)[]
+  allowed_actions: string[]
 }>()
 </script>
 
 <template>
   <HeadingBlock :level="3">{{ hero_file_title }}</HeadingBlock>
-  <template v-if="named_file_state[0]==='creating'">
-
+  <template v-if="named_file_state[0] === 'creating'">
     <div class="progress_main">
       <div class="creating">Creating {{ hero_file_name }}... {{ named_file_state[1] }}%</div>
     </div>
   </template>
-  <div v-else class="project_file ">
+  <div v-else class="project_file">
     <div class="file" :class="named_file_state[0]">
       <em>{{ hero_file_name }}</em>
     </div>
-    <template v-if="named_file_state[0]==='exists'">
-    <div class="actions">
-      <ButtonBox icon="edit" text="View/Edit" colour="blue"
-                 @pressed="$emit('edit',hero_file_name)"/>
-      <ButtonBox icon="delete" text="Delete" colour="red"
-                 @pressed="$emit('delete',hero_file_name)"/>
-    </div>
-      </template>
-    <template v-if="named_file_state[0]==='not_exists'">
-    <ButtonBox icon="edit" text="Create" colour="green"
-                 @pressed="$emit('create',hero_file_name)"/>
+    <template v-if="named_file_state[0] === 'exists'">
+      <div class="actions">
+        <ButtonBox
+          v-if="allowed_actions.includes('edit')"
+          icon="edit"
+          text="View/Edit"
+          colour="blue"
+          @pressed="$emit('edit', hero_file_name)"
+        />
+        <ButtonBox
+          v-if="allowed_actions.includes('delete')"
+          icon="delete"
+          text="Delete"
+          colour="red"
+          @pressed="$emit('delete', hero_file_name)"
+        />
+      </div>
+    </template>
+    <template v-if="named_file_state[0] === 'not_exists'">
+      <ButtonBox
+        v-if="allowed_actions.includes('create')"
+        icon="add"
+        text="Create"
+        colour="green"
+        @pressed="$emit('create', hero_file_name)"
+      />
     </template>
   </div>
 </template>
@@ -47,8 +62,8 @@ defineProps<{
 .file {
   padding: 0.5rem;
   width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
 }
 
 .actions {
@@ -74,5 +89,4 @@ defineProps<{
   padding: 0.5rem;
   border-radius: 0.5rem 0 0 0.5rem;
 }
-
 </style>

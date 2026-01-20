@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { onBeforeMount, onBeforeUnmount, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import TextBlock from '@/components/TextBlock.vue'
@@ -11,22 +11,30 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
 
-defineProps<{ create: 'defaults' | 'new' | 'edit' }>()
+const { project_name, mode } = defineProps<{
+  project_name?: string
+  mode: 'defaults' | 'new' | 'edit'
+}>()
+const emit = defineEmits(['saved'])
 const router = useRouter()
 const projectDefaults = ref({})
 const toast = useToast()
 const loading = ref<boolean>(true)
-const project_name = ref<string>('')
+const project_name_input = ref<string>('')
 
-const load_defaults = async () => {
+const load_defaults = async (url: string = '/settings/project-defaults/') => {
   await axios
-    .get('/settings/project-defaults/')
+    .get(url)
     .then((response) => {
       projectDefaults.value = response.data
     })
-    .catch((error) => {
-      toast.error('Error getting project defaults: ' + error.message)
-      console.error('Error loading project defaults:', error)
+    .catch(async (error) => {
+      if (error.response.status === 404) {
+        await load_defaults()
+      } else {
+        toast.error('Error getting project defaults: ' + error.message)
+        console.error('Error loading project defaults:', error)
+      }
     })
   loading.value = false
 }
@@ -37,22 +45,38 @@ const update_defaults = async () => {
     toast.error('Error updating default: ' + error.message)
     console.error('Error updating default:', error)
   })
+  emit('saved')
   await load_defaults()
 }
 
 const save_new_project = async () => {
   loading.value = true
   await axios
-    .post('/projects/', { name: project_name.value, settings: projectDefaults.value })
+    .post('/projects/', { name: project_name_input.value, settings: projectDefaults.value })
     .catch((error) => {
       toast.error('Error creating project: ' + error.message)
       console.error('Error creating project:', error)
     })
-  router.push({ name: 'projects' })
+  await router.push({ name: 'project', params: { project_name: project_name_input.value } })
 }
 
+const update_project_settings = async () => {
+  loading.value = true
+  await axios
+    .put(`projects/project/${project_name}/settings/`, projectDefaults.value)
+    .catch(async (error) => {
+      toast.error('Error updating project settings: ' + error.message)
+      console.error('Error updating project settings:', error)
+    })
+  emit('saved')
+  await load_defaults(`/projects/project/${project_name}/settings/`)
+}
 onBeforeMount(async () => {
-  await load_defaults()
+  if (mode === 'edit') {
+    await load_defaults(`/projects/project/${project_name}/settings/`)
+  } else {
+    await load_defaults()
+  }
 })
 onBeforeUnmount(() => {
   toast.clear()
@@ -120,9 +144,9 @@ const descriptions: Record<string, string> = {
 <template>
   <div class="card">
     <LoadingSpinner :loading="loading" />
-    <template v-if="create === 'new'">
+    <template v-if="mode === 'new'">
       <HeadingBlock :level="1">Create New Project</HeadingBlock>
-      <InputBlock type="text" v-model="project_name">Project Name: </InputBlock>
+      <InputBlock type="text" v-model="project_name_input">Project Name: </InputBlock>
       <ButtonBox
         icon="folder_copy"
         text="Create Project"
@@ -130,7 +154,7 @@ const descriptions: Record<string, string> = {
         @pressed="save_new_project()"
       />
     </template>
-    <template v-if="create === 'defaults'">
+    <template v-if="mode === 'defaults'">
       <HeadingBlock :level="1">Project Defaults</HeadingBlock>
       <TextBlock>These are the project defaults used to set up a new project.</TextBlock>
       <CalloutBox type="info">
@@ -138,14 +162,34 @@ const descriptions: Record<string, string> = {
         re-installation is required.
       </CalloutBox>
     </template>
-    <DividerLine />
-    <template v-if="create === 'new'">
-      <HeadingBlock :level="2">Project Settings</HeadingBlock>
-      <TextBlock
-        >These settgins will be saved in the project folder. They may be changed later.</TextBlock
-      >
+    <template v-if="mode === 'edit'">
+      <HeadingBlock :level="1">Edit Project Settings</HeadingBlock>
+      <TextBlock>
+        These are the project these are the project settings for project: {{ project_name }}.
+      </TextBlock>
+      <CalloutBox type="warning">
+        <TextBlock>
+          Please be careful editing these settings as they may affect the project and require
+          rebuild of the puzzle data, and the manuscript.
+        </TextBlock>
+      </CalloutBox>
     </template>
-    <template v-if="create === 'defaults'">
+    <DividerLine />
+    <template v-if="mode === 'new' || mode === 'edit'">
+      <HeadingBlock :level="2">Project Settings</HeadingBlock>
+      <TextBlock>
+        These settings will be saved in the project folder. They may be changed later.
+      </TextBlock>
+    </template>
+    <template v-if="mode === 'edit'">
+      <ButtonBox
+        icon="edit"
+        text="Save Changes"
+        colour="blue"
+        @pressed="update_project_settings()"
+      />
+    </template>
+    <template v-if="mode === 'defaults'">
       <HeadingBlock :level="2">Manage Defaults</HeadingBlock>
       <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
     </template>
@@ -160,7 +204,7 @@ const descriptions: Record<string, string> = {
         {{ mykey }}:
       </InputBlock>
     </div>
-    <template v-if="create === 'new'">
+    <template v-if="mode === 'new'">
       <ButtonBox
         icon="folder_copy"
         text="Create Project"
@@ -168,8 +212,16 @@ const descriptions: Record<string, string> = {
         @pressed="save_new_project()"
       />
     </template>
-    <template v-if="create === 'defaults'">
+    <template v-if="mode === 'defaults'">
       <ButtonBox icon="save" @pressed="update_defaults()" colour="green" text="Save Changes" />
+    </template>
+    <template v-if="mode === 'edit'">
+      <ButtonBox
+        icon="edit"
+        text="Save Changes"
+        colour="blue"
+        @pressed="update_project_settings()"
+      />
     </template>
   </div>
 </template>

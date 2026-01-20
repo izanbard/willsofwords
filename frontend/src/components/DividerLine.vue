@@ -3,7 +3,7 @@ import { computed } from 'vue'
 
 const props = defineProps<{ thickness?: number }>()
 const size = computed(() => {
-  return props.thickness ? `${props.thickness}px` : '1px'
+  return props.thickness !== undefined ? `${props.thickness}px` : '1px'
 })
 </script>
 

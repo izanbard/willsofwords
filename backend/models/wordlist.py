@@ -29,9 +29,13 @@ class WordlistBase(BaseModel, ABC):
         :param word_list: A list of words to be validated.
         :type word_list: list[str]
         """
+        profanity = []
         for word in word_list:
             if word.upper().strip(string.whitespace + string.punctuation) in self.profanity_list():
+                profanity.append(word)
                 Logger.get_logger().warn(f"Validating Input: Profanity found in word: {word}")
+
+        return profanity
 
     @staticmethod
     def profanity_list() -> list[str]:
@@ -82,11 +86,14 @@ class Category(WordlistBase):
 
         :return: None
         """
-        self._check_word_list(self.category.split())
-        self._check_word_list(self.long_fact.split())
-        self._check_word_list(self.short_fact.split())
+        profanity = (
+            self._check_word_list(self.category.split())
+            + self._check_word_list(self.long_fact.split())
+            + self._check_word_list(self.short_fact.split())
+        )
         for phrase in self.word_list:
-            self._check_word_list(phrase.split())
+            profanity += self._check_word_list(phrase.split())
+        return profanity
 
     def check_for_illegal_chars(self):
         """
@@ -101,10 +108,13 @@ class Category(WordlistBase):
         :raises ValueError:
             If any illegal character is found in a word within the word list.
         """
+        illegal_chars = []
         for word in self.word_list:
             for char in word:
                 if not (char.isascii() and char.isalpha() or char == " " or char == "-"):
-                    raise ValueError(f"Validating Input: Illegal character found in word: {self.category} - {word}")
+                    illegal_chars.append(char)
+                    Logger.get_logger().warn(f"Validating Input: Illegal character found in word: {self.category} - {word}")
+        return illegal_chars
 
 
 class Wordlist(WordlistBase):
@@ -133,7 +143,9 @@ class Wordlist(WordlistBase):
     title: str = Field(description="The title", min_length=3, max_length=80)
     category_prompt: str = Field(description="The prompt used to get the category list")
     wordlist_prompt: str = Field(description="The prompt used to get the word list")
-    creation_date: datetime = Field(default_factory=datetime.now, description="The date the word list was created")
+    creation_date: str = Field(
+        default_factory=lambda: datetime.now().isoformat(timespec="seconds"), description="The date the word list was created"
+    )
     category_list: list[Category] = Field(description="The category list")
 
     def check_profanity(self):
@@ -147,11 +159,14 @@ class Wordlist(WordlistBase):
 
         :raises ValueError: If any profane words are detected in the text attributes.
         """
-        self._check_word_list(self.title.split())
-        self._check_word_list(self.category_prompt.split())
-        self._check_word_list(self.wordlist_prompt.split())
+        profanity = (
+            self._check_word_list(self.title.split())
+            + self._check_word_list(self.category_prompt.split())
+            + self._check_word_list(self.wordlist_prompt.split())
+        )
         for category in self.category_list:
-            category.check_profanity()
+            profanity += category.check_profanity()
+        return profanity
 
     def validate_word_lists(self):
         """
@@ -166,6 +181,8 @@ class Wordlist(WordlistBase):
             the validation process.
         :return: None
         """
-        self.check_profanity()
+        profanity = self.check_profanity()
+        illegal_char_list = []
         for category in self.category_list:
-            category.check_for_illegal_chars()
+            illegal_char_list += category.check_for_illegal_chars()
+        return {"profanity": profanity, "illegal_chars": illegal_char_list}
