@@ -42,7 +42,7 @@ const addWord = () => {
           buttonText="Add"
           buttonColor="green"
           @pressed="addWord"
-          >
+        >
           Add Word
         </InputBlock>
       </div>

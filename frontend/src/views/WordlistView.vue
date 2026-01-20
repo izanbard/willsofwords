@@ -106,7 +106,7 @@ const save_wordlist = async () => {
       await load_wordlist()
     })
     .catch((error) => {
-      toast.error('Error saving wordlist'+error.message)
+      toast.error('Error saving wordlist' + error.message)
     })
   emit('saved')
   loading.value = false

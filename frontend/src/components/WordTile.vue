@@ -1,7 +1,6 @@
 <script setup lang="ts">
 defineEmits(['delete'])
 defineProps<{ word: string }>()
-
 </script>
 
 <template>
