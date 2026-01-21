@@ -2,6 +2,7 @@
 import ButtonBox from '@/components/ButtonBox.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
 
+defineEmits(['edit', 'delete', 'create'])
 defineProps<{
   hero_file_title: string
   hero_file_name: string

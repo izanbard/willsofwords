@@ -7,7 +7,7 @@ import { useToast } from 'vue-toast-notification'
 import ProjectFile from '@/components/ProjectFile.vue'
 import { useRouter } from 'vue-router'
 
-const { project_name } = defineProps<{ project_name: string }>()
+const { project_name } = defineProps<{ project_name: string; mode: string }>()
 
 let reloader: number | undefined
 
@@ -86,11 +86,22 @@ const edit_project_settings = () => {
     params: { project_name: project_name, mode: 'edit' },
   })
 }
-const edit_wordlist = () => {
+const edit_wordlist = (mode: 'edit' | 'create') => {
   router.push({
     name: 'edit-wordlist',
-    params: { project_name: project_name },
+    params: { project_name: project_name, mode: mode },
   })
+}
+const delete_wordlist = async () => {
+  await axios
+    .delete(`/projects/project/${project_name}/wordlist`)
+    .then(async () => {
+      edit_wordlist('create')
+      await load_project_file_list()
+    })
+    .catch((error) => {
+      toast.error('Error deleting wordlist:', error.message)
+    })
 }
 </script>
 
@@ -115,9 +126,9 @@ const edit_wordlist = () => {
         'delete',
         named_file_state(hero_files.project_settings)[0] === 'exists' ? 'create' : '',
       ]"
-      @edit="edit_wordlist"
+      @edit="edit_wordlist('edit')"
       @delete="delete_wordlist"
-      @create="create_wordlist"
+      @create="edit_wordlist('create')"
     />
     <ProjectFile
       hero_file_title="Puzzle Data"

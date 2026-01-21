@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
@@ -10,6 +10,7 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import WordlistCategory from '@/components/WordlistCategory.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
+import { useRouter, useRoute } from 'vue-router'
 
 export interface Category {
   category: string
@@ -26,15 +27,17 @@ interface Wordlist {
   category_list: Category[]
 }
 
-const props = defineProps<{ project_name: string }>()
+const props = defineProps<{ project_name: string; mode?: 'create' | 'edit' }>()
 const emit = defineEmits(['saved'])
+const router = useRouter()
+const route = useRoute()
 const loading = ref(true)
 const wordlist = ref<Wordlist>({
   title: '',
   category_prompt: '',
   wordlist_prompt: '',
   creation_date: '',
-  category_list: [{ category: '', word_list: [], short_fact: '', long_fact: '' }],
+  category_list: [],
 } as Wordlist)
 const toast = useToast()
 const new_category = ref<Category>({
@@ -44,8 +47,16 @@ const new_category = ref<Category>({
   long_fact: '',
 } as Category)
 
+const create_wordlist_according_to_mode = async () => {
+  if (props.mode !== 'create') {
+    await load_wordlist()
+    return
+  }
+  loading.value = false
+}
+
 onBeforeMount(async () => {
-  await load_wordlist()
+  await create_wordlist_according_to_mode()
 })
 
 const load_wordlist = async () => {
@@ -103,7 +114,10 @@ const save_wordlist = async () => {
     .post(`/projects/project/${props.project_name}/wordlist`, wordlist.value)
     .then(async (response) => {
       toast.success('Wordlist saved successfully')
-      await load_wordlist()
+      await router.push({
+        name: 'edit-wordlist',
+        params: { project_name: props.project_name, mode: 'edit' },
+      })
     })
     .catch((error) => {
       toast.error('Error saving wordlist' + error.message)
@@ -111,6 +125,23 @@ const save_wordlist = async () => {
   emit('saved')
   loading.value = false
 }
+
+watch(
+  () => route.params.mode,
+  async (mode) => {
+    if (mode === 'edit') {
+      await load_wordlist()
+    } else {
+      wordlist.value = {
+        title: '',
+        category_prompt: '',
+        wordlist_prompt: '',
+        creation_date: '',
+        category_list: [],
+      } as Wordlist
+    }
+  },
+)
 </script>
 
 <template>
@@ -125,11 +156,22 @@ const save_wordlist = async () => {
     <HeadingBlock :level="2">Base Data</HeadingBlock>
     <div class="actions">
       <ButtonBox colour="green" text="Save Changes" icon="save" @pressed="save_wordlist" />
-      <ButtonBox text="Revert to Saved" colour="indigo" icon="cancel" @pressed="load_wordlist" />
+      <ButtonBox
+        v-if="mode === 'edit'"
+        text="Revert to Saved"
+        colour="indigo"
+        icon="cancel"
+        @pressed="load_wordlist"
+      />
     </div>
     <div class="input_list">
       <InputBlock type="text" v-model="wordlist.title">Book Title:&nbsp;</InputBlock>
-      <InputBlock type="text" v-model="wordlist.creation_date">Created:&nbsp;</InputBlock>
+      <InputBlock
+        type="text"
+        v-model="wordlist.creation_date"
+        description="Not ued for now, but will form aprt of the AI audit process.  Feel free to leave it blank or otherwise unmolested."
+        >Created:&nbsp;
+      </InputBlock>
       <InputBlock
         type="text"
         v-model="wordlist.wordlist_prompt"

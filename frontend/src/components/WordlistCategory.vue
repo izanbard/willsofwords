@@ -8,8 +8,15 @@ import { ref } from 'vue'
 
 const category = defineModel<Category>({ required: false, default: null })
 const word_to_add = ref('')
+
 const addWord = () => {
-  category.value.word_list.push(word_to_add.value)
+  if (word_to_add.value.trim() === '') return
+  word_to_add.value
+    .trim()
+    .split(/\s*,\s*/)
+    .forEach((word) => {
+      category.value.word_list.push(word)
+    })
   word_to_add.value = ''
 }
 </script>
@@ -24,7 +31,7 @@ const addWord = () => {
     <div class="wordlist">
       <TextBlock class="label">Words in this category:</TextBlock>
       <div>
-        <template v-for="(word, index) in category.word_list">
+        <template v-for="(_, index) in category.word_list">
           <InputBlock
             type="text"
             v-model="category.word_list[index]"

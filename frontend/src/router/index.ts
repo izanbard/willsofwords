@@ -50,16 +50,16 @@ const router = createRouter({
       props: true,
       children: [
         {
-          path: 'settings',
+          path: 'settings/:mode',
           name: 'edit-project-settings',
           component: ProjectSettingsView,
-          props: (route) => ({ project_name: route.params.project_name, mode: 'edit' }),
+          props: (route) => ({ project_name: route.params.project_name, mode: route.params.mode }),
         },
         {
-          path: 'wordlist',
+          path: 'wordlist/:mode',
           name: 'edit-wordlist',
           component: WordlistView,
-          props: true,
+          props: (route) => ({ project_name: route.params.project_name, mode: route.params.mode }),
         },
       ],
     },
