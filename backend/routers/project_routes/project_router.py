@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 from starlette.requests import Request
 
-from .command_router import CommandRouter
 from .project_settings import ProjectSettingsRouter
 from .project_wordlist import ProjectWordlistRouter
+from .project_puzzledata import ProjectPuzzleDataRouter
+
 from backend.models import ProjectFolder
 from . import get_project_files
 
@@ -34,4 +35,4 @@ async def get_project(name: str, req: Request) -> ProjectFolder:
 
 ProjectRouter.include_router(ProjectSettingsRouter)
 ProjectRouter.include_router(ProjectWordlistRouter)
-ProjectRouter.include_router(CommandRouter)
+ProjectRouter.include_router(ProjectPuzzleDataRouter)

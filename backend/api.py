@@ -48,6 +48,7 @@ def inject_coors_settings(api: FastAPI):
             "Accept-Language",
             "Connection",
             "Host",
+            "Keep-Alive",
             "Origin",
             "Referer",
             "Sec-Fetch-Dest",
@@ -98,6 +99,14 @@ def create_api() -> FastAPI:
     )
 
     inject_coors_settings(api)
+
+    @api.middleware("http")
+    async def add_process_time_header(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Connection"] = "keep-alive"
+        response.headers["Keep-Alive"] = "timeout=120, max=100"
+        return response
+
     api.include_router(ProjectsRouter)
     api.include_router(SettingsRouter)
     api.add_exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR, internal_exception_handler)

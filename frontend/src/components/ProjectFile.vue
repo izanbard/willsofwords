@@ -84,7 +84,7 @@ defineProps<{
 }
 .creating {
   background-color: var(--vt-c-green-trans-bkg);
-  width: 10%;
+  width: v-bind(named_file_state[1] + '%');
   overflow: visible;
   white-space: nowrap;
   padding: 0.5rem;

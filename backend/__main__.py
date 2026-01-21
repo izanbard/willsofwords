@@ -12,7 +12,7 @@ LOG_LEVEL = "debug"
 
 def main() -> None:
     create_default_files()
-    uvicorn.run(create_api(), host=SERVER, port=SERVER_PORT)
+    uvicorn.run(create_api(), host=SERVER, port=SERVER_PORT, timeout_keep_alive=120)
 
 
 if __name__ == "__main__":

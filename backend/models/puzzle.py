@@ -12,6 +12,9 @@ from backend.utils import Logger, get_profanity_list
 
 class Puzzle(BaseModel):
     project_config: ProjectConfig = Field(..., description="Configuration for puzzle generation")
+    puzzle_id: str = Field(
+        ..., description="the unique id (within this book context) of the puzzle formed from the puzzle title"
+    )
     puzzle_title: str = Field(..., description="the title of the puzzle")
     display_title: str = Field(default="", description="the display title of the puzzle")
     input_word_list: list[str] = Field(..., description="the words supplied to this puzzle for creation")

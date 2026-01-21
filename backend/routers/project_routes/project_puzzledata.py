@@ -1,0 +1,105 @@
+import json
+from functools import lru_cache
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from starlette import status
+from starlette.requests import Request
+
+from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle
+
+ProjectPuzzleDataRouter = APIRouter(
+    prefix="/puzzledata",
+    tags=["Project"],
+)
+
+
+@ProjectPuzzleDataRouter.post(
+    "/",
+    summary="Create puzzle data for a project in the background.",
+    description="Create puzzle data for a project in the background.",
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def create_puzzledata(name: str, req: Request, bg_tasks: BackgroundTasks) -> None:
+    """Create puzzle data for a project in the background."""
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    input_file = data_dir / req.state.config.app.input_filename
+    with open(input_file) as fd:
+        wordlist = Wordlist(**json.load(fd))
+    validation_dict = wordlist.validate_word_lists()
+    if validation_dict["profanity"] or validation_dict["illegal_chars"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Wordlist contains invalid words. Profanity: {validation_dict['profanity']}, Illegal Chars: {validation_dict['illegal_chars']}",
+        )
+    with open(data_dir / req.state.config.app.project_settings, "r") as f:
+        puzzle_config = ProjectConfig(**json.load(f))
+
+    wordsearch = PuzzleData(project_config=puzzle_config, book_title=wordlist.title, wordlist=wordlist)
+    data_file = data_dir / req.state.config.app.data_filename
+    wordsearch.clear_marker_file(data_file)
+    (data_dir / f"{req.state.config.app.data_filename}.00.marker").touch()
+    load_the_puzzle_data.cache_clear()
+    bg_tasks.add_task(wordsearch.create_and_save_data, data_file)
+
+    return None
+
+
+@ProjectPuzzleDataRouter.delete(
+    "/",
+    summary="Delete puzzle data for a project.",
+    description="Delete puzzle data for a project.",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_puzzledata(name: str, req: Request) -> None:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzledata_path = data_dir / req.state.config.app.data_filename
+    if puzzledata_path.exists():
+        puzzledata_path.unlink()
+    load_the_puzzle_data.cache_clear()
+    return None
+
+
+@ProjectPuzzleDataRouter.get(
+    "/base_data/",
+    summary="Get base puzzle data for a project.",
+    description="Get base puzzle data for a project.",
+    status_code=status.HTTP_200_OK,
+    response_model=PuzzleBaseData,
+    response_description="The base puzzle data for the project.",
+)
+def get_base_puzzledata(name: str, req: Request) -> PuzzleBaseData:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+    return PuzzleBaseData(title=puzzle_data.book_title, puzzle_list=puzzle_data.get_puzzle_ids())
+
+
+@lru_cache
+def load_the_puzzle_data(filename: Path) -> PuzzleData:
+    with open(filename, "r") as f:
+        puzzle_data = PuzzleData(**json.load(f))
+    return puzzle_data
+
+
+@ProjectPuzzleDataRouter.get(
+    "/puzzle/{puzzle_id}/",
+    summary="Get puzzle data for a puzzle.",
+    description="Get puzzle data for a puzzle.",
+    status_code=status.HTTP_200_OK,
+    response_model=Puzzle,
+    response_description="The puzzle data for the puzzle.",
+)
+def get_puzzle_data(name: str, puzzle_id: str, req: Request) -> Puzzle:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+    if puzzle_id not in puzzle_data.get_puzzle_ids():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+    return puzzle_data.get_puzzle_by_id(puzzle_id)

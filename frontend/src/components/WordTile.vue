@@ -1,12 +1,17 @@
 <script setup lang="ts">
 defineEmits(['delete'])
-defineProps<{ word: string }>()
+const { word, delete_button = true } = defineProps<{ word: string; delete_button: boolean }>()
 </script>
 
 <template>
   <div class="tile">
     <div>{{ word }}</div>
-    <span class="material-symbols-outlined sized" @click="$emit('delete', word)">delete</span>
+    <span
+      v-if="delete_button"
+      class="material-symbols-outlined sized"
+      @click="$emit('delete', word)"
+      >delete</span
+    >
   </div>
 </template>
 

@@ -7,6 +7,7 @@ import SettingsView from '@/views/SettingsView.vue'
 import AboutView from '@/views/AboutView.vue'
 import ProjectView from '@/views/ProjectView.vue'
 import WordlistView from '@/views/WordlistView.vue'
+import PuzzleView from '@/views/PuzzleView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,6 +61,12 @@ const router = createRouter({
           name: 'edit-wordlist',
           component: WordlistView,
           props: (route) => ({ project_name: route.params.project_name, mode: route.params.mode }),
+        },
+        {
+          path: 'puzzledata',
+          name: 'edit-puzzledata',
+          component: PuzzleView,
+          props: true,
         },
       ],
     },

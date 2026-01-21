@@ -71,7 +71,7 @@ onBeforeMount(async () => {
 onMounted(() => {
   reloader = setInterval(async () => {
     await load_project_file_list()
-  }, 5000)
+  }, 2000)
 })
 
 onBeforeUnmount(() => {
@@ -101,6 +101,34 @@ const delete_wordlist = async () => {
     })
     .catch((error) => {
       toast.error('Error deleting wordlist:', error.message)
+    })
+}
+const edit_puzzledata = () => {
+  router.push({
+    name: 'edit-puzzledata',
+    params: { project_name: project_name },
+  })
+}
+const create_puzzledata = async () => {
+  await axios
+    .post(`/projects/project/${project_name}/puzzledata`)
+    .then(async () => {
+      toast.success('Background job for puzzle data creation has been initiated.')
+      await load_project_file_list()
+      await router.push({ name: 'project', params: { project_name: project_name } })
+    })
+    .catch((error) => {
+      toast.error('Error starting background job for puzzle data creation:', error.message)
+    })
+}
+const delete_puzzledata = async () => {
+  await axios
+    .delete(`/projects/project/${project_name}/puzzledata`)
+    .then(async () => {
+      await load_project_file_list()
+    })
+    .catch((error) => {
+      toast.error('Error deleting puzzle data:', error.message)
     })
 }
 </script>
