@@ -5,7 +5,6 @@ from pathlib import Path
 from .config import Config, AppConfig, AIConfig  # noqa: F401
 from .logging import Logger  # noqa: F401
 
-
 profanity_list = None
 dist_file_mapping = {
     "project_settings": (Path("backend/defaults/project_settings.json.dist"), Path("backend/project_settings.json")),
