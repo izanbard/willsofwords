@@ -22,6 +22,7 @@ a,
 }
 
 .card {
+  position: relative;
   background-color: var(--color-background-soft);
   padding: 1rem;
   border: var(--color-border) solid 2px;

@@ -2,7 +2,7 @@
 import ButtonBox from '@/components/ButtonBox.vue'
 
 interface Props {
-  type: 'float' | 'int' | 'text' | 'bool' | 'gridText' | 'textarea'
+  type: 'float' | 'int' | 'text' | 'bool' | 'gridText' | 'textarea' | 'select'
   value?: string | number | boolean
   unit?: string
   description?: string
@@ -11,6 +11,7 @@ interface Props {
   buttonIcon?: string
   buttonColor?: 'red' | 'indigo' | 'green' | 'orange' | 'blue' | 'yellow'
   readonly?: boolean
+  options?: string[]
 }
 
 const emit = defineEmits(['pressed', 'input', 'change'])
@@ -19,6 +20,7 @@ const content = defineModel<string | number | readonly string[] | null | undefin
   required: false,
   default: null,
 })
+const my_background = readonly ? 'var(--vt-c-text-dark-2)' : 'var(--color-background-wow)'
 
 const validate_text = () => {
   if (content.value && !/^[A-Za-z\s-]*$/.test(content.value.toString())) {
@@ -87,6 +89,11 @@ const validate_integer = () => {
         v-model="content"
         :readonly="readonly"
       />
+      <template v-if="type === 'select'">
+        <select class="input" @change="$emit('change')" v-model="content">
+          <option v-for="option in options" :key="option" :value="option">{{ option }}</option>
+        </select>
+      </template>
       <div v-if="unit" class="unit">{{ unit }}</div>
       <template v-if="withButton"
         ><ButtonBox
@@ -133,7 +140,8 @@ const validate_integer = () => {
 }
 
 .input {
-  background-color: var(--color-background-wow);
+  --my_background: v-bind(my_background);
+  background-color: var(--my_background);
   border: var(--color-border) solid 2px;
   border-radius: 0.5rem;
   padding: 0.3rem;

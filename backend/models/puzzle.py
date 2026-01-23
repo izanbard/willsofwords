@@ -214,6 +214,7 @@ class Puzzle(BaseModel):
         raise ValueError("You fucked this, wills, you moron")
 
     def check_for_inadvertent_profanity(self):
+        self.profanity = {}
         grid_strings: dict[str, str] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
             grid_string_substrings_forward = self._check_grid_string(grid_string)
@@ -256,3 +257,7 @@ class Puzzle(BaseModel):
         total_area = height * width
         density = solution_count / total_area
         return density
+
+
+class PuzzleLetter(BaseModel):
+    letter: str = Field(..., description="the letter of the puzzle", min_length=1, max_length=1)

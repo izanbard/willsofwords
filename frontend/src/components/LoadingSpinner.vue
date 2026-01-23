@@ -1,5 +1,6 @@
 <script setup lang="ts">
-defineProps<{ loading: boolean }>()
+const { loading, local = false } = defineProps<{ loading: boolean; local?: boolean }>()
+const position = local ? 'absolute' : 'fixed'
 </script>
 
 <template>
@@ -10,12 +11,12 @@ defineProps<{ loading: boolean }>()
 
 <style scoped>
 .container {
-  position: fixed;
+  position: v-bind(position);
   top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  width: 100%;
-  height: 100%;
 }
 .loader {
   font-size: 10px;

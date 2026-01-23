@@ -128,8 +128,15 @@ class PuzzleData(BaseModel):
     def get_puzzle_ids(self) -> list[str]:
         return [puzzle.puzzle_id for puzzle in self.puzzles]
 
-    def get_puzzle_by_id(self, puzzle_id: str) -> Puzzle | None:
+    def get_puzzle_by_id(self, puzzle_id: str) -> Puzzle:
         for puzzle in self.puzzles:
             if puzzle.puzzle_id == puzzle_id:
                 return puzzle
-        return None
+        raise KeyError(f"Puzzle with ID {puzzle_id} not found in the puzzle data")
+
+    def update_puzzle_by_id(self, puzzle_id: str, new_puzzle: Puzzle) -> None:
+        for index, puzzle in enumerate(self.puzzles):
+            if puzzle.puzzle_id == puzzle_id:
+                self.puzzles[index] = new_puzzle
+                return
+        raise KeyError(f"Puzzle with ID {puzzle_id} not found in the puzzle data")

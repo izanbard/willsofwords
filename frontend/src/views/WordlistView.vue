@@ -94,7 +94,7 @@ const save_wordlist = async () => {
     new_category.value.long_fact.length > 0 ||
     new_category.value.short_fact.length > 0
   ) {
-    let success = add_category()
+    const success = add_category()
     if (!success) return
   }
   if (
@@ -112,7 +112,7 @@ const save_wordlist = async () => {
   loading.value = true
   await axios
     .post(`/projects/project/${props.project_name}/wordlist`, wordlist.value)
-    .then(async (response) => {
+    .then(async () => {
       toast.success('Wordlist saved successfully')
       await router.push({
         name: 'edit-wordlist',
@@ -187,7 +187,7 @@ watch(
     </div>
     <DividerLine />
     <HeadingBlock :level="2">Categories</HeadingBlock>
-    <template v-for="(category, index) in wordlist.category_list">
+    <template v-for="(category, index) in wordlist.category_list" :key="index">
       <WordlistCategory v-model="wordlist.category_list[index]" />
     </template>
     <HeadingBlock :level="2">Add New Category</HeadingBlock>

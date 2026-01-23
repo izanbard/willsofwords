@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { onBeforeMount, onBeforeUnmount, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import TextBlock from '@/components/TextBlock.vue'

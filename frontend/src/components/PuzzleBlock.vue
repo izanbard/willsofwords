@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toast-notification'
-import { onBeforeMount, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
 import DividerLine from '@/components/DividerLine.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import WordTile from '@/components/WordTile.vue'
+import ButtonBox from '@/components/ButtonBox.vue'
+import PuzzleGrid from '@/components/PuzzleGrid.vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 interface Cell {
   loc_x: number
@@ -28,7 +31,7 @@ interface PuzzleData {
   cells: Cell[][]
   puzzle_search_list: string[]
   density: number
-  profanity: Record<string, (string | (string | number)[])[]>
+  profanity: Record<string, (string | (string | number)[])[][]>
 }
 
 const { project_name, puzzle_id } = defineProps<{ project_name: string; puzzle_id: string }>()
@@ -44,12 +47,14 @@ const puzzle_data = ref<PuzzleData>({
   short_fact: '',
   rows: 0,
   columns: 0,
-  cells: [[]],
+  cells: [[]] as Cell[][],
   puzzle_search_list: [],
   density: 0,
   profanity: {},
 })
+
 const load_puzzle_data = async () => {
+  loading.value = true
   await axios
     .get(`/projects/project/${project_name}/puzzledata/puzzle/${puzzle_id}/`)
     .then((response) => {
@@ -64,67 +69,137 @@ const load_puzzle_data = async () => {
 onMounted(async () => {
   await load_puzzle_data()
 })
+const save_puzzle = async () => {
+  loading.value = true
+  await axios
+    .put(`/projects/project/${project_name}/puzzledata/puzzle/${puzzle_id}/`, puzzle_data.value)
+    .then(async () => {
+      toast.success('Puzzle saved successfully')
+      await load_puzzle_data()
+    })
+    .catch((error) => {
+      toast.error('Error saving puzzle:', error.message)
+    })
+}
+const rebuild_puzzle = async () => {
+  loading.value = true
+  await axios
+    .delete(`/projects/project/${project_name}/puzzledata/puzzle/${puzzle_id}/`)
+    .then(async () => {
+      toast.success('Puzzle rebuilt successfully')
+      await load_puzzle_data()
+    })
+    .catch((error) => {
+      toast.error('Error rebuilding puzzle:', error.message)
+    })
+}
 </script>
 
 <template>
-  <HeadingBlock :level="2">{{ puzzle_data.display_title }}</HeadingBlock>
-  <div class="puzzle_data">
-    <InputBlock type="text" v-model="puzzle_data.puzzle_id" readonly>Puzzle ID:</InputBlock>
-    <InputBlock type="text" v-model="puzzle_data.puzzle_title">Puzzle Title:</InputBlock>
-    <InputBlock type="text" v-model="puzzle_data.display_title">Display Title:</InputBlock>
-    <InputBlock type="textarea" v-model="puzzle_data.long_fact">Long Fact:</InputBlock>
-    <InputBlock type="textarea" v-model="puzzle_data.short_fact">Short Fact:</InputBlock>
-    <InputBlock type="text" v-model="puzzle_data.density" readonly>Density:</InputBlock>
-    <InputBlock type="text" v-model="puzzle_data.rows" readonly>Rows:</InputBlock>
-    <InputBlock type="text" v-model="puzzle_data.columns" readonly>Columns:</InputBlock>
-    <div class="search_words">
-      <div class="label">Input Words:</div>
-      <div class="words">
-        <template v-for="(word, index) in puzzle_data.input_word_list" :key="index">
-          <InputBlock
-            type="text"
-            v-model="puzzle_data.input_word_list[index]"
-            withButton
-            buttonIcon="delete"
-            buttonColor="red"
-            @pressed="puzzle_data.input_word_list.splice(index, 1)"
-          />
-        </template>
+  <div class="puzzle_block_container">
+    <LoadingSpinner :loading="loading" :local="true" />
+    <HeadingBlock :level="2">{{ puzzle_data.display_title }}</HeadingBlock>
+    <div class="actions">
+      <ButtonBox icon="save" text="Save Changes" colour="green" @pressed="save_puzzle" />
+      <ButtonBox
+        icon="change_circle"
+        text="Rebild Puzzle"
+        colour="blue"
+        @pressed="rebuild_puzzle"
+      />
+      <ButtonBox icon="cancel" text="Revert to Saved" colour="indigo" @pressed="load_puzzle_data" />
+    </div>
+    <div class="puzzle_data">
+      <InputBlock type="text" v-model="puzzle_data.puzzle_id" readonly>Puzzle ID:</InputBlock>
+      <InputBlock type="text" v-model="puzzle_data.puzzle_title">Puzzle Title:</InputBlock>
+      <InputBlock type="text" v-model="puzzle_data.display_title">Display Title:</InputBlock>
+      <InputBlock type="textarea" v-model="puzzle_data.long_fact">Long Fact:</InputBlock>
+      <InputBlock type="textarea" v-model="puzzle_data.short_fact">Short Fact:</InputBlock>
+      <InputBlock type="text" v-model="puzzle_data.density" readonly>Density:</InputBlock>
+      <InputBlock type="text" v-model="puzzle_data.rows" readonly>Rows:</InputBlock>
+      <InputBlock type="text" v-model="puzzle_data.columns" readonly>Columns:</InputBlock>
+      <div class="search_words">
+        <div class="label">Input Words:</div>
+        <div class="words">
+          <template v-for="(word, index) in puzzle_data.input_word_list" :key="index">
+            <InputBlock
+              type="text"
+              v-model="puzzle_data.input_word_list[index]"
+              withButton
+              buttonIcon="delete"
+              buttonColor="red"
+              @pressed="puzzle_data.input_word_list.splice(index, 1)"
+            />
+          </template>
+        </div>
+      </div>
+      <div class="search_words">
+        <div class="label">Search Words:</div>
+        <div class="words">
+          <template v-for="(word, index) in puzzle_data.puzzle_search_list" :key="index">
+            <WordTile colour="'var(--vt-c-text-dark-2)'" :word="word" :delete_button="false" />
+          </template>
+        </div>
       </div>
     </div>
-    <div class="search_words">
-      <div class="label">Search Words:</div>
-      <div class="words">
-        <template v-for="(word, index) in puzzle_data.puzzle_search_list" :key="index">
-          <WordTile :word="word" :delete_button="false" />
-        </template>
-      </div>
-    </div>
+    <PuzzleGrid
+      :project_name="project_name"
+      :puzzle_id="puzzle_id"
+      :columns="puzzle_data.columns"
+      :rows="puzzle_data.rows"
+      v-model="puzzle_data.cells"
+      @reload="load_puzzle_data"
+    />
   </div>
-  <div class="puzzle_grids">
-    <div class="puzzle_grid">
-      <template v-if="puzzle_data.cells" v-for="(row, y) in puzzle_data.cells" :key="y">
-        <template v-if="puzzle_data.cells[y]" v-for="(cell, x) in row" :key="x">
-          <LetterTile v-model="puzzle_data.cells[y][x]" :solution="false">{{
-            cell.value
-          }}</LetterTile>
-        </template>
-      </template>
-    </div>
-    <div class="puzzle_grid">
-      <template v-if="puzzle_data.cells" v-for="(row, y) in puzzle_data.cells" :key="y">
-        <template v-if="puzzle_data.cells[y]" v-for="(cell, x) in row" :key="x">
-          <LetterTile v-model="puzzle_data.cells[y][x]" :solution="true">{{
-            cell.value
-          }}</LetterTile>
-        </template>
-      </template>
-    </div>
+  <div class="profanity_list">
+    <HeadingBlock :level="3">Profanity List</HeadingBlock>
+    <template v-for="(words_and_location_list, line) in puzzle_data.profanity" :key="line">
+      <div class="line_list">
+        <div class="label">On {{ line }}:</div>
+        <div class="profanity_words">
+          <template v-for="(single_word_list, index) in words_and_location_list" :key="index">
+            <div class="profanity_word">
+              <WordTile
+                :word="single_word_list[0] as string"
+                :delete_button="false"
+                colour="var(--vt-c-red-trans-bkg)"
+              />
+              <div v-if="single_word_list[1]">
+                {{ single_word_list[1][0] === 'F' ? 'forwards' : 'reversed' }} from char
+                {{ single_word_list[1][1] }} to char {{ single_word_list[1][2] }}
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
   </div>
   <DividerLine />
 </template>
 
 <style scoped>
+.actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+.line_list {
+  display: flex;
+}
+.profanity_words {
+  display: flex;
+  flex-direction: column;
+}
+.profanity_word {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.puzzle_block_container {
+  position: relative;
+}
 .puzzle_data {
   display: flex;
   flex-direction: column;
@@ -139,16 +214,5 @@ onMounted(async () => {
 .words {
   display: flex;
   flex-wrap: wrap;
-}
-.puzzle_grids {
-  display: flex;
-  justify-content: space-evenly;
-}
-.puzzle_grid {
-  display: grid;
-  --puzzle-rows: v-bind(puzzle_data.rows);
-  --puzzle-columns: v-bind(puzzle_data.columns);
-  grid-template-columns: repeat(var(--puzzle-columns), 20px);
-  grid-template-rows: repeat(var(--puzzle-rows), 20px);
 }
 </style>

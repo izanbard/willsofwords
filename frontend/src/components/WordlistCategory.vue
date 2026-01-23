@@ -2,7 +2,6 @@
 import InputBlock from '@/components/InputBlock.vue'
 import TextBlock from '@/components/TextBlock.vue'
 import DividerLine from '@/components/DividerLine.vue'
-import ButtonBox from '@/components/ButtonBox.vue'
 import type { Category } from '@/views/WordlistView.vue'
 import { ref } from 'vue'
 
@@ -31,7 +30,7 @@ const addWord = () => {
     <div class="wordlist">
       <TextBlock class="label">Words in this category:</TextBlock>
       <div>
-        <template v-for="(_, index) in category.word_list">
+        <template v-for="(_, index) in category.word_list" :key="index">
           <InputBlock
             type="text"
             v-model="category.word_list[index]"

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 defineEmits(['delete'])
-const { word, delete_button = true } = defineProps<{ word: string; delete_button: boolean }>()
+const {
+  word,
+  delete_button = true,
+  colour = 'var(--color-background-wow)',
+} = defineProps<{ word: string; delete_button: boolean; colour?: string }>()
 </script>
 
 <template>
@@ -17,7 +21,8 @@ const { word, delete_button = true } = defineProps<{ word: string; delete_button
 
 <style scoped>
 .tile {
-  background-color: var(--color-background-wow);
+  --my_colour: v-bind(colour);
+  background-color: var(--my_colour);
   border-radius: 0.5rem;
 
   border: var(--color-border) solid 2px;

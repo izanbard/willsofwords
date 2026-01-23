@@ -42,7 +42,7 @@ const load_base_data = async () => {
     <HeadingBlock :level="1">Puzzle View</HeadingBlock>
     <HeadingBlock :level="2">Book Title: {{ puzzle_base_data.title }}</HeadingBlock>
     <DividerLine />
-    <template v-for="(puzzle_id, _) in puzzle_base_data.puzzle_list">
+    <template v-for="(puzzle_id, index) in puzzle_base_data.puzzle_list" :key="index">
       <PuzzleBlock :project_name="project_name" :puzzle_id="puzzle_id" />
     </template>
   </div>

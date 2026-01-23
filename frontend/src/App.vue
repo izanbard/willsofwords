@@ -8,6 +8,7 @@ const icon_list: string[] = [
   'add',
   'cancel',
   'cell_merge',
+  'change_circle',
   'check_circle',
   'create_new_folder',
   'delete',

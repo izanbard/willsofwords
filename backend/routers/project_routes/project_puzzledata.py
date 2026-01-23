@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from starlette import status
 from starlette.requests import Request
 
-from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle
+from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle, PuzzleLetter
 
 ProjectPuzzleDataRouter = APIRouter(
     prefix="/puzzledata",
@@ -103,3 +103,63 @@ def get_puzzle_data(name: str, puzzle_id: str, req: Request) -> Puzzle:
     if puzzle_id not in puzzle_data.get_puzzle_ids():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
     return puzzle_data.get_puzzle_by_id(puzzle_id)
+
+
+@ProjectPuzzleDataRouter.put(
+    "/puzzle/{puzzle_id}/",
+    summary="change the puzzledata for this puzzle",
+    description="Change the title of a puzzle.",
+    status_code=status.HTTP_200_OK,
+)
+def update_puzzle(name: str, puzzle_id: str, new_puzzle: Puzzle, req: Request) -> Puzzle:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+    try:
+        puzzle_data.update_puzzle_by_id(puzzle_id, new_puzzle)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+    return new_puzzle
+
+
+@ProjectPuzzleDataRouter.delete(
+    "/puzzle/{puzzle_id}/",
+    summary="Delete a puzzle and rebuild it",
+    description="Delete a puzzle and rebuild it",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_puzzle(name: str, puzzle_id: str, req: Request) -> None:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+    try:
+        puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+    puzzle.puzzle_reset()
+    puzzle.populate_puzzle()
+    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+    return None
+
+
+@ProjectPuzzleDataRouter.put(
+    "/puzzle/{puzzle_id}/cell/{x}/{y}/",
+    summary="Change the letter in a puzzle cell.",
+    description="Change the letter in a puzzle cell.",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def change_letter_in_puzzle(name: str, puzzle_id: str, x: int, y: int, new_letter: PuzzleLetter, req: Request) -> None:
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+    puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
+    if puzzle is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+    puzzle.cells[y][x].value = new_letter.letter
+    puzzle.check_for_inadvertent_profanity()
+    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+    return None
