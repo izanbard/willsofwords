@@ -37,12 +37,14 @@ class TestSubContentsCell(TestUtils):
 
     @pytest.fixture
     def instance_puzzle(self, mock_cell, cell_size, puzzle_grid_type, project_config):
-        return SubContentsCell(cell=mock_cell, cell_size=cell_size, grid_type=puzzle_grid_type, project_config=project_config)
+        return SubContentsCell(
+            cell=mock_cell, cell_size=cell_size, grid_type=puzzle_grid_type, project_config=project_config, print_debug=False
+        )
 
     @pytest.fixture
     def instance_solution(self, mock_cell, cell_size, solution_grid_type, project_config):
         return SubContentsCell(
-            cell=mock_cell, cell_size=cell_size, grid_type=solution_grid_type, project_config=project_config
+            cell=mock_cell, cell_size=cell_size, grid_type=solution_grid_type, project_config=project_config, print_debug=False
         )
 
     @pytest.fixture

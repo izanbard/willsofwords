@@ -7,6 +7,7 @@ from starlette import status
 from starlette.requests import Request
 
 from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle, PuzzleLetter
+from backend.utils import clear_marker_file, set_marker_file
 
 ProjectPuzzleDataRouter = APIRouter(
     prefix="/puzzledata",
@@ -39,8 +40,8 @@ def create_puzzledata(name: str, req: Request, bg_tasks: BackgroundTasks) -> Non
 
     wordsearch = PuzzleData(project_config=puzzle_config, book_title=wordlist.title, wordlist=wordlist)
     data_file = data_dir / req.state.config.app.data_filename
-    wordsearch.clear_marker_file(data_file)
-    (data_dir / f"{req.state.config.app.data_filename}.00.marker").touch()
+    clear_marker_file(data_file)
+    set_marker_file(data_file, 0)
     load_the_puzzle_data.cache_clear()
     bg_tasks.add_task(wordsearch.create_and_save_data, data_file)
 
@@ -77,7 +78,9 @@ def get_base_puzzledata(name: str, req: Request) -> PuzzleBaseData:
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
-    return PuzzleBaseData(title=puzzle_data.book_title, puzzle_list=puzzle_data.get_puzzle_ids())
+    return PuzzleBaseData(
+        title=puzzle_data.book_title, puzzle_list=puzzle_data.get_puzzle_ids(), page_count=puzzle_data.page_count
+    )
 
 
 @lru_cache

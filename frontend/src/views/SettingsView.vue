@@ -48,8 +48,7 @@ const descriptions: Record<string, string> = {
   log_level: 'level of log output generated',
   input_filename: 'the default file name for the wordlist input',
   data_filename: 'the default file name for the puzzle data output',
-  output_filename:
-    'the default file name for the manuscript output.  If print debug id true the, it is appended with _PRINT_DEBUG',
+  output_filename: 'the default file name for the manuscript output.',
   frontend_host_for_cors:
     'the url in the browser for sone looking at the front end this is to permit a poke through on the CORS security shield.',
   model: 'the name of the model being used',

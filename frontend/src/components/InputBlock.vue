@@ -16,7 +16,7 @@ interface Props {
 
 const emit = defineEmits(['pressed', 'input', 'change'])
 const { readonly = false } = defineProps<Props>()
-const content = defineModel<string | number | readonly string[] | null | undefined>({
+const content = defineModel<string | number | boolean | readonly string[] | null | undefined>({
   required: false,
   default: null,
 })

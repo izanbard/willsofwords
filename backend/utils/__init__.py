@@ -64,3 +64,13 @@ def create_default_files():
     data_dir.mkdir(parents=True, exist_ok=True)
     archives_dir = Path(conf.app.archive_folder)
     archives_dir.mkdir(parents=True, exist_ok=True)
+
+
+def set_marker_file(filename: Path, percentage: int):
+    clear_marker_file(filename)
+    (filename.parent / f"{filename.name}.{percentage:02d}.marker").touch()
+
+
+def clear_marker_file(filename: Path):
+    for p in filename.parent.glob(f"{filename.name}.*.marker"):
+        p.unlink()

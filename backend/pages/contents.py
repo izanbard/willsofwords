@@ -9,8 +9,8 @@ from backend.utils import Logger
 
 
 class Contents(PrintParams, ABC):
-    def __init__(self, *, project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, *, project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.size: tuple[int, int] = (self.config.content_width_pixels, self.config.content_height_pixels)
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
@@ -40,8 +40,10 @@ class Contents(PrintParams, ABC):
 
 
 class ContentsFront(Contents):
-    def __init__(self, project_config: ProjectConfig, front_type: TitlePageEnum = TitlePageEnum.PUZZLE) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(
+        self, project_config: ProjectConfig, front_type: TitlePageEnum = TitlePageEnum.PUZZLE, print_debug: bool = False
+    ) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.front_type: TitlePageEnum = front_type
 
     def get_content_image(self) -> Image.Image:
@@ -74,18 +76,19 @@ class ContentsPuzzleGrid(Contents):
         project_config: ProjectConfig,
         grid_page_type: LayoutEnum = LayoutEnum.SINGLE,
         grid_image_type: BoardImageEnum = BoardImageEnum.PUZZLE,
+        print_debug: bool = False,
     ) -> None:
-        super().__init__(project_config=project_config)
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.puzzle: Puzzle = puzzle
         self.grid_page_type: LayoutEnum = grid_page_type
         self.grid_image_type: BoardImageEnum = grid_image_type
 
     def get_content_image(self) -> Image.Image:
         Logger.get_logger().debug(
-            f"Generating {self.__class__} image for puzzle grid of {self.puzzle.display_title} with layout {self.grid_page_type} and print debug {self.config.debug}"
+            f"Generating {self.__class__} image for puzzle grid of {self.puzzle.display_title} with layout {self.grid_page_type}"
         )
         title_image: Image.Image = SubContentsHeader(
-            header_title=self.puzzle.display_title, project_config=self.config
+            header_title=self.puzzle.display_title, project_config=self.config, print_debug=self.print_debug
         ).get_content_image()
         cell_size = self.calculate_cells_size(self.puzzle.columns, self.puzzle.rows)
         grid_image: Image.Image = SubContentsGrid(
@@ -95,6 +98,7 @@ class ContentsPuzzleGrid(Contents):
             cell_size=cell_size,
             grid_type=self.grid_image_type,
             project_config=self.config,
+            print_debug=self.print_debug,
         ).get_content_image()
         self.base_image.paste(im=title_image, box=(0, 0), mask=title_image)
         self.base_image.paste(
@@ -104,12 +108,15 @@ class ContentsPuzzleGrid(Contents):
         )
         if self.grid_page_type == LayoutEnum.SINGLE and self.grid_image_type == BoardImageEnum.PUZZLE:
             wordlist: Image.Image = SubContentsSearchList(
-                wordlist=self.puzzle.puzzle_search_list, layout_type=LayoutEnum.SINGLE, project_config=self.config
+                wordlist=self.puzzle.puzzle_search_list,
+                layout_type=LayoutEnum.SINGLE,
+                project_config=self.config,
+                print_debug=self.print_debug,
             ).get_content_image()
             self.base_image.paste(
                 im=wordlist, box=(0, self.base_image.height - self.config.wordlist_box_height_pixels), mask=wordlist
             )
-        if self.config.debug:
+        if self.print_debug:
             self.draw.line(
                 [
                     (0, self.config.title_box_height_pixels),
@@ -143,24 +150,21 @@ class ContentsPuzzleGrid(Contents):
 
 
 class ContentsPuzzleWordlist(Contents):
-    def __init__(
-        self,
-        puzzle: Puzzle,
-        project_config: ProjectConfig,
-    ) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, puzzle: Puzzle, project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.puzzle: Puzzle = puzzle
 
     def get_content_image(self) -> Image.Image:
-        Logger.get_logger().debug(
-            f"Generating {self.__class__} image for puzzle wordlist for {self.puzzle.display_title} with print debug {self.config.debug}"
-        )
+        Logger.get_logger().debug(f"Generating {self.__class__} image for puzzle wordlist for {self.puzzle.display_title}")
         title_image: Image.Image = SubContentsHeader(
-            header_title=self.puzzle.display_title, project_config=self.config
+            header_title=self.puzzle.display_title, project_config=self.config, print_debug=self.print_debug
         ).get_content_image()
         self.base_image.paste(im=title_image, box=(0, 0), mask=title_image)
         wordlist: Image.Image = SubContentsSearchList(
-            wordlist=self.puzzle.puzzle_search_list, layout_type=LayoutEnum.DOUBLE, project_config=self.config
+            wordlist=self.puzzle.puzzle_search_list,
+            layout_type=LayoutEnum.DOUBLE,
+            project_config=self.config,
+            print_debug=self.print_debug,
         ).get_content_image()
         self.base_image.paste(
             im=wordlist,
@@ -168,7 +172,7 @@ class ContentsPuzzleWordlist(Contents):
             mask=wordlist,
         )
         long_fact: Image.Image = SubContentsLongFact(
-            long_fact=self.puzzle.long_fact, project_config=self.config
+            long_fact=self.puzzle.long_fact, project_config=self.config, print_debug=self.print_debug
         ).get_content_image()
         self.base_image.paste(
             long_fact,
@@ -178,7 +182,7 @@ class ContentsPuzzleWordlist(Contents):
             ),
             long_fact,
         )
-        if self.config.debug:
+        if self.print_debug:
             self.draw.line(
                 [
                     (0, self.config.title_box_height_pixels),
@@ -208,14 +212,14 @@ class ContentsPuzzleWordlist(Contents):
 
 
 class ContentsSolution(Contents):
-    def __init__(self, puzzle_list: list[Puzzle], project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, puzzle_list: list[Puzzle], project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.puzzle_list: list[Puzzle] = puzzle_list
 
     def _create_solution_thumbnail(self, puzzle: Puzzle) -> Image.Image:
         thumbnail: Image.Image = self._make_base_image()
         title_image: Image.Image = SubContentsHeader(
-            header_title=puzzle.display_title, project_config=self.config
+            header_title=puzzle.display_title, project_config=self.config, print_debug=self.print_debug
         ).get_content_image()
         thumbnail.paste(im=title_image, box=(0, 0), mask=title_image)
         grid_image: Image.Image = SubContentsGrid(
@@ -225,15 +229,14 @@ class ContentsSolution(Contents):
             cell_size=self.calculate_cells_size(puzzle.columns, puzzle.rows),
             grid_type=BoardImageEnum.SOLUTION,
             project_config=self.config,
+            print_debug=self.print_debug,
         ).get_content_image()
         grid_image = ImageOps.contain(image=grid_image, size=(thumbnail.width, thumbnail.height - title_image.height))
         thumbnail.paste(im=grid_image, box=(0, title_image.height), mask=grid_image)
         return thumbnail
 
     def get_content_image(self) -> Image.Image:
-        Logger.get_logger().debug(
-            f"Generating {self.__class__} image for puzzle solution with {len(self.puzzle_list)} puzzles and print debug {self.config.debug}"
-        )
+        Logger.get_logger().debug(f"Generating {self.__class__} image for puzzle solution with {len(self.puzzle_list)}")
         col_width = self.config.content_width_pixels // self.config.solution_page_cols
         row_height = self.config.content_height_pixels // self.config.solution_page_rows
         for n, puzzle in enumerate(self.puzzle_list):
@@ -246,7 +249,7 @@ class ContentsSolution(Contents):
                 box=((x * col_width) + (col_width // 2) - (solution_thumbnail.width // 2), y * row_height),
                 mask=solution_thumbnail,
             )
-        if self.config.debug:
+        if self.print_debug:
             for x in range(1, self.config.solution_page_cols):
                 self.draw.line(
                     xy=[(x * col_width, 0), (x * col_width, self.base_image.height)],
@@ -263,8 +266,8 @@ class ContentsSolution(Contents):
 
 
 class ContentsBlank(Contents):
-    def __init__(self, project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
 
     def get_content_image(self) -> Image.Image:
         Logger.get_logger().debug(f"Generating {self.__class__} image for blank page")

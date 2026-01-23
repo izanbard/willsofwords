@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 
 
 class ProjectConfig(BaseModel):
-    debug: bool = Field(..., description="Print debug mode")
     dpi: int = Field(..., description="DPI for the output PDF")
     page_height_inches: float = Field(..., description="Page height in inches")
     page_width_inches: float = Field(..., description="Page width in inches")

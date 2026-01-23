@@ -6,6 +6,7 @@ import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import ProjectFile from '@/components/ProjectFile.vue'
 import { useRouter } from 'vue-router'
+import InputBlock from '@/components/InputBlock.vue'
 
 const { project_name } = defineProps<{ project_name: string; mode: string }>()
 
@@ -15,6 +16,7 @@ const file_list = ref<{ name: string; project_files: [{ name: string; modified_d
 const loading = ref<boolean>(true)
 const toast = useToast()
 const router = useRouter()
+const print_debug = ref<boolean>(false)
 
 enum file_state_enum {
   exists = 'exists',
@@ -26,7 +28,6 @@ enum hero_files {
   wordlist = 'wordlist.json',
   puzzledata = 'puzzledata.json',
   manuscript = 'manuscript.pdf',
-  manuscript_print_debug = 'manuscript_PRINT_DEBUG.pdf',
 }
 
 const named_file_state = (named_file: string) => {
@@ -131,6 +132,31 @@ const delete_puzzledata = async () => {
       toast.error('Error deleting puzzle data:', error.message)
     })
 }
+const create_manuscript = async () => {
+  await axios
+    .post(`/projects/project/${project_name}/manuscript/`, null, {
+      params: { print_debug: print_debug.value },
+    })
+    .then(async () => {
+      toast.success('Background job for manuscript creation has been initiated.')
+      await load_project_file_list()
+      await router.push({ name: 'project', params: { project_name: project_name } })
+    })
+    .catch((error) => {
+      toast.error('Error starting background job for manuscript creation:', error.message)
+    })
+}
+const delete_manuscript = async () => {
+  await axios
+    .delete(`/projects/project/${project_name}/manuscript/`)
+    .then(async () => {
+      await load_project_file_list()
+      await router.push({ name: 'project', params: { project_name: project_name } })
+    })
+    .catch((error) => {
+      toast.error('Error deleting manuscript:', error.message)
+    })
+}
 </script>
 
 <template>
@@ -186,26 +212,13 @@ const delete_puzzledata = async () => {
           ? 'create'
           : '',
       ]"
-      @edit="edit_manuscript"
+      @edit="view_manuscript"
       @delete="delete_manuscript"
       @create="create_manuscript"
     />
-    <ProjectFile
-      hero_file_title=""
-      :hero_file_name="hero_files.manuscript_print_debug"
-      :named_file_state="named_file_state(hero_files.manuscript_print_debug)"
-      :allowed_actions="[
-        'edit',
-        'delete',
-        named_file_state(hero_files.project_settings)[0] === 'exists' &&
-        named_file_state(hero_files.puzzledata)[0] === 'exists'
-          ? 'create'
-          : '',
-      ]"
-      @edit="edit_manuscript"
-      @delete="delete_manuscript"
-      @create="create_manuscript"
-    />
+    <div class="print_debug">
+      <InputBlock type="bool" v-model="print_debug">Print Debug:</InputBlock>
+    </div>
     <HeadingBlock :level="3">Other Files</HeadingBlock>
     <div class="project_files">
       <template v-for="(file, index) in file_list?.project_files" :key="index">
@@ -218,4 +231,9 @@ const delete_puzzledata = async () => {
   <RouterView @saved="load_project_file_list" />
 </template>
 
-<style scoped></style>
+<style scoped>
+.print_debug {
+  display: flex;
+  justify-content: flex-end;
+}
+</style>

@@ -1,19 +1,21 @@
 import string
+from math import ceil
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from .enums import LayoutEnum
 from .grid_size import GridSize
 from .puzzle import Puzzle
 from .wordlist import Wordlist, Category
 from .project_config import ProjectConfig
-from backend.utils import Logger
+from backend.utils import Logger, set_marker_file, clear_marker_file
 
 
 class PuzzleBaseData(BaseModel):
     title: str = Field(..., description="Title of the book")
     puzzle_list: list[str] = Field(..., description="List of puzzle names")
+    page_count: int = Field(..., description="Number of pages in the book")
 
 
 class PuzzleData(BaseModel):
@@ -21,6 +23,20 @@ class PuzzleData(BaseModel):
     book_title: str = Field(..., description="Title of the book")
     wordlist: Wordlist = Field(..., description="List of words provided from LLM")
     puzzles: list[Puzzle] = Field(default_factory=list, description="List of created Puzzles")
+
+    @computed_field
+    @property
+    def page_count(self) -> int:
+        pages = 1
+        for puzzle in self.puzzles:
+            pages += 2 if puzzle.get_puzzle_layout() == LayoutEnum.DOUBLE else 1
+        if pages % 2 != 0:
+            pages += 1
+        pages += ceil(len(self.puzzles) / self.project_config.solution_per_page)
+        pages += 1
+        if pages % 2 != 0:
+            pages += 1
+        return pages
 
     def create_and_save_data(self, filename: Path) -> None:
         self.create_puzzles(filename=filename)
@@ -34,28 +50,18 @@ class PuzzleData(BaseModel):
             self._add_a_puzzle(category)
             count += 1
             percentage = int(count / base * 90)
-            self.set_marker_file(filename, percentage)
+            set_marker_file(filename, percentage)
         self._check_fix_puzzle_order()
-        self.set_marker_file(filename, 95)
+        set_marker_file(filename, 95)
         self.add_puzzle_display_name()
-        self.set_marker_file(filename, 99)
+        set_marker_file(filename, 99)
         Logger.get_logger().info("Completed creating puzzles")
-
-    @staticmethod
-    def set_marker_file(filename: Path, percentage: int):
-        PuzzleData.clear_marker_file(filename)
-        (filename.parent / f"{filename.name}.{percentage:02d}.marker").touch()
-
-    @staticmethod
-    def clear_marker_file(filename: Path):
-        for p in filename.parent.glob(f"{filename.name}.*.marker"):
-            p.unlink()
 
     def save_data(self, filename: Path) -> None:
         Logger.get_logger().info(f"Saving puzzles to {filename}")
         with open(filename, "w") as fd:
             fd.write(self.model_dump_json(indent=2))
-        self.clear_marker_file(filename)
+        clear_marker_file(filename)
 
         Logger.get_logger().info(f"Done saving puzzles to {filename}")
 

@@ -3,15 +3,17 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from backend.models import PuzzleData, TitlePageEnum, PageTypeEnum, LayoutEnum, ProjectConfig
-from backend.utils import Logger
+from backend.utils import Logger, set_marker_file, clear_marker_file
 from .contents import ContentsFront, ContentsBlank, ContentsPuzzleGrid, ContentsPuzzleWordlist, ContentsSolution
 from .print_params import PrintParams
 from .sub_contents import SubContentsPageNumber
 
 
 class Page(PrintParams):
-    def __init__(self, content: Image.Image, page_number: int, project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(
+        self, content: Image.Image, page_number: int, project_config: ProjectConfig, print_debug: bool = False
+    ) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.content: Image.Image = content
         self.page_number: int = page_number
         self.page_type: PageTypeEnum = PageTypeEnum.RECTO if self.page_number % 2 == 1 else PageTypeEnum.VERSO
@@ -30,7 +32,7 @@ class Page(PrintParams):
         self.base_image.paste(im=self.content, box=(left_margin_x_coord, y_coord), mask=self.content)
         if self.page_number > 1:
             page_number_image = SubContentsPageNumber(
-                page_number=str(self.page_number), project_config=self.config
+                page_number=str(self.page_number), project_config=self.config, print_debug=self.print_debug
             ).get_content_image()
             if self.page_type == PageTypeEnum.RECTO:
                 page_number_location = (
@@ -47,7 +49,7 @@ class Page(PrintParams):
                 box=page_number_location,
                 mask=page_number_image,
             )
-        if self.config.debug:
+        if self.print_debug:
             self.draw.line(
                 [(left_margin_x_coord, 0), (left_margin_x_coord, self.base_image.height)],
                 fill=self.colours["DEBUG_RED"],
@@ -72,11 +74,15 @@ class Page(PrintParams):
 
 
 class Pages(PrintParams):
-    def __init__(self, word_search_data: PuzzleData, project_config: ProjectConfig, filename: Path):
-        super().__init__(project_config=project_config)
+    def __init__(self, word_search_data: PuzzleData, project_config: ProjectConfig, filename: Path, print_debug: bool = False):
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.word_search_data = word_search_data
-        self.filename: Path = filename if not self.config.debug else filename.with_stem(filename.stem + "_PRINT_DEBUG")
+        self.filename: Path = filename
         self.puzzle_pages: list[Image.Image] = []
+
+    def create_and_save_pages(self):
+        self.create_pages()
+        self.save_pdf()
 
     def create_pages(self):
         Logger.get_logger().info("Creating pages...")
@@ -87,10 +93,12 @@ class Pages(PrintParams):
         self._add_puzzle_pages()
         if len(self.puzzle_pages) % 2 == 1:
             self._add_blank_page()
+        set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
         self._add_front_page(TitlePageEnum.SOLUTION)
         self._add_solution_pages()
         if len(self.puzzle_pages) % 2 == 1:
             self._add_blank_page()
+        set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
 
     def _add_solution_pages(self):
         for n in range(0, len(self.word_search_data.puzzles), self.config.solution_per_page):
@@ -100,11 +108,14 @@ class Pages(PrintParams):
                     content=ContentsSolution(
                         puzzle_list=self.word_search_data.puzzles[n : n + self.config.solution_per_page],
                         project_config=self.config,
+                        print_debug=self.print_debug,
                     ).get_content_image(),
                     page_number=len(self.puzzle_pages) + 1,
                     project_config=self.config,
+                    print_debug=self.print_debug,
                 ).get_page_image()
             )
+            set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
 
     def _add_blank_page(self):
         self.puzzle_pages.append(
@@ -112,6 +123,7 @@ class Pages(PrintParams):
                 content=ContentsBlank(project_config=self.config).get_content_image(),
                 page_number=len(self.puzzle_pages) + 1,
                 project_config=self.config,
+                print_debug=self.print_debug,
             ).get_page_image()
         )
 
@@ -122,30 +134,39 @@ class Pages(PrintParams):
             self.puzzle_pages.append(
                 Page(
                     content=ContentsPuzzleGrid(
-                        puzzle=puzzle, grid_page_type=layout, project_config=self.config
+                        puzzle=puzzle, grid_page_type=layout, project_config=self.config, print_debug=self.print_debug
                     ).get_content_image(),
                     page_number=len(self.puzzle_pages) + 1,
                     project_config=self.config,
+                    print_debug=self.print_debug,
                 ).get_page_image()
             )
             if layout == LayoutEnum.DOUBLE:
                 self.puzzle_pages.append(
                     Page(
-                        content=ContentsPuzzleWordlist(puzzle=puzzle, project_config=self.config).get_content_image(),
+                        content=ContentsPuzzleWordlist(
+                            puzzle=puzzle, project_config=self.config, print_debug=self.print_debug
+                        ).get_content_image(),
                         page_number=len(self.puzzle_pages) + 1,
                         project_config=self.config,
+                        print_debug=self.print_debug,
                     ).get_page_image()
                 )
             Logger.get_logger().debug(f"Added puzzle page for {puzzle.display_title}")
+            set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
 
     def _add_front_page(self, front_page_type: TitlePageEnum = TitlePageEnum.PUZZLE):
         self.puzzle_pages.append(
             Page(
-                content=ContentsFront(front_type=front_page_type, project_config=self.config).get_content_image(),
+                content=ContentsFront(
+                    front_type=front_page_type, project_config=self.config, print_debug=self.print_debug
+                ).get_content_image(),
                 page_number=len(self.puzzle_pages) + 1,
                 project_config=self.config,
+                print_debug=self.print_debug,
             ).get_page_image()
         )
+        set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
 
     def save_pdf(self):
         if len(self.puzzle_pages) <= 0:
@@ -159,3 +180,4 @@ class Pages(PrintParams):
             title=self.word_search_data.book_title,
         )
         Logger.get_logger().info(f"Saved to {self.filename}")
+        clear_marker_file(self.filename)

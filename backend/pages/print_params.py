@@ -4,11 +4,12 @@ from backend.models import ProjectConfig
 
 
 class PrintParams:
-    def __init__(self, *, project_config: ProjectConfig) -> None:
+    def __init__(self, *, project_config: ProjectConfig, print_debug: bool = False) -> None:
         self.config: ProjectConfig = project_config
+        self.print_debug: bool = print_debug
 
         self.size: tuple[int, int] = (0, 0)
-        if self.config.debug:
+        if self.print_debug:
             self.mode = "RGBA"
             self.colours: dict[str, tuple[int, int, int, int]] | dict[str, tuple[int, int]] = {
                 "DEBUG_BLUE": (0, 0, 255, 255),
@@ -28,7 +29,7 @@ class PrintParams:
 
         self.fonts: dict[str, ImageFont.FreeTypeFont] = {
             "TITLE_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.title_font_size_pixels),
-            "HEADING_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.long_fact_line_spacing_pixels),
+            "HEADING_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.long_fact_line_size_pixels),
             "CONTENT_FONT": ImageFont.truetype(
                 "backend/assets/verdana.ttf", size=self.config.long_fact_content_font_size_pixels
             ),

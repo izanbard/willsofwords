@@ -13,8 +13,8 @@ from backend.utils import Logger
 class SubContents(PrintParams, ABC):
     ROOT_TWO_APPX = 1.42
 
-    def __init__(self, *, project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, *, project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
 
     @abstractmethod
     def get_content_image(self) -> Image.Image:
@@ -22,8 +22,8 @@ class SubContents(PrintParams, ABC):
 
 
 class SubContentsHeader(SubContents):
-    def __init__(self, header_title: str, project_config: ProjectConfig) -> None:
-        super().__init__(project_config=project_config)
+    def __init__(self, header_title: str, project_config: ProjectConfig, print_debug: bool = False) -> None:
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.size: tuple[int, int] = (self.config.content_width_pixels, self.config.title_box_height_pixels)
         self.base_image: Image.Image = self._make_base_image()
         self.draw: ImageDraw.ImageDraw = ImageDraw.Draw(self.base_image)
@@ -43,9 +43,13 @@ class SubContentsHeader(SubContents):
 
 class SubContentsSearchList(SubContents):
     def __init__(
-        self, wordlist: list[str], project_config: ProjectConfig, layout_type: LayoutEnum = LayoutEnum.SINGLE
+        self,
+        wordlist: list[str],
+        project_config: ProjectConfig,
+        layout_type: LayoutEnum = LayoutEnum.SINGLE,
+        print_debug: bool = False,
     ) -> None:
-        super().__init__(project_config=project_config)
+        super().__init__(project_config=project_config, print_debug=print_debug)
         if layout_type == layout_type.SINGLE:
             self.size: tuple[int, int] = (self.config.content_width_pixels, self.config.wordlist_box_height_pixels)
         else:
@@ -60,7 +64,7 @@ class SubContentsSearchList(SubContents):
 
     def get_content_image(self) -> Image.Image:
         Logger.get_logger().debug(
-            f"Generating {self.__class__} image for search list with {len(self.wordlist)} words, layout {self.layout_type} and print debug {self.config.debug}"
+            f"Generating {self.__class__} image for search list with {len(self.wordlist)} words, layout {self.layout_type}"
         )
         column_width, columns = self._calculate_font_size()
 
@@ -72,7 +76,7 @@ class SubContentsSearchList(SubContents):
                 anchor="ma",
                 fill=self.colours["SOLID_BLACK"],
             )
-        if self.config.debug:
+        if self.print_debug:
             for column_number in range(1, len(columns)):
                 self.draw.line(
                     xy=[
@@ -144,9 +148,14 @@ class SubContentsCell(SubContents):
     """
 
     def __init__(
-        self, cell: Cell, cell_size: int, project_config: ProjectConfig, grid_type: BoardImageEnum = BoardImageEnum.PUZZLE
+        self,
+        cell: Cell,
+        cell_size: int,
+        project_config: ProjectConfig,
+        grid_type: BoardImageEnum = BoardImageEnum.PUZZLE,
+        print_debug: bool = False,
     ):
-        super().__init__(project_config=project_config)
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.cell: Cell = cell
         self.solution_line_width = int(cell_size / 10)
         if grid_type == BoardImageEnum.PUZZLE:
@@ -224,8 +233,9 @@ class SubContentsGrid(SubContents):
         cell_size: int,
         project_config: ProjectConfig,
         grid_type: BoardImageEnum = BoardImageEnum.PUZZLE,
+        print_debug: bool = False,
     ) -> None:
-        super().__init__(project_config=project_config)
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.rows: int = rows
         self.cols: int = cols
         self.cells: list[list[Cell]] = cells
@@ -246,7 +256,11 @@ class SubContentsGrid(SubContents):
         for row in self.cells:
             for cell in row:
                 tile_image = SubContentsCell(
-                    cell=cell, cell_size=self.cell_size, grid_type=self.grid_type, project_config=self.config
+                    cell=cell,
+                    cell_size=self.cell_size,
+                    grid_type=self.grid_type,
+                    project_config=self.config,
+                    print_debug=self.print_debug,
                 ).get_content_image()
                 if self.grid_type == BoardImageEnum.PUZZLE:
                     box = ((cell.loc_x * self.cell_size) + self.offset, (cell.loc_y * self.cell_size) + self.offset)
@@ -275,7 +289,7 @@ class SubContentsGrid(SubContents):
             outline=self.colours["SOLID_BLACK"],
             width=self.config.grid_border_pixels,
         )
-        if self.config.debug:
+        if self.print_debug:
             for r in range(self.rows):
                 char = ImageText.Text(text=str(r), font=self.fonts["CELL_DEBUG_FONT"])
                 self.draw.text(
@@ -436,8 +450,8 @@ class SubContentsGrid(SubContents):
 
 
 class SubContentsLongFact(SubContents):
-    def __init__(self, long_fact: str, project_config: ProjectConfig):
-        super().__init__(project_config=project_config)
+    def __init__(self, long_fact: str, project_config: ProjectConfig, print_debug: bool = False):
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.size: tuple[int, int] = (
             self.config.content_width_pixels,
             (self.config.content_height_pixels - self.config.title_box_height_pixels) // 2,
@@ -485,8 +499,8 @@ class SubContentsLongFact(SubContents):
 
 
 class SubContentsPageNumber(SubContents):
-    def __init__(self, page_number: str, project_config: ProjectConfig):
-        super().__init__(project_config=project_config)
+    def __init__(self, page_number: str, project_config: ProjectConfig, print_debug: bool = False):
+        super().__init__(project_config=project_config, print_debug=print_debug)
         self.size: tuple[int, int] = (
             self.config.page_number_font_size_pixels + self.config.page_number_offset_pixels,
             self.config.page_number_font_size_pixels + self.config.page_number_offset_pixels,
@@ -504,7 +518,7 @@ class SubContentsPageNumber(SubContents):
             anchor="mm",
             fill=self.colours["SOLID_BLACK"],
         )
-        if self.config.debug:
+        if self.print_debug:
             self.draw.rectangle(
                 xy=[(0, 0), (self.base_image.width - 1, self.base_image.height - 1)],
                 fill=None,
