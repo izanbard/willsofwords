@@ -29,7 +29,9 @@ class PrintParams:
 
         self.fonts: dict[str, ImageFont.FreeTypeFont] = {
             "TITLE_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.title_font_size_pixels),
-            "HEADING_FONT": ImageFont.truetype("backend/assets/verdana.ttf", size=self.config.long_fact_line_size_pixels),
+            "HEADING_FONT": ImageFont.truetype(
+                "backend/assets/verdana.ttf", size=self.config.long_fact_heading_font_size_pixels
+            ),
             "CONTENT_FONT": ImageFont.truetype(
                 "backend/assets/verdana.ttf", size=self.config.long_fact_content_font_size_pixels
             ),

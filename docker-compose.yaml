@@ -16,12 +16,16 @@ services:
     command: "/bin/sh -c 'pip install -U pip; pip install -r requirements.txt; python -u -m backend'"
     environment:
       - APP__LOG_LEVEL=INFO
-      - APP__INPUT_FILENAME=./data/wordlist.json
-      - APP__DATA_FILENAME=./data/puzzledata.json
-      - APP__OUTPUT_FILENAME=./data/manuscript.pdf
+      - APP__ARCHIVE_FOLDER=archive
+      - APP__DATA_FOLDER=data
+      - APP__PROJECT_SETTINGS=project_settings.json
+      - APP__INPUT_FILENAME=wordlist.json
+      - APP__DATA_FILENAME=puzzledata.json
+      - APP__OUTPUT_FILENAME=manuscript.pdf
       - APP__FRONTEND_HOST_FOR_CORS=http://localhost:5001
+      - VITE_API_BASE_URL=http://localhost:5000
 
-      # Not currently used, but stand by
+        # Not currently used, but stand by
       - AI__MODEL=gemma3:12b
       - AI__HOST=http://localhost:11434/
   dorothy:

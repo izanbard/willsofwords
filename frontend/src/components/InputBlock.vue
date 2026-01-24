@@ -45,7 +45,7 @@ const validate_integer = () => {
         v-if="type === 'textarea'"
         class="input"
         @input="$emit('input')"
-        v-model="content"
+        v-model="content as string"
         :readonly="readonly"
       ></textarea>
       <input

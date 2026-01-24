@@ -4,7 +4,7 @@ const {
   word,
   delete_button = true,
   colour = 'var(--color-background-wow)',
-} = defineProps<{ word: string; delete_button: boolean; colour?: string }>()
+} = defineProps<{ word: string; delete_button?: boolean; colour?: string }>()
 </script>
 
 <template>
