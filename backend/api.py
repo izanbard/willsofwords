@@ -85,7 +85,6 @@ def create_api() -> FastAPI:
         version = f.readline().strip()
     tags_metadata = [
         {"name": "Project", "description": "Endpoint Collection for Wordsworth Puzzles"},
-        {"name": "Command", "description": "Endpoint Collection for Puzzles"},
         {"name": "Settings", "description": "Endpoint Collection for Settings"},
     ]
     logger.info(f"Creating the API... version: {version}")

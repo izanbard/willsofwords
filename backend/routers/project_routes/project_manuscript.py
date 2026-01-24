@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException
+from starlette.responses import FileResponse
 
 from backend.models import PuzzleData
 from backend.pages import Pages
@@ -56,3 +57,21 @@ def delete_manuscript(name: str, req: Request) -> None:
     if manuscript_path.exists():
         manuscript_path.unlink()
     return None
+
+
+@ProjectManuscriptRouter.get(
+    "/manuscript.pdf",
+    summary="Get the manuscript pdf for a project.",
+    description="Get the manuscript pdf for a project.",
+    status_code=status.HTTP_200_OK,
+    response_class=FileResponse,
+)
+def get_manuscript(name: str, req: Request) -> FileResponse:
+    """Get the manuscript pdf for a project."""
+    data_dir = Path(req.state.config.app.data_folder) / name
+    if not data_dir.exists() or not data_dir.is_dir():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
+    manuscript_path = data_dir / req.state.config.app.output_filename
+    if not manuscript_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Manuscript for project {name} not found")
+    return FileResponse(manuscript_path, media_type="application/pdf")

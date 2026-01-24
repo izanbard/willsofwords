@@ -157,6 +157,14 @@ const delete_manuscript = async () => {
       toast.error('Error deleting manuscript:', error.message)
     })
 }
+const view_manuscript = () => {
+  // router.push({
+  //   name: 'view-manuscript',
+  //   params: { project_name: project_name },
+  // })
+  const pdfSource:string = (import.meta.env.VITE_API_BASE_URL + '/projects/project/' + project_name + '/manuscript/manuscript.pdf')
+  window.open(pdfSource, '_blank')
+}
 </script>
 
 <template>
