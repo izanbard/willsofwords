@@ -12,6 +12,7 @@ from .project_manuscript import ProjectManuscriptRouter
 
 from backend.models import ProjectFolder
 from . import get_project_files
+from ...utils import sanitise_user_input_path
 
 ProjectRouter = APIRouter(
     prefix="/project/{name}",
@@ -28,6 +29,7 @@ ProjectRouter = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 async def get_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> ProjectFolder:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")

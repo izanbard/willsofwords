@@ -1,6 +1,7 @@
 import json
 import string
 from pathlib import Path as FilePath
+from typing import re
 
 from .config import Config, AppConfig, AIConfig  # noqa: F401
 from .logging import Logger  # noqa: F401
@@ -64,6 +65,10 @@ def create_default_files():
     data_dir.mkdir(parents=True, exist_ok=True)
     archives_dir = FilePath(conf.app.archive_folder)
     archives_dir.mkdir(parents=True, exist_ok=True)
+
+
+def sanitise_user_input_path(path: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_-]", "", path)
 
 
 def set_marker_file(filename: FilePath, percentage: int):

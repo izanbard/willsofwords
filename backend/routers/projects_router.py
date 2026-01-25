@@ -8,7 +8,7 @@ from starlette.requests import Request
 
 from .project_routes.project_router import ProjectRouter
 from backend.models import ProjectConfig, ProjectsList, ProjectCreate
-from backend.utils import get_project_settings_defaults, save_project_settings
+from backend.utils import get_project_settings_defaults, save_project_settings, sanitise_user_input_path
 from .project_routes import get_project_files
 
 ProjectsRouter = APIRouter(
@@ -72,6 +72,8 @@ async def update_project(
     req: Request,
     copy: bool = False,
 ):
+    name = sanitise_user_input_path(name)
+    new_name = sanitise_user_input_path(new_name)
     data_dir = FilePath(req.state.config.app.data_folder)
     if name not in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
@@ -106,6 +108,7 @@ async def update_project(
     responses={404: {"description": "Project not found"}},
 )
 async def archive_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request):
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder)
     if name not in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
@@ -130,6 +133,7 @@ async def archive_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA
     responses={404: {"description": "Project not found"}},
 )
 async def restore_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request):
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder)
     if name in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(

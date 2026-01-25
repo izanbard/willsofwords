@@ -8,6 +8,7 @@ from starlette.requests import Request
 
 
 from backend.models import Wordlist
+from backend.utils import sanitise_user_input_path
 
 ProjectWordlistRouter = APIRouter(
     prefix="/wordlist",
@@ -23,6 +24,7 @@ ProjectWordlistRouter = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 async def get_wordlist(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> Wordlist:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -43,6 +45,7 @@ async def get_wordlist(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0
 async def update_wordlist(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], wordlist: Wordlist, req: Request
 ) -> Wordlist:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -65,6 +68,7 @@ async def update_wordlist(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_wordlist(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")

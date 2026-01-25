@@ -8,7 +8,7 @@ from starlette import status
 from starlette.requests import Request
 
 from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle, PuzzleLetter
-from backend.utils import clear_marker_file, set_marker_file
+from backend.utils import clear_marker_file, set_marker_file, sanitise_user_input_path
 
 ProjectPuzzleDataRouter = APIRouter(
     prefix="/puzzledata",
@@ -26,6 +26,7 @@ def create_puzzledata(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request, bg_tasks: BackgroundTasks
 ) -> None:
     """Create puzzle data for a project in the background."""
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -58,6 +59,7 @@ def create_puzzledata(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -77,6 +79,7 @@ def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-
     response_description="The base puzzle data for the project.",
 )
 def get_base_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> PuzzleBaseData:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -104,6 +107,7 @@ def load_the_puzzle_data(filename: FilePath) -> PuzzleData:
 def get_puzzle_data(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request
 ) -> Puzzle:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -122,6 +126,7 @@ def get_puzzle_data(
 def update_puzzle(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, new_puzzle: Puzzle, req: Request
 ) -> Puzzle:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -141,6 +146,7 @@ def update_puzzle(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_puzzle(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request) -> None:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -170,6 +176,7 @@ def change_letter_in_puzzle(
     new_letter: PuzzleLetter,
     req: Request,
 ) -> None:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")

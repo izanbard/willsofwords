@@ -8,7 +8,7 @@ from starlette.requests import Request
 
 
 from backend.models import ProjectConfigUpdate, ProjectConfig
-from backend.utils import get_project_settings_defaults, save_project_settings
+from backend.utils import get_project_settings_defaults, save_project_settings, sanitise_user_input_path
 
 ProjectSettingsRouter = APIRouter(
     prefix="/settings",
@@ -25,6 +25,7 @@ ProjectSettingsRouter = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 async def get_settings(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> ProjectConfig:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} settings not found")
@@ -45,6 +46,7 @@ async def get_settings(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0
 async def update_settings(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request, settings: ProjectConfigUpdate
 ) -> ProjectConfig:
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")

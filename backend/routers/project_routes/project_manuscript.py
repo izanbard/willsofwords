@@ -7,7 +7,7 @@ from starlette.responses import FileResponse
 
 from backend.models import PuzzleData
 from backend.pages import Pages
-from backend.utils import clear_marker_file, set_marker_file
+from backend.utils import clear_marker_file, set_marker_file, sanitise_user_input_path
 
 ProjectManuscriptRouter = APIRouter(
     prefix="/manuscript",
@@ -28,6 +28,7 @@ def create_manuscript(
     bg_tasks: BackgroundTasks,
 ) -> None:
     """Create a manuscript for a project in the background."""
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
@@ -58,6 +59,7 @@ def create_manuscript(
 )
 def delete_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
     """Delete the manuscript for a project."""
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     manuscript_path = data_dir / req.state.config.app.output_filename
     if manuscript_path.exists():
@@ -74,6 +76,7 @@ def delete_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-
 )
 def get_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> FileResponse:
     """Get the manuscript pdf for a project."""
+    name = sanitise_user_input_path(name)
     data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
