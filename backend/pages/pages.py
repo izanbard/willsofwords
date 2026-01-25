@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import Path as FilePath
 
 from PIL import Image, ImageDraw
 
@@ -74,10 +74,12 @@ class Page(PrintParams):
 
 
 class Pages(PrintParams):
-    def __init__(self, word_search_data: PuzzleData, project_config: ProjectConfig, filename: Path, print_debug: bool = False):
+    def __init__(
+        self, word_search_data: PuzzleData, project_config: ProjectConfig, filename: FilePath, print_debug: bool = False
+    ):
         super().__init__(project_config=project_config, print_debug=print_debug)
         self.word_search_data = word_search_data
-        self.filename: Path = filename
+        self.filename: FilePath = filename
         self.puzzle_pages: list[Image.Image] = []
 
     def create_and_save_pages(self):

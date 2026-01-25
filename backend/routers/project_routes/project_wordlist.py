@@ -1,7 +1,8 @@
 import json
-from pathlib import Path
+from pathlib import Path as FilePath
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from starlette import status
 from starlette.requests import Request
 
@@ -21,8 +22,8 @@ ProjectWordlistRouter = APIRouter(
     response_description="The project wordlist.",
     status_code=status.HTTP_200_OK,
 )
-async def get_wordlist(name: str, req: Request) -> Wordlist:
-    data_dir = Path(req.state.config.app.data_folder) / name
+async def get_wordlist(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> Wordlist:
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     wordlist_path = data_dir / req.state.config.app.input_filename
@@ -39,8 +40,10 @@ async def get_wordlist(name: str, req: Request) -> Wordlist:
     status_code=status.HTTP_200_OK,
     response_description="The updated project wordlist.",
 )
-async def update_wordlist(name: str, wordlist: Wordlist, req: Request) -> Wordlist:
-    data_dir = Path(req.state.config.app.data_folder) / name
+async def update_wordlist(
+    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], wordlist: Wordlist, req: Request
+) -> Wordlist:
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     validation_dict = wordlist.validate_word_lists()
@@ -61,8 +64,8 @@ async def update_wordlist(name: str, wordlist: Wordlist, req: Request) -> Wordli
     description="Deletes the project wordlist",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_wordlist(name: str, req: Request) -> None:
-    data_dir = Path(req.state.config.app.data_folder) / name
+async def delete_wordlist(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     wordlist_path = data_dir / req.state.config.app.input_filename

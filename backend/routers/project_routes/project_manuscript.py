@@ -1,7 +1,8 @@
 import json
-from pathlib import Path
+from pathlib import Path as FilePath
+from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException, Path
 from starlette.responses import FileResponse
 
 from backend.models import PuzzleData
@@ -21,13 +22,13 @@ ProjectManuscriptRouter = APIRouter(
     status_code=status.HTTP_202_ACCEPTED,
 )
 def create_manuscript(
-    name: str,
+    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
     print_debug: bool,
     req: Request,
     bg_tasks: BackgroundTasks,
 ) -> None:
     """Create a manuscript for a project in the background."""
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data_path = data_dir / req.state.config.app.data_filename
@@ -55,9 +56,9 @@ def create_manuscript(
     description="Delete the manuscript for a project.",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_manuscript(name: str, req: Request) -> None:
+def delete_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
     """Delete the manuscript for a project."""
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     manuscript_path = data_dir / req.state.config.app.output_filename
     if manuscript_path.exists():
         manuscript_path.unlink()
@@ -71,9 +72,9 @@ def delete_manuscript(name: str, req: Request) -> None:
     status_code=status.HTTP_200_OK,
     response_class=FileResponse,
 )
-def get_manuscript(name: str, req: Request) -> FileResponse:
+def get_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> FileResponse:
     """Get the manuscript pdf for a project."""
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     manuscript_path = data_dir / req.state.config.app.output_filename

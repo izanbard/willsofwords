@@ -1,6 +1,6 @@
 import string
 from math import ceil
-from pathlib import Path
+from pathlib import Path as FilePath
 
 from pydantic import BaseModel, Field, computed_field
 
@@ -38,11 +38,11 @@ class PuzzleData(BaseModel):
             pages += 1
         return pages
 
-    def create_and_save_data(self, filename: Path) -> None:
+    def create_and_save_data(self, filename: FilePath) -> None:
         self.create_puzzles(filename=filename)
         self.save_data(filename)
 
-    def create_puzzles(self, filename: Path) -> None:
+    def create_puzzles(self, filename: FilePath) -> None:
         Logger.get_logger().info("Creating puzzles")
         base = len(self.wordlist.category_list)
         count = 0
@@ -57,7 +57,7 @@ class PuzzleData(BaseModel):
         set_marker_file(filename, 99)
         Logger.get_logger().info("Completed creating puzzles")
 
-    def save_data(self, filename: Path) -> None:
+    def save_data(self, filename: FilePath) -> None:
         Logger.get_logger().info(f"Saving puzzles to {filename}")
         with open(filename, "w") as fd:
             fd.write(self.model_dump_json(indent=2))

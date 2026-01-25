@@ -1,7 +1,8 @@
 import uuid
-from pathlib import Path
+from pathlib import Path as FilePath
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from starlette import status
 from starlette.requests import Request
 
@@ -25,7 +26,7 @@ ProjectsRouter = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 async def get_projects(req: Request) -> ProjectsList:
-    data_dir = Path(req.state.config.app.data_folder)
+    data_dir = FilePath(req.state.config.app.data_folder)
     projects_list = []
     for project in [project for project in data_dir.iterdir() if project.is_dir()]:
         project_folder = get_project_files(project)
@@ -44,7 +45,7 @@ async def get_projects(req: Request) -> ProjectsList:
     responses={409: {"description": "Project already exists"}},
 )
 async def create_project(project: ProjectCreate, req: Request):
-    data_dir = Path(req.state.config.app.data_folder)
+    data_dir = FilePath(req.state.config.app.data_folder)
     if project.name in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Project {project.name} already exists")
     default_config = ProjectConfig(**get_project_settings_defaults())
@@ -65,14 +66,19 @@ async def create_project(project: ProjectCreate, req: Request):
     response_model=ProjectsList,
     responses={404: {"description": "Project not found"}, 409: {"description": "Project already exists"}},
 )
-async def update_project(name: str, new_name: str, req: Request, copy: bool = False):
-    data_dir = Path(req.state.config.app.data_folder)
+async def update_project(
+    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
+    new_name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
+    req: Request,
+    copy: bool = False,
+):
+    data_dir = FilePath(req.state.config.app.data_folder)
     if name not in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
     if new_name in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Project {new_name} already exists")
 
-    def dir_copy(src: Path, dst: Path):
+    def dir_copy(src: FilePath, dst: FilePath):
         for root, dirs, files in src.walk():
             for file in files:
                 with open(root / file, "rb") as fd:
@@ -99,11 +105,11 @@ async def update_project(name: str, new_name: str, req: Request, copy: bool = Fa
     response_model=ProjectsList,
     responses={404: {"description": "Project not found"}},
 )
-async def archive_project(name: str, req: Request):
-    data_dir = Path(req.state.config.app.data_folder)
+async def archive_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request):
+    data_dir = FilePath(req.state.config.app.data_folder)
     if name not in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
-    archives_dir = Path(req.state.config.app.archive_folder)
+    archives_dir = FilePath(req.state.config.app.archive_folder)
     new_name = f"{name}_{uuid.uuid4().hex[:8]}"
     if new_name in [proj.stem for proj in archives_dir.iterdir()]:
         raise HTTPException(
@@ -123,14 +129,14 @@ async def archive_project(name: str, req: Request):
     response_model=ProjectsList,
     responses={404: {"description": "Project not found"}},
 )
-async def restore_project(name: str, req: Request):
-    data_dir = Path(req.state.config.app.data_folder)
+async def restore_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request):
+    data_dir = FilePath(req.state.config.app.data_folder)
     if name in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Project {name} already exists, please manually rename archive and try again",
         )
-    archives_dir = Path(req.state.config.app.archive_folder)
+    archives_dir = FilePath(req.state.config.app.archive_folder)
     if name not in [proj.stem for proj in archives_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} does not exist")
     (archives_dir / name).rename(data_dir / name)

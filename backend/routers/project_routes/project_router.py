@@ -1,6 +1,7 @@
-from pathlib import Path
+from pathlib import Path as FilePath
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from starlette import status
 from starlette.requests import Request
 
@@ -26,8 +27,8 @@ ProjectRouter = APIRouter(
     response_description="The project folder.",
     status_code=status.HTTP_200_OK,
 )
-async def get_project(name: str, req: Request) -> ProjectFolder:
-    data_dir = Path(req.state.config.app.data_folder) / name
+async def get_project(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> ProjectFolder:
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     project_folder = get_project_files(data_dir)

@@ -1,14 +1,14 @@
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path as FilePath
 
 from backend.models import ProjectFolder, ProjectFile
 
 
-def get_project_files(data_dir: Path) -> ProjectFolder:
+def get_project_files(data_dir: FilePath) -> ProjectFolder:
     """Retrieve project files from a directory and return a ProjectFolder object.
 
     Args:
-        data_dir (Path): The directory containing project files.
+        data_dir (FilePath): The directory containing project files.
 
     Returns:
         ProjectFolder: A ProjectFolder object representing the project files.
