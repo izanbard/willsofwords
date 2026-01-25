@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, Field
 
 from .project_config import ProjectConfigUpdate
 
@@ -25,5 +25,5 @@ class ProjectsList(BaseModel):
 
 
 class ProjectCreate(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, pattern=r"^[a-zA-Z0-9_-]+$")
     settings: ProjectConfigUpdate

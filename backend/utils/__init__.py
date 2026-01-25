@@ -1,7 +1,7 @@
 import json
 import string
 from pathlib import Path as FilePath
-from typing import re
+import re
 
 from .config import Config, AppConfig, AIConfig  # noqa: F401
 from .logging import Logger  # noqa: F401

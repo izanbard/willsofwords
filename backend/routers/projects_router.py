@@ -46,12 +46,13 @@ async def get_projects(req: Request) -> ProjectsList:
 )
 async def create_project(project: ProjectCreate, req: Request):
     data_dir = FilePath(req.state.config.app.data_folder)
-    if project.name in [proj.stem for proj in data_dir.iterdir()]:
+    project_name = sanitise_user_input_path(project.name)
+    if project_name in [proj.stem for proj in data_dir.iterdir()]:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Project {project.name} already exists")
     default_config = ProjectConfig(**get_project_settings_defaults())
     updates = project.settings.model_dump(exclude_unset=True)
     project_config = default_config.model_copy(update=updates)
-    project_dir = data_dir / project.name
+    project_dir = data_dir / project_name
     project_dir.mkdir(parents=True)
     save_project_settings(project_config.model_dump(), project_dir / req.state.config.app.project_settings)
     return await get_projects(req)
