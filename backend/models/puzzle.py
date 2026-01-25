@@ -43,6 +43,12 @@ class Puzzle(BaseModel):
         self.density = 0
         self.profanity = {}
 
+    def reset_profanity(self):
+        self.profanity = {}
+        for y in range(len(self.cells)):
+            for x in range(len(self.cells[y])):
+                self.cells[y][x].is_profane = False
+
     def change_puzzle_size(self, height: int, width: int):
         self.rows = height
         self.columns = width
@@ -214,42 +220,55 @@ class Puzzle(BaseModel):
         raise ValueError("You fucked this, wills, you moron")
 
     def check_for_inadvertent_profanity(self):
-        self.profanity = {}
-        grid_strings: dict[str, str] = self._get_grid_strings()
+        self.reset_profanity()
+        grid_strings: dict[str, list[tuple[str, tuple[int, int]]]] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
             grid_string_substrings_forward = self._check_grid_string(grid_string)
             gird_string_substrings_backward = self._check_grid_string(grid_string[::-1], "R")
-            bad_words = grid_string_substrings_forward + gird_string_substrings_backward
+            if len(grid_string_substrings_forward) > 0:
+                for coord_list in [x[2] for x in grid_string_substrings_forward]:
+                    for coord in coord_list:
+                        self.cells[coord[1]][coord[0]].is_profane = True
+            if len(gird_string_substrings_backward) > 0:
+                for coord_list in [x[2] for x in gird_string_substrings_backward]:
+                    for coord in coord_list:
+                        self.cells[coord[1]][coord[0]].is_profane = True
+            bad_words = [(x[0], x[1]) for x in grid_string_substrings_forward] + [
+                (x[0], x[1]) for x in gird_string_substrings_backward
+            ]
             if len(bad_words) > 0:
                 self.profanity[name] = bad_words
 
-    def _check_grid_string(self, grid_string: str, direction: str = "F") -> list[tuple[str, tuple[str, int, int]]]:
-        return [
-            (grid_string[i:j], (direction, i, j))
-            for i in range(len(grid_string))
-            for j in range(i + 1, len(grid_string) + 1)
-            if self._check_a_word_against_profanity_list(grid_string[i:j])
-        ]
+    def _check_grid_string(
+        self, grid_string: list[tuple[str, tuple[int, int]]], direction: str = "F"
+    ) -> list[tuple[str, tuple[str, int, int], list[tuple[int, int]]]]:
+        ret_var = []
+        for i in range(len(grid_string)):
+            for j in range(i + 1, len(grid_string) + 1):
+                word = "".join(letter[0] for letter in grid_string[i:j])
+                if self._check_a_word_against_profanity_list(word):
+                    ret_var.append((word, (direction, i, j), [letter[1] for letter in grid_string[i:j]]))
+        return ret_var
 
     @staticmethod
     def _check_a_word_against_profanity_list(word: str) -> bool:
         return word in get_profanity_list()
 
-    def _get_grid_strings(self) -> dict[str, str]:
-        return_strings: dict[str, str] = {}
-        lattice = np.empty((self.rows, self.columns), dtype=str)
+    def _get_grid_strings(self) -> dict[str, list[tuple[str, tuple[int, int]]]]:
+        return_strings: dict[str, list[tuple[str, tuple[int, int]]]] = {}
+        lattice = np.empty((self.rows, self.columns), dtype=object)
         for row in self.cells:
             for cell in row:
-                lattice[cell.loc_y, cell.loc_x] = cell.value
+                lattice[cell.loc_y, cell.loc_x] = (cell.value, (cell.loc_x, cell.loc_y))
         for y in range(self.rows):
-            return_strings[f"row{y}"] = "".join(lattice[y, :])
+            return_strings[f"row{y}"] = [(x[0], x[1]) for x in lattice[y, :]]
         for x in range(self.columns):
-            return_strings[f"col{x}"] = "".join(lattice[:, x])
+            return_strings[f"col{x}"] = [(x[0], x[1]) for x in lattice[:, x]]
         for j in range(-self.rows + 1, self.columns):
             nwse_cords = f"0-{-j}" if j <= 0 else f"{j}-0"
             nesw_cords = f"0-{self.rows + j}" if j <= 0 else f"{j}-{self.rows}"
-            return_strings[f"nwse{nwse_cords}"] = "".join(lattice.diagonal(j))
-            return_strings[f"swne{nesw_cords}"] = "".join(np.flipud(lattice).diagonal(j))
+            return_strings[f"nwse{nwse_cords}"] = [(x[0], x[1]) for x in lattice.diagonal(j)]
+            return_strings[f"swne{nesw_cords}"] = [(x[0], x[1]) for x in np.flipud(lattice).diagonal(j)]
         return return_strings
 
     @staticmethod

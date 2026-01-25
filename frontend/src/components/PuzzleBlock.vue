@@ -9,12 +9,15 @@ import WordTile from '@/components/WordTile.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
 import PuzzleGrid from '@/components/PuzzleGrid.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import CalloutBox from "@/components/CalloutBox.vue";
+import GridTile from "@/components/GridTile.vue";
 
 interface Cell {
   loc_x: number
   loc_y: number
   value: string
   is_answer: boolean
+  is_profane: boolean
   direction: { NS: boolean; EW: boolean; NESW: boolean; NWSE: boolean }
 }
 
@@ -118,11 +121,14 @@ const rebuild_puzzle = async () => {
       <InputBlock type="text" v-model="puzzle_data.density" readonly>Density:</InputBlock>
       <InputBlock type="text" v-model="puzzle_data.rows" readonly>Rows:</InputBlock>
       <InputBlock type="text" v-model="puzzle_data.columns" readonly>Columns:</InputBlock>
+      <DividerLine />
+      <CalloutBox type="info">Words highlighted in red are in the input, but not used in the actual puzzle</CalloutBox>
       <div class="search_words">
         <div class="label">Input Words:</div>
         <div class="words">
           <template v-for="(word, index) in puzzle_data.input_word_list" :key="index">
             <InputBlock
+              :class="{'not_used': !puzzle_data.puzzle_search_list.includes(word.toUpperCase())}"
               type="text"
               v-model="puzzle_data.input_word_list[index]"
               withButton
@@ -133,7 +139,7 @@ const rebuild_puzzle = async () => {
           </template>
         </div>
       </div>
-      <div class="search_words">
+      <div v-if="false" class="search_words">
         <div class="label">Search Words:</div>
         <div class="words">
           <template v-for="(word, index) in puzzle_data.puzzle_search_list" :key="index">
@@ -142,6 +148,7 @@ const rebuild_puzzle = async () => {
         </div>
       </div>
     </div>
+
     <PuzzleGrid
       :project_name="project_name"
       :puzzle_id="puzzle_id"
@@ -151,6 +158,7 @@ const rebuild_puzzle = async () => {
       @reload="load_puzzle_data"
     />
   </div>
+  <CalloutBox type="info">letters highlighted <div class="call_out_tile"><GridTile :profane="true">A</GridTile></div> are part of profane words; those highlighted <div class="call_out_tile"><GridTile :profane="true" :profane_answer="true">A</GridTile></div> are also part of answers.</CalloutBox>
   <div class="profanity_list">
     <HeadingBlock :level="3">Profanity List</HeadingBlock>
     <template v-for="(words_and_location_list, line) in puzzle_data.profanity" :key="line">
@@ -174,7 +182,7 @@ const rebuild_puzzle = async () => {
       </div>
     </template>
   </div>
-  <DividerLine />
+  <DividerLine :thickness="5"/>
 </template>
 
 <style scoped>
@@ -215,4 +223,11 @@ const rebuild_puzzle = async () => {
   display: flex;
   flex-wrap: wrap;
 }
+.call_out_tile {
+  display: inline-block;
+  width: 1.3rem;
+  height: 1.3rem;
+  margin: 0.2rem;
+}
+
 </style>

@@ -12,6 +12,7 @@ interface Cell {
   loc_y: number
   value: string
   is_answer: boolean
+  is_profane: boolean
   direction: { NS: boolean; EW: boolean; NESW: boolean; NWSE: boolean }
 }
 
@@ -87,7 +88,7 @@ const change_letter = async () => {
       <div class="grid_title">Puzzle Grid</div>
       <template v-for="(row, y) in cells" :key="y">
         <template v-for="(cell, x) in row" :key="x">
-          <GridTile @pressed="set_target_letter(x, y, cell)">{{ cell.value }}</GridTile>
+          <GridTile @pressed="set_target_letter(x, y, cell)" :profane="cell.is_profane" :profane_answer="cell.is_profane && cell.is_answer">{{ cell.value }}</GridTile>
         </template>
       </template>
     </div>
@@ -95,7 +96,7 @@ const change_letter = async () => {
       <div class="grid_title">Solution Grid</div>
       <template v-for="(row, y) in cells" :key="y">
         <template v-for="(cell, x) in row" :key="x">
-          <GridTile @pressed="true" :solution="true" :directions="cell.direction">{{
+          <GridTile :solution="true" :directions="cell.direction" :profane="cell.is_profane" :profane_answer="cell.is_profane && cell.is_answer">{{
             cell.value
           }}</GridTile>
         </template>
@@ -190,53 +191,5 @@ const change_letter = async () => {
   grid-column: 1/-1;
   margin: 0.5em;
   place-self: center;
-}
-.grid_square {
-  border: 1px solid var(--color-border);
-  padding: 0.15em;
-  text-align: center;
-  cursor: pointer;
-  position: relative;
-}
-.NS::after {
-  content: '';
-  border-left: 2px solid var(--vt-c-black);
-  height: 1.45em;
-  position: absolute;
-  left: 50%;
-  top: -0.1em;
-}
-.EW::after {
-  content: '';
-  border-top: 2px solid var(--vt-c-black);
-  width: 1.35em;
-  position: absolute;
-  left: -0.1em;
-  top: 50%;
-}
-.NESW::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: -0.1em;
-  width: 1.93em;
-  height: 0;
-  border-top: 2px solid var(--vt-c-black);
-  transform: rotate(-47.5deg);
-  transform-origin: left top;
-}
-.NWSE::after {
-  content: '';
-  position: absolute;
-  top: -0.1em;
-  left: 0;
-  width: 1.93em;
-  height: 0;
-  border-bottom: 2px solid var(--vt-c-black);
-  transform: rotate(47.5deg);
-  transform-origin: left top;
-}
-.is_answer {
-  background-color: var(--vt-c-green-trans-bkg);
 }
 </style>

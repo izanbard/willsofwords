@@ -5,6 +5,7 @@ from typing import AsyncIterator
 from fastapi import FastAPI, Response, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_bgtasks_dashboard import mount_bg_tasks_dashboard
 from starlette.responses import RedirectResponse
 from yaml import dump as yaml_dump
 
@@ -98,6 +99,7 @@ def create_api() -> FastAPI:
     )
 
     inject_coors_settings(api)
+    mount_bg_tasks_dashboard(api)
 
     @api.middleware("http")
     async def add_process_time_header(request: Request, call_next):

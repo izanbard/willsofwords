@@ -147,6 +147,9 @@ const validate_integer = () => {
   padding: 0.3rem;
   font-size: 1rem;
 }
+.not_used input {
+ background-color: var(--vt-c-red-trans-bkg);
+}
 textarea {
   resize: both;
   field-sizing: content;
