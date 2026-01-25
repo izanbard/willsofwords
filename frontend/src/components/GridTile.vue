@@ -1,9 +1,13 @@
 <script setup lang="ts">
-const { solution = false, directions, profane=false } = defineProps<{
+const {
+  solution = false,
+  directions,
+  profane = false,
+} = defineProps<{
   solution?: boolean
   directions?: { NS: boolean; EW: boolean; NESW: boolean; NWSE: boolean }
-  profane?:boolean
-  profane_answer?:boolean
+  profane?: boolean
+  profane_answer?: boolean
 }>()
 const emit = defineEmits(['pressed'])
 const ping_event = () => {
@@ -14,7 +18,11 @@ const ping_event = () => {
 </script>
 
 <template>
-  <div class="grid_square" @click="ping_event" :class="{ is_profane: profane, is_both: profane_answer }">
+  <div
+    class="grid_square"
+    @click="ping_event"
+    :class="{ is_profane: profane, is_both: profane_answer }"
+  >
     <slot></slot>
     <template v-if="directions && solution">
       <div class="NS" v-if="directions.NS"></div>
@@ -26,7 +34,6 @@ const ping_event = () => {
 </template>
 
 <style scoped>
-
 .grid_square {
   border: 1px solid var(--color-border);
   padding: 0.15em;

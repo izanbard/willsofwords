@@ -162,7 +162,11 @@ const view_manuscript = () => {
   //   name: 'view-manuscript',
   //   params: { project_name: project_name },
   // })
-  const pdfSource:string = (import.meta.env.VITE_API_BASE_URL + '/projects/project/' + project_name + '/manuscript/manuscript.pdf')
+  const pdfSource: string =
+    import.meta.env.VITE_API_BASE_URL +
+    '/projects/project/' +
+    project_name +
+    '/manuscript/manuscript.pdf'
   window.open(pdfSource, '_blank')
 }
 </script>

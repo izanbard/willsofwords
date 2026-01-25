@@ -52,7 +52,7 @@ const load_base_data = async () => {
       unit="pages"
       >Page Count:</InputBlock
     >
-    <DividerLine :thickness="5"/>
+    <DividerLine :thickness="5" />
     <template v-for="(puzzle_id, index) in puzzle_base_data.puzzle_list" :key="index">
       <PuzzleBlock :project_name="project_name" :puzzle_id="puzzle_id" />
     </template>

@@ -88,7 +88,12 @@ const change_letter = async () => {
       <div class="grid_title">Puzzle Grid</div>
       <template v-for="(row, y) in cells" :key="y">
         <template v-for="(cell, x) in row" :key="x">
-          <GridTile @pressed="set_target_letter(x, y, cell)" :profane="cell.is_profane" :profane_answer="cell.is_profane && cell.is_answer">{{ cell.value }}</GridTile>
+          <GridTile
+            @pressed="set_target_letter(x, y, cell)"
+            :profane="cell.is_profane"
+            :profane_answer="cell.is_profane && cell.is_answer"
+            >{{ cell.value }}</GridTile
+          >
         </template>
       </template>
     </div>
@@ -96,9 +101,13 @@ const change_letter = async () => {
       <div class="grid_title">Solution Grid</div>
       <template v-for="(row, y) in cells" :key="y">
         <template v-for="(cell, x) in row" :key="x">
-          <GridTile :solution="true" :directions="cell.direction" :profane="cell.is_profane" :profane_answer="cell.is_profane && cell.is_answer">{{
-            cell.value
-          }}</GridTile>
+          <GridTile
+            :solution="true"
+            :directions="cell.direction"
+            :profane="cell.is_profane"
+            :profane_answer="cell.is_profane && cell.is_answer"
+            >{{ cell.value }}</GridTile
+          >
         </template>
       </template>
     </div>

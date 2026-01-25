@@ -1,9 +1,9 @@
 import json
 from functools import lru_cache
-from pathlib import Path
+from pathlib import Path as FilePath
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Path
 from starlette import status
 from starlette.requests import Request
 
@@ -26,7 +26,7 @@ def create_puzzledata(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request, bg_tasks: BackgroundTasks
 ) -> None:
     """Create puzzle data for a project in the background."""
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     input_file = data_dir / req.state.config.app.input_filename
@@ -58,7 +58,7 @@ def create_puzzledata(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzledata_path = data_dir / req.state.config.app.data_filename
@@ -77,7 +77,7 @@ def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-
     response_description="The base puzzle data for the project.",
 )
 def get_base_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> PuzzleBaseData:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
@@ -87,7 +87,7 @@ def get_base_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z
 
 
 @lru_cache
-def load_the_puzzle_data(filename: Path) -> PuzzleData:
+def load_the_puzzle_data(filename: FilePath) -> PuzzleData:
     with open(filename, "r") as f:
         puzzle_data = PuzzleData(**json.load(f))
     return puzzle_data
@@ -104,7 +104,7 @@ def load_the_puzzle_data(filename: Path) -> PuzzleData:
 def get_puzzle_data(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request
 ) -> Puzzle:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
@@ -122,7 +122,7 @@ def get_puzzle_data(
 def update_puzzle(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, new_puzzle: Puzzle, req: Request
 ) -> Puzzle:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
@@ -141,7 +141,7 @@ def update_puzzle(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_puzzle(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request) -> None:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
@@ -170,7 +170,7 @@ def change_letter_in_puzzle(
     new_letter: PuzzleLetter,
     req: Request,
 ) -> None:
-    data_dir = Path(req.state.config.app.data_folder) / name
+    data_dir = FilePath(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
