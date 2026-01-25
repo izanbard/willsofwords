@@ -1,10 +1,9 @@
 import json
-import re
 from functools import lru_cache
 from pathlib import Path as FilePath
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Path, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Path
 from starlette import status
 from starlette.requests import Request
 
@@ -17,20 +16,11 @@ ProjectPuzzleDataRouter = APIRouter(
 )
 
 
-def validate_filename(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")]) -> None:
-    """Validate that a filename is valid for use in a project."""
-    if not name:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename cannot be empty")
-    if not re.match(r"^[a-zA-Z0-9_-]+$", name):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename contains invalid characters")
-
-
 @ProjectPuzzleDataRouter.post(
     "/",
     summary="Create puzzle data for a project in the background.",
     description="Create puzzle data for a project in the background.",
     status_code=status.HTTP_202_ACCEPTED,
-    dependencies=[Depends(validate_filename)],
 )
 def create_puzzledata(
     name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request, bg_tasks: BackgroundTasks

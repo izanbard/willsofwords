@@ -1,7 +1,9 @@
 import json
+import re
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException, Depends
 from starlette.responses import FileResponse
 
 from backend.models import PuzzleData
@@ -14,13 +16,27 @@ ProjectManuscriptRouter = APIRouter(
 )
 
 
+def validate_filename(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")]) -> None:
+    """Validate that a filename is valid for use in a project."""
+    if not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename cannot be empty")
+    if not re.match(r"^[a-zA-Z0-9_-]+$", name):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Filename contains invalid characters")
+
+
 @ProjectManuscriptRouter.post(
     "/",
     summary="Create a manuscript for a project in the background.",
     description="Create a manuscript for a project in the background.",
     status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(validate_filename)],
 )
-def create_manuscript(name: str, print_debug: bool, req: Request, bg_tasks: BackgroundTasks) -> None:
+def create_manuscript(
+    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
+    print_debug: bool,
+    req: Request,
+    bg_tasks: BackgroundTasks,
+) -> None:
     """Create a manuscript for a project in the background."""
     data_dir = Path(req.state.config.app.data_folder) / name
     if not data_dir.exists() or not data_dir.is_dir():
