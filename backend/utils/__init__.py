@@ -1,4 +1,3 @@
-import json
 import string
 from functools import lru_cache
 from pathlib import Path as FilePath
@@ -29,16 +28,6 @@ def get_profanity_list() -> list[str]:
         ]
     profanity_list.sort()
     return profanity_list
-
-
-def get_project_settings_defaults() -> dict:
-    with open(dist_file_mapping["project_settings"][1], "r") as fd:
-        return json.load(fd)
-
-
-def save_project_settings(new_settings: dict, file_path: FilePath = dist_file_mapping["project_settings"][1]):
-    with open(file_path, "w") as fd:
-        json.dump(new_settings, fd, indent=2)
 
 
 def _creat_dist_file_if_not_exists(dist_path: FilePath, target_path: FilePath):

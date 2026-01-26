@@ -41,7 +41,7 @@ const load_defaults = async (url: string = '/settings/project-defaults/') => {
 
 const update_defaults = async () => {
   loading.value = true
-  await axios.patch('/settings/project-defaults/', projectDefaults.value).catch((error) => {
+  await axios.post('/settings/project-defaults/', projectDefaults.value).catch((error) => {
     toast.error('Error updating default: ' + error.message)
     console.error('Error updating default:', error)
   })
@@ -50,6 +50,12 @@ const update_defaults = async () => {
 }
 
 const save_new_project = async () => {
+  if (!project_name_input.value.match(/^[a-zA-Z0-9_-]+$/)) {
+    toast.error(
+      'Project name can only contain [a-z] [A-Z] [0-9] [_-] characters, no spaces or other punctuation permitted.',
+    )
+    return
+  }
   loading.value = true
   await axios
     .post('/projects/', { name: project_name_input.value, settings: projectDefaults.value })
@@ -146,7 +152,12 @@ const descriptions: Record<string, string> = {
     <LoadingSpinner :loading="loading" />
     <template v-if="mode === 'new'">
       <HeadingBlock :level="1">Create New Project</HeadingBlock>
-      <InputBlock type="text" v-model="project_name_input">Project Name: </InputBlock>
+      <InputBlock
+        type="text"
+        v-model="project_name_input"
+        description="[a-z] [A-Z] [0-9] [_-] characters only, no spaces or other punctuation permitted."
+        >Project Name:
+      </InputBlock>
       <ButtonBox
         icon="folder_copy"
         text="Create Project"
