@@ -188,10 +188,10 @@ watch(
     <DividerLine />
     <HeadingBlock :level="2">Categories</HeadingBlock>
     <template v-for="(category, index) in wordlist.category_list" :key="index">
-      <WordlistCategory v-model="wordlist.category_list[index]" />
+      <WordlistCategory v-model="wordlist.category_list[index]" @remove="wordlist.category_list.splice(index, 1)"/>
     </template>
     <HeadingBlock :level="2">Add New Category</HeadingBlock>
-    <WordlistCategory v-model="new_category" />
+    <WordlistCategory v-model="new_category" :adding="true"/>
     <ButtonBox colour="green" text="Add Another" icon="add" @pressed="add_category" />
   </div>
 </template>
