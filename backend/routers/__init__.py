@@ -25,15 +25,29 @@ def sanitise_user_input_path(path: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_-]", "", path)
 
 
+def get_data_path(req: Request) -> FilePath:
+    return FilePath(req.state.config.app.data_folder)
+
+
+def get_archive_path(req: Request) -> FilePath:
+    return FilePath(req.state.config.app.archive_folder)
+
+
+def check_file_path_in_data_path(target_path: FilePath, data_path: FilePath) -> bool:
+    if str(target_path.resolve()).startswith(str(data_path.resolve())):
+        return True
+    return False
+
+
 def get_project_path_from_name(
     name: Annotated[str, Path(min_length=1, pattern=r"^[a-zA-Z0-9_-]+$")], req: Request
 ) -> FilePath:
     name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder)
+    data_dir = get_data_path(req)
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     project_dir = data_dir / name
-    if not str(project_dir.resolve()).startswith(str(data_dir.resolve())):
+    if not check_file_path_in_data_path(project_dir, data_dir):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access other parts of the file system"
         )
