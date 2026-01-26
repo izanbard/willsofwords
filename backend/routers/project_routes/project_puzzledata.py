@@ -1,14 +1,26 @@
-import json
-from functools import lru_cache
 from pathlib import Path as FilePath
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Path
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from starlette import status
-from starlette.requests import Request
 
-from backend.models import Wordlist, PuzzleData, ProjectConfig, PuzzleBaseData, Puzzle, PuzzleLetter
-from backend.utils import clear_marker_file, set_marker_file, sanitise_user_input_path
+from backend.models import (
+    ProjectConfig,
+    Puzzle,
+    PuzzleBaseData,
+    PuzzleData,
+    PuzzleLetter,
+    Wordlist,
+)
+from backend.utils import clear_marker_file, set_marker_file
+
+from .. import (
+    check_puzzle_data_exists,
+    get_puzzle_data_path,
+    load_project_settings,
+    load_puzzle_data,
+    validate_word_lists,
+)
 
 ProjectPuzzleDataRouter = APIRouter(
     prefix="/puzzledata",
@@ -23,31 +35,17 @@ ProjectPuzzleDataRouter = APIRouter(
     status_code=status.HTTP_202_ACCEPTED,
 )
 def create_puzzledata(
-    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request, bg_tasks: BackgroundTasks
+    bg_tasks: BackgroundTasks,
+    wordlist: Annotated[Wordlist, Depends(validate_word_lists)],
+    puzzle_config: Annotated[ProjectConfig, Depends(load_project_settings)],
+    puzzle_data_path: FilePath = Depends(get_puzzle_data_path),
 ) -> None:
     """Create puzzle data for a project in the background."""
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    input_file = data_dir / req.state.config.app.input_filename
-    with open(input_file) as fd:
-        wordlist = Wordlist(**json.load(fd))
-    validation_dict = wordlist.validate_word_lists()
-    if validation_dict["profanity"] or validation_dict["illegal_chars"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Wordlist contains invalid words. Profanity: {validation_dict['profanity']}, Illegal Chars: {validation_dict['illegal_chars']}",
-        )
-    with open(data_dir / req.state.config.app.project_settings, "r") as f:
-        puzzle_config = ProjectConfig(**json.load(f))
-
     wordsearch = PuzzleData(project_config=puzzle_config, book_title=wordlist.title, wordlist=wordlist)
-    data_file = data_dir / req.state.config.app.data_filename
-    clear_marker_file(data_file)
-    set_marker_file(data_file, 0)
-    load_the_puzzle_data.cache_clear()
-    bg_tasks.add_task(wordsearch.create_and_save_data, data_file)
+    clear_marker_file(puzzle_data_path)
+    set_marker_file(puzzle_data_path, 0)
+    load_puzzle_data.cache_clear()
+    bg_tasks.add_task(wordsearch.create_and_save_data, puzzle_data_path)
 
     return None
 
@@ -58,15 +56,9 @@ def create_puzzledata(
     description="Delete puzzle data for a project.",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzledata_path = data_dir / req.state.config.app.data_filename
-    if puzzledata_path.exists():
-        puzzledata_path.unlink()
-    load_the_puzzle_data.cache_clear()
+def delete_puzzledata(puzzledata_path: Annotated[FilePath, Depends(check_puzzle_data_exists)]) -> None:
+    puzzledata_path.unlink()
+    load_puzzle_data.cache_clear()
     return None
 
 
@@ -78,22 +70,10 @@ def delete_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-
     response_model=PuzzleBaseData,
     response_description="The base puzzle data for the project.",
 )
-def get_base_puzzledata(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> PuzzleBaseData:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+def get_base_puzzledata(puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)]) -> PuzzleBaseData:
     return PuzzleBaseData(
         title=puzzle_data.book_title, puzzle_list=puzzle_data.get_puzzle_ids(), page_count=puzzle_data.page_count
     )
-
-
-@lru_cache
-def load_the_puzzle_data(filename: FilePath) -> PuzzleData:
-    with open(filename, "r") as f:
-        puzzle_data = PuzzleData(**json.load(f))
-    return puzzle_data
 
 
 @ProjectPuzzleDataRouter.get(
@@ -104,17 +84,12 @@ def load_the_puzzle_data(filename: FilePath) -> PuzzleData:
     response_model=Puzzle,
     response_description="The puzzle data for the puzzle.",
 )
-def get_puzzle_data(
-    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request
-) -> Puzzle:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
-    if puzzle_id not in puzzle_data.get_puzzle_ids():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
-    return puzzle_data.get_puzzle_by_id(puzzle_id)
+def get_puzzle_data(puzzle_id: str, puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)]) -> Puzzle:
+    try:
+        puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found")
+    return puzzle
 
 
 @ProjectPuzzleDataRouter.put(
@@ -124,18 +99,16 @@ def get_puzzle_data(
     status_code=status.HTTP_200_OK,
 )
 def update_puzzle(
-    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, new_puzzle: Puzzle, req: Request
+    puzzle_id: str,
+    new_puzzle: Puzzle,
+    puzzle_data_path: Annotated[FilePath, Depends(get_puzzle_data_path)],
+    puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)],
 ) -> Puzzle:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
     try:
         puzzle_data.update_puzzle_by_id(puzzle_id, new_puzzle)
     except KeyError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
-    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found ")
+    puzzle_data.save_data(puzzle_data_path)
     return new_puzzle
 
 
@@ -145,20 +118,19 @@ def update_puzzle(
     description="Delete a puzzle and rebuild it",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_puzzle(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], puzzle_id: str, req: Request) -> None:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
+def delete_puzzle(
+    puzzle_id: str,
+    puzzle_data_path: Annotated[FilePath, Depends(get_puzzle_data_path)],
+    puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)],
+) -> None:
     try:
         puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
     except KeyError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found")
     puzzle.puzzle_reset()
     puzzle.populate_puzzle()
     puzzle.check_for_inadvertent_profanity()
-    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+    puzzle_data.save_data(puzzle_data_path)
     return None
 
 
@@ -169,22 +141,18 @@ def delete_puzzle(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def change_letter_in_puzzle(
-    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
     puzzle_id: str,
     x: int,
     y: int,
     new_letter: PuzzleLetter,
-    req: Request,
+    puzzle_data_path: Annotated[FilePath, Depends(get_puzzle_data_path)],
+    puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)],
 ) -> None:
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data = load_the_puzzle_data(data_dir / req.state.config.app.data_filename)
-    puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
-    if puzzle is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found in project {name}")
+    try:
+        puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found")
     puzzle.cells[y][x].value = new_letter.letter
     puzzle.check_for_inadvertent_profanity()
-    puzzle_data.save_data(data_dir / req.state.config.app.data_filename)
+    puzzle_data.save_data(puzzle_data_path)
     return None

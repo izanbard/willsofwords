@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from backend.models import ProjectConfig, ProjectConfigUpdate
+from backend.models import ProjectConfig
 from backend.utils import get_project_settings_defaults, save_project_settings
 
 ProjectDefaultsRouter = APIRouter(
@@ -29,7 +29,7 @@ async def project_defaults() -> ProjectConfig:
     response_description="The updated project configuration.",
     status_code=status.HTTP_200_OK,
 )
-async def patch_project_defaults(config: ProjectConfigUpdate) -> ProjectConfig:
+async def patch_project_defaults(config: ProjectConfig) -> ProjectConfig:
     old_config = ProjectConfig(**get_project_settings_defaults())
     updates = config.model_dump(exclude_unset=True)
     new_config = old_config.model_copy(update=updates)

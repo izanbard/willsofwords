@@ -1,3 +1,5 @@
+from pathlib import Path as FilePath
+
 from pydantic import BaseModel, Field
 
 
@@ -184,44 +186,6 @@ class ProjectConfig(BaseModel):
     def max_rows(self) -> int:
         return self.grid_height_two_page // self.min_cell_size
 
-
-class ProjectConfigUpdate(BaseModel):
-    debug: bool | None = Field(default=None, description="Print debug mode")
-    dpi: int | None = Field(default=None, description="DPI for the output PDF")
-    page_height_inches: float | None = Field(default=None, description="Page height in inches")
-    page_width_inches: float | None = Field(default=None, description="Page width in inches")
-    top_margin_inches: float | None = Field(default=None, description="Top margin in inches")
-    bottom_margin_inches: float | None = Field(default=None, description="Bottom margin in inches")
-    outer_margin_inches: float | None = Field(default=None, description="Outer margin in inches")
-    inner_margin_inches: float | None = Field(default=None, description="Inner margin in inches")
-    title_box_height_inches: float | None = Field(default=None, description="Title box height in inches")
-    wordlist_box_height_inches: float | None = Field(default=None, description="Wordlist box height in inches")
-    wordlist_font_size_inches: float | None = Field(default=None, description="Wordlist font size in inches")
-    wordlist_line_spacing_inches: float | None = Field(default=None, description="Wordlist line spacing in inches")
-    grid_pad_inches: float | None = Field(
-        default=None, description="Grid padding in inches from the edge of the content box to the borderline"
-    )
-    grid_border_inches: float | None = Field(
-        default=None, description="Grid border in inches, minimum value for KDP is 0.0125"
-    )
-    grid_border_radius_inches: float | None = Field(default=None, description="Grid border radius in inches")
-    grid_margin_inches: float | None = Field(
-        default=None, description="Grid margin in inches from the inside of the border to the edge of the grid"
-    )
-    cell_font_size_inches: float | None = Field(default=None, description="Cell font size in inches")
-    min_cell_size_factor: float | None = Field(default=None, description="Minimum cell size factor")
-    variable_cell_size: bool | None = Field(default=None, description="Enable variable cell size")
-    max_cell_size_factor: float | None = Field(default=None, description="Maximum cell size factor")
-    long_fact_heading_font_size_inches: float | None = Field(default=None, description="Long fact heading font size in inches")
-    long_fact_content_font_size_inches: float | None = Field(default=None, description="Long fact content font size in inches")
-    long_fact_line_spacing_inches: float | None = Field(default=None, description="Long fact line spacing in inches")
-    page_number_font_size_inches: float | None = Field(default=None, description="Page number font size in inches")
-    page_number_offset_inches: float | None = Field(default=None, description="Page number offset in inches")
-    solution_page_cols: int | None = Field(default=None, description="Number of columns for solution pages")
-    solution_page_rows: int | None = Field(default=None, description="Number of rows for solution pages")
-    max_density: float | None = Field(default=None, description="Maximum density for puzzle generation")
-    min_density: float | None = Field(default=None, description="Minimum density for puzzle generation")
-    max_placement_attempts: int | None = Field(
-        default=None, description="Maximum number of placement attempts for puzzle generation"
-    )
-    enable_profanity_filter: bool | None = Field(default=None, description="Enable profanity filter for puzzle generation")
+    def save_config(self, filename: FilePath) -> None:
+        with open(filename, "w") as fd:
+            fd.write(self.model_dump_json(indent=2))

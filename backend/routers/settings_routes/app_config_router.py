@@ -1,5 +1,4 @@
-from fastapi import APIRouter, status, Request
-
+from fastapi import APIRouter, Request, status
 
 from backend.utils import Config
 

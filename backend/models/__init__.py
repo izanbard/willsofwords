@@ -1,9 +1,21 @@
-from .wordlist import Wordlist, Category  # noqa: F401
-from .enums import DirectionEnum, TitlePageEnum, PageTypeEnum, LayoutEnum, SizeEnum, BoardImageEnum  # noqa: F401
-from .grid_size import GridSize  # noqa: F401
 from .cell import Cell  # noqa: F401
-from .puzzle import Puzzle, PuzzleLetter  # noqa: F401
-from .puzzle_data import PuzzleData, PuzzleBaseData  # noqa: F401
+from .enums import (  # noqa: F401
+    BoardImageEnum,
+    DirectionEnum,
+    LayoutEnum,
+    PageTypeEnum,
+    SizeEnum,
+    TitlePageEnum,
+)
+from .grid_size import GridSize  # noqa: F401
 from .profanity import ProfanityList  # noqa: F401
-from .projects import ProjectFile, ProjectCreate, ProjectsList, ProjectFolder  # noqa: F401
-from .project_config import ProjectConfig, ProjectConfigUpdate  # noqa: F401
+from .project_config import ProjectConfig  # noqa: F401
+from .projects import (  # noqa: F401
+    ProjectCreate,
+    ProjectFile,
+    ProjectFolder,
+    ProjectsList,
+)
+from .puzzle import Puzzle, PuzzleLetter  # noqa: F401
+from .puzzle_data import PuzzleBaseData, PuzzleData  # noqa: F401
+from .wordlist import Category, Wordlist  # noqa: F401

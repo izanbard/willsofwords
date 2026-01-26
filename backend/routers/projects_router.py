@@ -6,10 +6,11 @@ from fastapi import APIRouter, HTTPException, Path
 from starlette import status
 from starlette.requests import Request
 
+from backend.models import ProjectConfig, ProjectCreate, ProjectsList
+from backend.utils import get_project_settings_defaults, save_project_settings
+
+from . import get_project_files, sanitise_user_input_path
 from .project_routes.project_router import ProjectRouter
-from backend.models import ProjectConfig, ProjectsList, ProjectCreate
-from backend.utils import get_project_settings_defaults, save_project_settings, sanitise_user_input_path
-from .project_routes import get_project_files
 
 ProjectsRouter = APIRouter(
     prefix="/projects",

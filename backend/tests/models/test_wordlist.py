@@ -1,8 +1,10 @@
 from datetime import datetime
 
 import pytest
-from backend.models.wordlist import Category, Wordlist
 from pydantic import ValidationError
+
+from backend.models.wordlist import Category, Wordlist
+
 from ...utils import get_profanity_list
 from ..test_utils import TestUtils
 

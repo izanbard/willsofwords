@@ -1,10 +1,11 @@
 from math import ceil
 
 import pytest
-
 from PIL import Image
+
 from backend.models import BoardImageEnum, DirectionEnum
 from backend.pages import SubContentsCell
+
 from ..test_utils import TestUtils
 
 

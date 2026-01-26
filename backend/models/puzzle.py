@@ -2,12 +2,13 @@ import bisect
 import random
 
 import numpy as np
-
 from pydantic import BaseModel, Field
-from .cell import Cell
-from .enums import LayoutEnum, DirectionEnum
-from .project_config import ProjectConfig
+
 from backend.utils import Logger, get_profanity_list
+
+from .cell import Cell
+from .enums import DirectionEnum, LayoutEnum
+from .project_config import ProjectConfig
 
 
 class Puzzle(BaseModel):

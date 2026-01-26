@@ -1,13 +1,19 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from copy import copy
 from math import ceil
 
-from PIL import ImageDraw, ImageText, Image
+from PIL import Image, ImageDraw, ImageText
 
-
-from backend.models import Cell, LayoutEnum, BoardImageEnum, DirectionEnum, ProjectConfig
-from .print_params import PrintParams
+from backend.models import (
+    BoardImageEnum,
+    Cell,
+    DirectionEnum,
+    LayoutEnum,
+    ProjectConfig,
+)
 from backend.utils import Logger
+
+from .print_params import PrintParams
 
 
 class SubContents(PrintParams, ABC):

@@ -2,9 +2,22 @@ from pathlib import Path as FilePath
 
 from PIL import Image, ImageDraw
 
-from backend.models import PuzzleData, TitlePageEnum, PageTypeEnum, LayoutEnum, ProjectConfig
-from backend.utils import Logger, set_marker_file, clear_marker_file
-from .contents import ContentsFront, ContentsBlank, ContentsPuzzleGrid, ContentsPuzzleWordlist, ContentsSolution
+from backend.models import (
+    LayoutEnum,
+    PageTypeEnum,
+    ProjectConfig,
+    PuzzleData,
+    TitlePageEnum,
+)
+from backend.utils import Logger, clear_marker_file, set_marker_file
+
+from .contents import (
+    ContentsBlank,
+    ContentsFront,
+    ContentsPuzzleGrid,
+    ContentsPuzzleWordlist,
+    ContentsSolution,
+)
 from .print_params import PrintParams
 from .sub_contents import SubContentsPageNumber
 

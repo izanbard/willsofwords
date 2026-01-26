@@ -1,9 +1,11 @@
 import string
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
+from pathlib import Path as FilePath
+
 from pydantic import BaseModel, Field
 
-from backend.utils import get_profanity_list, Logger
+from backend.utils import Logger, get_profanity_list
 
 
 class WordlistBase(BaseModel, ABC):
@@ -179,10 +181,14 @@ class Wordlist(WordlistBase):
 
         :raises ValueError: Raised if profanity or illegal characters are detected during
             the validation process.
-        :return: None
+        :return: A dictionary with keys 'profanity' and 'illegal_chars' indicating validation results.
         """
         profanity = self.check_profanity()
         illegal_char_list = []
         for category in self.category_list:
             illegal_char_list += category.check_for_illegal_chars()
         return {"profanity": profanity, "illegal_chars": illegal_char_list}
+
+    def save_wordlist(self, filename: FilePath):
+        with open(filename, "w") as fd:
+            fd.write(self.model_dump_json(indent=2))

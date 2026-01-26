@@ -1,7 +1,9 @@
 from math import ceil
 
 import pytest
+
 from backend.models.grid_size import GridSize, ProjectConfig
+
 from ..test_utils import TestUtils
 
 

@@ -2,16 +2,16 @@ from contextlib import asynccontextmanager
 from io import StringIO
 from typing import AsyncIterator
 
-from fastapi import FastAPI, Response, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi_bgtasks_dashboard import mount_bg_tasks_dashboard
 from starlette.responses import RedirectResponse
 from yaml import dump as yaml_dump
 
-from backend.routers import ProjectsRouter
-from backend.utils import Logger, Config
+from backend.utils import Config, Logger
 
+from .routers.projects_router import ProjectsRouter
 from .routers.settings_router import SettingsRouter
 
 

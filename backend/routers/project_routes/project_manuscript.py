@@ -1,13 +1,18 @@
-import json
 from pathlib import Path as FilePath
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Request, status, HTTPException, Path
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from starlette.responses import FileResponse
 
 from backend.models import PuzzleData
 from backend.pages import Pages
-from backend.utils import clear_marker_file, set_marker_file, sanitise_user_input_path
+from backend.utils import clear_marker_file, set_marker_file
+
+from .. import (
+    check_manuscript_exists,
+    get_manuscript_path,
+    load_puzzle_data,
+)
 
 ProjectManuscriptRouter = APIRouter(
     prefix="/manuscript",
@@ -22,23 +27,12 @@ ProjectManuscriptRouter = APIRouter(
     status_code=status.HTTP_202_ACCEPTED,
 )
 def create_manuscript(
-    name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")],
     print_debug: bool,
-    req: Request,
     bg_tasks: BackgroundTasks,
+    puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)],
+    manuscript_path: Annotated[FilePath, Depends(get_manuscript_path)],
 ) -> None:
     """Create a manuscript for a project in the background."""
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    puzzle_data_path = data_dir / req.state.config.app.data_filename
-    if not puzzle_data_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} puzzle data not found")
-    with open(puzzle_data_path, "r") as fd:
-        puzzle_data = PuzzleData(**json.load(fd))
-
-    manuscript_path = data_dir / req.state.config.app.output_filename
     pages = Pages(
         word_search_data=puzzle_data,
         filename=manuscript_path,
@@ -57,13 +51,9 @@ def create_manuscript(
     description="Delete the manuscript for a project.",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> None:
+def delete_manuscript(manuscript_path: Annotated[FilePath, Depends(check_manuscript_exists)]) -> None:
     """Delete the manuscript for a project."""
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    manuscript_path = data_dir / req.state.config.app.output_filename
-    if manuscript_path.exists():
-        manuscript_path.unlink()
+    manuscript_path.unlink()
     return None
 
 
@@ -74,13 +64,6 @@ def delete_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-
     status_code=status.HTTP_200_OK,
     response_class=FileResponse,
 )
-def get_manuscript(name: Annotated[str, Path(min_length=1, regex=r"^[a-zA-Z0-9_-]+$")], req: Request) -> FileResponse:
+def get_manuscript(manuscript_path: Annotated[FilePath, Depends(check_manuscript_exists)]) -> FileResponse:
     """Get the manuscript pdf for a project."""
-    name = sanitise_user_input_path(name)
-    data_dir = FilePath(req.state.config.app.data_folder) / name
-    if not data_dir.exists() or not data_dir.is_dir():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
-    manuscript_path = data_dir / req.state.config.app.output_filename
-    if not manuscript_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Manuscript for project {name} not found")
     return FileResponse(manuscript_path, media_type="application/pdf")

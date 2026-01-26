@@ -4,12 +4,13 @@ from pathlib import Path as FilePath
 
 from pydantic import BaseModel, Field, computed_field
 
+from backend.utils import Logger, clear_marker_file, set_marker_file
+
 from .enums import LayoutEnum
 from .grid_size import GridSize
-from .puzzle import Puzzle
-from .wordlist import Wordlist, Category
 from .project_config import ProjectConfig
-from backend.utils import Logger, set_marker_file, clear_marker_file
+from .puzzle import Puzzle
+from .wordlist import Category, Wordlist
 
 
 class PuzzleBaseData(BaseModel):
@@ -62,7 +63,6 @@ class PuzzleData(BaseModel):
         with open(filename, "w") as fd:
             fd.write(self.model_dump_json(indent=2))
         clear_marker_file(filename)
-
         Logger.get_logger().info(f"Done saving puzzles to {filename}")
 
     def _add_a_puzzle(self, category: Category) -> None:

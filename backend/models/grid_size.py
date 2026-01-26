@@ -1,4 +1,4 @@
-from math import ceil, sqrt, floor
+from math import ceil, floor, sqrt
 
 from .project_config import ProjectConfig
 

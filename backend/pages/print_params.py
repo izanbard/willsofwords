@@ -1,4 +1,4 @@
-from PIL import ImageFont, Image
+from PIL import Image, ImageFont
 
 from backend.models import ProjectConfig
 

@@ -2,8 +2,9 @@ import sys
 
 import uvicorn
 
-from . import create_api
 from backend.utils import create_default_files
+
+from . import create_api
 
 SERVER_PORT = 5000
 SERVER = "0.0.0.0"  # nosec: B104

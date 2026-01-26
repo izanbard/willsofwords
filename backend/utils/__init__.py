@@ -1,9 +1,8 @@
 import json
 import string
 from pathlib import Path as FilePath
-import re
 
-from .config import Config, AppConfig, AIConfig  # noqa: F401
+from .config import AIConfig, AppConfig, Config  # noqa: F401
 from .logging import Logger  # noqa: F401
 
 profanity_list = None
@@ -33,13 +32,6 @@ def get_profanity_list() -> list[str]:
     return profanity_list
 
 
-def save_profanity_list(new_list: list[str]):
-    global profanity_list
-    profanity_list = sorted(list(set(new_list)))
-    with open(dist_file_mapping["profanity"][1], "w") as fd:
-        fd.write("\n".join(profanity_list))
-
-
 def get_project_settings_defaults() -> dict:
     with open(dist_file_mapping["project_settings"][1], "r") as fd:
         return json.load(fd)
@@ -65,10 +57,6 @@ def create_default_files():
     data_dir.mkdir(parents=True, exist_ok=True)
     archives_dir = FilePath(conf.app.archive_folder)
     archives_dir.mkdir(parents=True, exist_ok=True)
-
-
-def sanitise_user_input_path(path: str) -> str:
-    return re.sub(r"[^a-zA-Z0-9_-]", "", path)
 
 
 def set_marker_file(filename: FilePath, percentage: int):

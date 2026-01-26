@@ -1,11 +1,23 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
-from PIL import ImageText, ImageDraw, Image, ImageOps
+from PIL import Image, ImageDraw, ImageOps, ImageText
 
-from backend.models import TitlePageEnum, Puzzle, LayoutEnum, BoardImageEnum, ProjectConfig
-from .print_params import PrintParams
-from .sub_contents import SubContentsHeader, SubContentsSearchList, SubContentsGrid, SubContentsLongFact
+from backend.models import (
+    BoardImageEnum,
+    LayoutEnum,
+    ProjectConfig,
+    Puzzle,
+    TitlePageEnum,
+)
 from backend.utils import Logger
+
+from .print_params import PrintParams
+from .sub_contents import (
+    SubContentsGrid,
+    SubContentsHeader,
+    SubContentsLongFact,
+    SubContentsSearchList,
+)
 
 
 class Contents(PrintParams, ABC):
