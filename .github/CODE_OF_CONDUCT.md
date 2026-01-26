@@ -2,7 +2,7 @@
 
 Although this is not yet a community project for your participation, please make it a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-We all benefit from a open, welcoming, diverse, inclusive, and healthy community.
+We all benefit from an open, welcoming, diverse, inclusive, and healthy community.
 
 It is not okay to:
 - use sexualized language or imagery, and sexual attention or advances of any kind

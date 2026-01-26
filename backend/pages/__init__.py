@@ -1,19 +1,19 @@
 from .contents import (  # noqa: F401
     Contents,
-    ContentsPuzzleGrid,
-    ContentsFront,
-    ContentsSolution,
-    ContentsPuzzleWordlist,
     ContentsBlank,
-)  # noqa: F401
+    ContentsFront,
+    ContentsPuzzleGrid,
+    ContentsPuzzleWordlist,
+    ContentsSolution,
+)
 from .pages import Page, Pages  # noqa: F401
 from .print_params import PrintParams  # noqa: F401
 from .sub_contents import (  # noqa: F401
-    SubContentsSearchList,
-    SubContentsHeader,
     SubContents,
     SubContentsCell,
     SubContentsGrid,
+    SubContentsHeader,
     SubContentsLongFact,
     SubContentsPageNumber,
-)  # noqa: F401
+    SubContentsSearchList,
+)

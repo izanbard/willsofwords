@@ -1,41 +1,80 @@
-from pathlib import Path
+import string
+from math import ceil
+from pathlib import Path as FilePath
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
+
+from backend.utils import Logger, clear_marker_file, set_marker_file
 
 from .enums import LayoutEnum
 from .grid_size import GridSize
+from .project_config import ProjectConfig
 from .puzzle import Puzzle
-from .wordlist import Wordlist, Category
-from backend.utils import Logger, PuzzleConfig
+from .wordlist import Category, Wordlist
+
+
+class PuzzleBaseData(BaseModel):
+    title: str = Field(..., description="Title of the book")
+    puzzle_list: list[str] = Field(..., description="List of puzzle names")
+    page_count: int = Field(..., description="Number of pages in the book")
 
 
 class PuzzleData(BaseModel):
-    puzzle_config: PuzzleConfig = Field(..., description="Configuration for puzzle generation")
+    project_config: ProjectConfig = Field(..., description="Configuration for puzzle generation")
     book_title: str = Field(..., description="Title of the book")
     wordlist: Wordlist = Field(..., description="List of words provided from LLM")
     puzzles: list[Puzzle] = Field(default_factory=list, description="List of created Puzzles")
 
-    def create_puzzles(self) -> None:
+    @computed_field
+    @property
+    def page_count(self) -> int:
+        pages = 1
+        for puzzle in self.puzzles:
+            pages += 2 if puzzle.get_puzzle_layout() == LayoutEnum.DOUBLE else 1
+        if pages % 2 != 0:
+            pages += 1
+        pages += ceil(len(self.puzzles) / self.project_config.solution_per_page)
+        pages += 1
+        if pages % 2 != 0:
+            pages += 1
+        return pages
+
+    def create_and_save_data(self, filename: FilePath) -> None:
+        self.create_puzzles(filename=filename)
+        self.save_data(filename)
+
+    def create_puzzles(self, filename: FilePath) -> None:
         Logger.get_logger().info("Creating puzzles")
+        base = len(self.wordlist.category_list)
+        count = 0
         for category in self.wordlist.category_list:
             self._add_a_puzzle(category)
+            count += 1
+            percentage = int(count / base * 90)
+            set_marker_file(filename, percentage)
         self._check_fix_puzzle_order()
+        set_marker_file(filename, 95)
         self.add_puzzle_display_name()
+        set_marker_file(filename, 99)
         Logger.get_logger().info("Completed creating puzzles")
 
-    def save_data(self, filename: Path) -> None:
+    def save_data(self, filename: FilePath) -> None:
         Logger.get_logger().info(f"Saving puzzles to {filename}")
         with open(filename, "w") as fd:
             fd.write(self.model_dump_json(indent=2))
+        clear_marker_file(filename)
         Logger.get_logger().info(f"Done saving puzzles to {filename}")
 
     def _add_a_puzzle(self, category: Category) -> None:
         Logger.get_logger().debug(f"Creating puzzle: {category.category}")
         len_words = sum(len(word) for word in category.word_list)
-        size = GridSize(self.puzzle_config, len_words, self.puzzle_config.max_density)
+        size = GridSize(self.project_config, len_words, self.project_config.max_density)
         Logger.get_logger().debug(f"Puzzle Target Size: {size.columns}x{size.rows}")
         puzzle = Puzzle(
-            puzzle_config=self.puzzle_config,
+            project_config=self.project_config,
+            puzzle_id=category.category.strip()
+            .upper()
+            .translate({ord(c): None for c in string.whitespace + string.digits + string.punctuation}),
             puzzle_title=category.category,
             input_word_list=category.word_list,
             long_fact=category.long_fact,
@@ -45,7 +84,7 @@ class PuzzleData(BaseModel):
         )
         puzzle.populate_puzzle()
         count = 1
-        while puzzle.density < self.puzzle_config.min_density:
+        while puzzle.density < self.project_config.min_density:
             Logger.get_logger().debug(f"Puzzle failed density check, trying again, actual density: {puzzle.density}")
             if count % 5 == 0:
                 Logger.get_logger().debug("Reducing size of Puzzle before retry")
@@ -57,7 +96,7 @@ class PuzzleData(BaseModel):
                 puzzle.puzzle_reset()
             puzzle.populate_puzzle()
             count += 1
-        if self.puzzle_config.enable_profanity_filter:
+        if self.project_config.enable_profanity_filter:
             puzzle.check_for_inadvertent_profanity()
         if len(puzzle.profanity) > 0:
             for row, words in puzzle.profanity.items():
@@ -91,3 +130,19 @@ class PuzzleData(BaseModel):
     def add_puzzle_display_name(self):
         for puzzle_number, puzzle in enumerate(self.puzzles, 1):
             puzzle.display_title = str(puzzle_number) + ". " + puzzle.puzzle_title
+
+    def get_puzzle_ids(self) -> list[str]:
+        return [puzzle.puzzle_id for puzzle in self.puzzles]
+
+    def get_puzzle_by_id(self, puzzle_id: str) -> Puzzle:
+        for puzzle in self.puzzles:
+            if puzzle.puzzle_id == puzzle_id:
+                return puzzle
+        raise KeyError(f"Puzzle with ID {puzzle_id} not found in the puzzle data")
+
+    def update_puzzle_by_id(self, puzzle_id: str, new_puzzle: Puzzle) -> None:
+        for index, puzzle in enumerate(self.puzzles):
+            if puzzle.puzzle_id == puzzle_id:
+                self.puzzles[index] = new_puzzle
+                return
+        raise KeyError(f"Puzzle with ID {puzzle_id} not found in the puzzle data")

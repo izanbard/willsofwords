@@ -34,7 +34,7 @@ book:
   category.
 * **Safety Filtering:** It includes a profanity filter (found in `backend/assets/`) to ensure generated grids don't
   accidentally contain offensive strings in the random filler characters.
-* **PDF Export:** It renders the puzzles, word lists, and facts into a multi-page PDF document suitable for printing.
+* **PDF Export:** It renders the puzzles, word lists, and facts into a multipage PDF document suitable for printing.
 
 There are two primary services involved in the application:
 
@@ -46,47 +46,77 @@ The Backend has three main modules:
 * **API:** **FastAPI** and **Pydantic** exposing and access and control layer for the application.
 * **Puzzle Generation:** The core business logic processes the input wordlist and creates the puzzle data structures.
 * **PDF Generation:** Heavily reling on **Pillow (PIL)** for the low-level rendering of grids, text, and solution lines,
-  this model produces a cover pdf and manuscript pdf suitable for printing.
+  this model produces a cover PDF and manuscript PDF suitable for printing.
 
-The Frontend is currently vapourware, but will be:
+The Frontend made from VUE.JS has two main modules:
 
-* **GUI:** A **Vue.js** / **Vite** / **TypeScript** setup for creating wordlists, managing the application including
-  profanity lists, and controlling the conversion in to puzzles and PDFs.
-* **AI Integration:** Using **Ollama**, and some model yet to be identified, this module will allow the generation of
-  the wordlist and acts for the planned book.
+* **Projects:** A component for managing the projects from end to end (inception to PDF generation).
+* **Settings:** the ability to change some of the underlying settings of the application.
+
 
 ## Current State
 
 The project is in active development.
 
-- The backend is fully functional and can be used to generate word lists and puzzles.
-- The backend needs a solid controller mechanism.
-- The back end API to facilitate the frontend is not yet complete.
-- The frontend is currently vapourware.
+- The backend and frontend are in place and work, but not yet fully featured:
+- - Need to add cover generation
+- - Need to improve profanity filtering
 - The AI integration is planned. A couple of experiments have been run, but nothing solid yet.
-- The whole system needs wrapping up in docker for easy deployment.
+- Docker compose is available for running the application locally. In the future github action will deploy a fully built image to use.
 
 ## In a nutshell
 
 Wordsworth is a **factory for word search books**. You provide the words and themes, and it handles the algorithmic
-placement of words, the visual design of the pages, and the generation of a print-ready PDF.
+placement of words, the visual design of the pages, and the generation of a print-ready (for KDP) PDF.
 
 ***
 
-## Installation
+## User Installation
 
 ### Requirements
 
 * Docker >= 29.1.3
 
-## Usage
-the description goes here for how to run the application using docker compose, what it does, and how to access the front end.
+## Installation
+
+##### Check out the code
+
+```shell
+$ git clone git@github.com:<<Repo>>
+$ cd <<folder>>
+```
+
+##### Run the application
+
+```shell
+$ docker compose up
+```
+
+Access the application at http://localhost:5001
 
 ### Configuration
-the description goes here for how to configure the application.
 
-### GUI
-the description of the GUI and screenshots of the pages goes here.
+These environment variables can be set to change the behaviour of the application:
+
+| Variable                    | Default                 | Notes                                                                                              |
+|-----------------------------|-------------------------|----------------------------------------------------------------------------------------------------|
+| APP__LOG_LEVEL              | INFO                    | Standard Python debug levles available (DEBUG, INFO, WARNING, ERROR, CRITICAL)                     |
+| APP__DATA_FOLDER            | data                    | The main data folder.  Thsi folder must exist within the specified volume.                         |
+| APP__ARCHIVE_FOLDER         | archive                 | The archive folder (where deleted rpojects go).                                                    |
+| APP__PROJECT_SETTINGS       | project_settings.json   | The file name for the project settings                                                             |
+| APP__INPUT_FILENAME         | wordlist.json           | The file name for the input wordlist                                                               |
+| APP__DATA_FILENAME          | puzzledata.json         | The file name for the calculated puzzle data                                                       |
+| APP__OUTPUT_FILENAME        | manuscript.pdf          | The file name for the output PDF                                                                   |
+| APP__FRONTEND_HOST_FOR_CORS | http://localhost:5001   | The frontend address (as it appears in your browser) for CORS                                      |
+| VITE_API_BASE_URL           | http://localhost:5000   | The base url for the front end to be able to find the backend, must be the same for both services. |
+| AI__MODEL                   | gemma3:12b              | Not currently used, but future proofing                                                            |
+| AI__HOST                    | http://localhost:11434/ | Not curently used, but future proofing                                                             |
+
+All other configurations can be changed in the front end.
+
+### User Guide
+
+The application reads and writes files from the specified data folder (by default `./data/`).  The application creates a new folder in the data folder for each project.  Files are directly available through your usual file system tools.
 
 ## Development
 

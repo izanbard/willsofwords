@@ -29,6 +29,7 @@ class Cell(BaseModel):
     loc_y: int = Field(description="The y position of the cell", ge=0)
     value: str = Field(default=".", description="The letter of the cell", max_length=1, min_length=1)
     is_answer: bool = Field(default=False, description="Whether the cell is part of an answer")
+    is_profane: bool = Field(default=False, description="Whether the cell contains profanity")
     direction: dict[DirectionEnum, bool] = Field(
         default_factory=lambda: dict.fromkeys(list(DirectionEnum), False),
         description="The direction of any answers passing through the cell",

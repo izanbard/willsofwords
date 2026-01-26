@@ -1,6 +1,8 @@
 import pytest
+
 from backend.models.cell import Cell
 from backend.models.enums import DirectionEnum
+
 from ..test_utils import TestUtils
 
 

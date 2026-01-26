@@ -1,10 +1,11 @@
 from math import ceil
 
 import pytest
-
 from PIL import Image
+
 from backend.models import BoardImageEnum, DirectionEnum
 from backend.pages import SubContentsCell
+
 from ..test_utils import TestUtils
 
 
@@ -36,12 +37,16 @@ class TestSubContentsCell(TestUtils):
         return BoardImageEnum.SOLUTION
 
     @pytest.fixture
-    def instance_puzzle(self, mock_cell, cell_size, puzzle_grid_type):
-        return SubContentsCell(cell=mock_cell, cell_size=cell_size, grid_type=puzzle_grid_type)
+    def instance_puzzle(self, mock_cell, cell_size, puzzle_grid_type, project_config):
+        return SubContentsCell(
+            cell=mock_cell, cell_size=cell_size, grid_type=puzzle_grid_type, project_config=project_config, print_debug=False
+        )
 
     @pytest.fixture
-    def instance_solution(self, mock_cell, cell_size, solution_grid_type):
-        return SubContentsCell(cell=mock_cell, cell_size=cell_size, grid_type=solution_grid_type)
+    def instance_solution(self, mock_cell, cell_size, solution_grid_type, project_config):
+        return SubContentsCell(
+            cell=mock_cell, cell_size=cell_size, grid_type=solution_grid_type, project_config=project_config, print_debug=False
+        )
 
     @pytest.fixture
     def solution_cell_size(self, cell_size):
