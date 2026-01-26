@@ -1,7 +1,7 @@
 import pytest
 
 from backend.models import ProjectConfig
-from backend.utils import create_default_files, get_project_settings_defaults
+from backend.utils import create_default_files
 
 
 class TestUtils:
@@ -12,7 +12,7 @@ class TestUtils:
 
     @pytest.fixture
     def project_config(self):
-        return ProjectConfig(**get_project_settings_defaults())
+        return ProjectConfig(**ProjectConfig.get_project_settings_defaults())
 
     @pytest.fixture
     def bad_words(self):

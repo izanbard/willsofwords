@@ -90,8 +90,10 @@ const confirm_rename = (project_name: string, is_copy: boolean = false) => {
 }
 
 const copy_project = async () => {
-  if (new_name.value.length === 0 || !new_name.value.match(/^[a-zA-Z0-9]+$/)) {
-    toast.warning('Invalid New Name, letters and numbers only')
+  if (new_name.value.length === 0 || !new_name.value.match(/^[a-zA-Z0-9-_]+$/)) {
+    toast.error(
+      'Project name can only contain [a-z] [A-Z] [0-9] [_-] characters, no spaces or other punctuation permitted.',
+    )
     new_name.value = ''
     return
   }

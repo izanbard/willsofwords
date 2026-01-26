@@ -1,3 +1,4 @@
+import json
 from pathlib import Path as FilePath
 
 from pydantic import BaseModel, Field
@@ -189,3 +190,8 @@ class ProjectConfig(BaseModel):
     def save_config(self, filename: FilePath) -> None:
         with open(filename, "w") as fd:
             fd.write(self.model_dump_json(indent=2))
+
+    @staticmethod
+    def get_project_settings_defaults() -> dict:
+        with open(FilePath("backend/project_settings.json"), "r") as fd:
+            return json.load(fd)
