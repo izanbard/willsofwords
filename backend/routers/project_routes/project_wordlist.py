@@ -39,6 +39,7 @@ async def get_wordlist(wordlist: Annotated[Wordlist, Depends(load_wordlist)]) ->
 async def update_wordlist(new_wordlist: Wordlist, wordlist_path: Annotated[FilePath, Depends(get_wordlist_path)]) -> Wordlist:
     new_wordlist = validate_word_lists(new_wordlist)
     new_wordlist.save_wordlist(wordlist_path)
+    load_wordlist.cache_clear()
     return new_wordlist
 
 
@@ -50,4 +51,5 @@ async def update_wordlist(new_wordlist: Wordlist, wordlist_path: Annotated[FileP
 )
 async def delete_wordlist(wordlist_path: Annotated[FilePath, Depends(check_wordlist_exists)]) -> None:
     wordlist_path.unlink()
+    load_wordlist.cache_clear()
     return None

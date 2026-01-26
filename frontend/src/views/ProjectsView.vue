@@ -128,53 +128,53 @@ const copy_project = async () => {
       />
     </div>
     <div class="project_list">
-      <div
-        class="project"
-        v-for="(project, index) in project_list"
-        :key="index"
-        @click="$router.push({ name: 'project', params: { project_name: project.name } })"
-      >
-        <div class="title">
-          <HeadingBlock :level="2">{{ project.name }}</HeadingBlock>
-          <div class="actions">
-            <ButtonBox
-              icon="edit"
-              text="Rename"
-              colour="blue"
-              @pressed="confirm_rename(project.name, false)"
-            />
-            <ButtonBox
-              icon="folder_copy"
-              text="Duplicate"
-              colour="blue"
-              @pressed="confirm_rename(project.name, true)"
-            />
-            <ButtonBox
-              icon="delete"
-              text="Delete"
-              colour="red"
-              @pressed="confirm_delete(project.name)"
-            />
+      <template v-for="(project, index) in project_list" :key="index">
+        <div
+          class="project"
+          @click="$router.push({ name: 'project', params: { project_name: project.name } })"
+        >
+          <div class="title">
+            <HeadingBlock :level="2">{{ project.name }}</HeadingBlock>
+            <div class="actions">
+              <ButtonBox
+                icon="edit"
+                text="Rename"
+                colour="blue"
+                @pressed="confirm_rename(project.name, false)"
+              />
+              <ButtonBox
+                icon="folder_copy"
+                text="Duplicate"
+                colour="blue"
+                @pressed="confirm_rename(project.name, true)"
+              />
+              <ButtonBox
+                icon="delete"
+                text="Delete"
+                colour="red"
+                @pressed="confirm_delete(project.name)"
+              />
+            </div>
+          </div>
+          <div class="subtitle">
+            <HeadingBlock :level="3">Project Files:</HeadingBlock>
+          </div>
+          <div class="project_files">
+            <template v-for="(file, index2) in project.project_files" :key="index2">
+              <div class="project_file" v-if="!file.name?.endsWith('.marker')">
+                <div class="file">
+                  <em>{{ file.name }}</em>
+                </div>
+                <div class="modified">
+                  <em>
+                    <span class="tiny">last modified: </span>{{ date_format(file.modified_date) }}
+                  </em>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
-        <div class="subtitle">
-          <HeadingBlock :level="3">Project Files:</HeadingBlock>
-        </div>
-        <div class="project_files">
-          <template v-for="(file, index2) in project.project_files" :key="index2">
-            <div class="project_file" v-if="!file.name?.endsWith('.marker')">
-              <div class="file">
-                <em>{{ file.name }}</em>
-              </div>
-              <div class="modified">
-                <em>
-                  <span class="tiny">last modified: </span>{{ date_format(file.modified_date) }}
-                </em>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 

@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path as FilePath
@@ -9,12 +10,12 @@ from fastapi import Depends, HTTPException, Path
 from starlette import status
 from starlette.requests import Request
 
-# from .projects_router import ProjectsRouter  # noqa: F401
 from ..models import (
     ProfanityList,
     ProjectConfig,
     ProjectFile,
     ProjectFolder,
+    ProjectsList,
     PuzzleData,
     Wordlist,
 )
@@ -33,10 +34,10 @@ def get_archive_path(req: Request) -> FilePath:
     return FilePath(req.state.config.app.archive_folder)
 
 
-def check_file_path_in_data_path(target_path: FilePath, data_path: FilePath) -> bool:
+def check_file_path_in_data_path(target_path: FilePath, data_path: FilePath) -> FilePath:
     if str(target_path.resolve()).startswith(str(data_path.resolve())):
-        return True
-    return False
+        return target_path
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access other parts of the file system")
 
 
 def get_project_path_from_name(
@@ -47,10 +48,13 @@ def get_project_path_from_name(
     if not data_dir.exists() or not data_dir.is_dir():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project {name} not found")
     project_dir = data_dir / name
-    if not check_file_path_in_data_path(project_dir, data_dir):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to access other parts of the file system"
-        )
+    project_dir_safe = check_file_path_in_data_path(project_dir, data_dir)
+    return project_dir_safe
+
+
+def check_project_path_exists(project_dir: Annotated[FilePath, Depends(get_project_path_from_name)]) -> FilePath:
+    if not project_dir.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project_dir
 
 
@@ -131,6 +135,19 @@ def check_manuscript_exists(manuscript_path: Annotated[FilePath, Depends(get_man
     return manuscript_path
 
 
+def get_archive_project_path(
+    name: Annotated[str, Path(min_length=1, pattern=r"^[a-zA-Z0-9_-]+$")],
+    req: Request,
+) -> FilePath:
+    new_name_path = get_archive_path(req) / f"{name}_{uuid.uuid4().hex[:8]}"
+    if new_name_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Project {name}  archive conflict, please manually delete old project from archive and try again",
+        )
+    return new_name_path
+
+
 def get_project_files(project_dir: Annotated[FilePath, Depends(get_project_path_from_name)]) -> ProjectFolder:
     project_files = [
         ProjectFile(name=file.name, modified_date=datetime.fromtimestamp(file.stat().st_mtime))
@@ -142,5 +159,24 @@ def get_project_files(project_dir: Annotated[FilePath, Depends(get_project_path_
     return project_folder
 
 
+def get_projects(data_path: Annotated[FilePath, Depends(get_data_path)]) -> ProjectsList:
+    projects_list = ProjectsList(
+        projects=[get_project_files(project_dir) for project_dir in data_path.iterdir() if project_dir.is_dir()]
+    )
+    projects_list.projects.sort(key=lambda x: x.name.lower())
+    return projects_list
+
+
 def get_profanity_list_model() -> ProfanityList:
     return ProfanityList(word_list=get_profanity_list())
+
+
+def dir_copy(src: FilePath, dst: FilePath):
+    for root, dirs, files in src.walk():
+        for file in files:
+            with open(root / file, "rb") as fd:
+                with open(dst / file, "wb") as tfd:
+                    tfd.write(fd.read())
+        for directory in dirs:
+            (dst / directory).mkdir(parents=True)
+            dir_copy(root / directory, dst / directory)

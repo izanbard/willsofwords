@@ -109,6 +109,7 @@ def update_puzzle(
     except KeyError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found ")
     puzzle_data.save_data(puzzle_data_path)
+    load_puzzle_data.cache_clear()
     return new_puzzle
 
 
@@ -131,6 +132,7 @@ def delete_puzzle(
     puzzle.populate_puzzle()
     puzzle.check_for_inadvertent_profanity()
     puzzle_data.save_data(puzzle_data_path)
+    load_puzzle_data.cache_clear()
     return None
 
 
@@ -155,4 +157,5 @@ def change_letter_in_puzzle(
     puzzle.cells[y][x].value = new_letter.letter
     puzzle.check_for_inadvertent_profanity()
     puzzle_data.save_data(puzzle_data_path)
+    load_puzzle_data.cache_clear()
     return None
