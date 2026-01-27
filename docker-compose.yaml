@@ -2,6 +2,7 @@ services:
   wordsworth:
     container_name: wordsworth
     image: gordywills/wordsworth:latest
+    pull_policy: always
     restart: "no"
     volumes:
       - .:/app
@@ -26,6 +27,7 @@ services:
   dorothy:
     container_name: dorothy
     image: gordywills/dorothy:latest
+    pull_policy: always
     restart: "no"
     volumes:
       - .:/app
