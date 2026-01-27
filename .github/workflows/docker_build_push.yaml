@@ -4,7 +4,6 @@ on:
   push:
     branches: # Specify your branches here
       - main # The 'main' branch
-      - willsofwords-26
     tags:
       - "v*.*.*"
 
