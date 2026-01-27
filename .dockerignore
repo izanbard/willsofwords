@@ -1,0 +1,10 @@
+.cov
+.venv
+ai-data
+data_bak
+demo_data
+infra
+frontend/dist
+frontend/node_modules
+frontend/.eslintcache
+.env
