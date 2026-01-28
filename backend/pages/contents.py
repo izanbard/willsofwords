@@ -7,7 +7,6 @@ from backend.models import (
     LayoutEnum,
     ProjectConfig,
     Puzzle,
-    TitlePageEnum,
 )
 from backend.utils import Logger
 
@@ -52,20 +51,12 @@ class Contents(PrintParams, ABC):
 
 
 class ContentsFront(Contents):
-    def __init__(
-        self, project_config: ProjectConfig, front_type: TitlePageEnum = TitlePageEnum.PUZZLE, print_debug: bool = False
-    ) -> None:
+    def __init__(self, project_config: ProjectConfig, print_debug: bool = False) -> None:
         super().__init__(project_config=project_config, print_debug=print_debug)
-        self.front_type: TitlePageEnum = front_type
 
     def get_content_image(self) -> Image.Image:
-        Logger.get_logger().debug(f"Generating {self.__class__} image for {self.front_type}")
-        if self.front_type == TitlePageEnum.PUZZLE:
-            words = "A Glorious Front Page Goes Here"
-        elif self.front_type == TitlePageEnum.SOLUTION:
-            words = "The Solutions you seek are here"
-        else:
-            raise ValueError("Unknown Board Image Type")
+        Logger.get_logger().debug(f"Generating {self.__class__} image")
+        words = "A Glorious Front Page Goes Here"
         text: ImageText.Text = ImageText.Text(
             text=words,
             font=self.fonts["TITLE_FONT"],

@@ -19,11 +19,6 @@ class BoardImageEnum(StrEnum):
     SOLUTION = "SOLUTION"
 
 
-class TitlePageEnum(StrEnum):
-    PUZZLE = "PUZZLE"
-    SOLUTION = "SOLUTION"
-
-
 class LayoutEnum(StrEnum):
     SINGLE = "SINGLE"
     DOUBLE = "DOUBLE"

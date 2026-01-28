@@ -5,7 +5,6 @@ from .enums import (  # noqa: F401
     LayoutEnum,
     PageTypeEnum,
     SizeEnum,
-    TitlePageEnum,
 )
 from .grid_size import GridSize  # noqa: F401
 from .profanity import ProfanityList  # noqa: F401
