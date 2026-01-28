@@ -7,6 +7,7 @@
   "outer_margin_inches": 0.25,
   "inner_margin_inches": 0.75,
   "title_box_height_inches": 1.0,
+  "title_font_size_inches": 0.3,
   "wordlist_box_height_inches": 2.0,
   "wordlist_font_size_inches": 0.14,
   "wordlist_line_spacing_inches": 0.02,
