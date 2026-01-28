@@ -7,7 +7,6 @@ from backend.models import (
     PageTypeEnum,
     ProjectConfig,
     PuzzleData,
-    TitlePageEnum,
 )
 from backend.utils import Logger, clear_marker_file, set_marker_file
 
@@ -106,10 +105,9 @@ class Pages(PrintParams):
             raise ValueError("No puzzles in to make in to pages")
         self._add_front_page()
         self._add_puzzle_pages()
-        if len(self.puzzle_pages) % 2 == 1:
+        if len(self.puzzle_pages) % 2 == 0:
             self._add_blank_page()
         set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
-        self._add_front_page(TitlePageEnum.SOLUTION)
         self._add_solution_pages()
         if len(self.puzzle_pages) % 2 == 1:
             self._add_blank_page()
@@ -170,12 +168,10 @@ class Pages(PrintParams):
             Logger.get_logger().debug(f"Added puzzle page for {puzzle.display_title}")
             set_marker_file(self.filename, int(len(self.puzzle_pages) / self.word_search_data.page_count * 100))
 
-    def _add_front_page(self, front_page_type: TitlePageEnum = TitlePageEnum.PUZZLE):
+    def _add_front_page(self):
         self.puzzle_pages.append(
             Page(
-                content=ContentsFront(
-                    front_type=front_page_type, project_config=self.config, print_debug=self.print_debug
-                ).get_content_image(),
+                content=ContentsFront(project_config=self.config, print_debug=self.print_debug).get_content_image(),
                 page_number=len(self.puzzle_pages) + 1,
                 project_config=self.config,
                 print_debug=self.print_debug,
