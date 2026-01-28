@@ -2,8 +2,6 @@ name: Docker Build
 on:
   workflow_dispatch:
   push:
-    branches: # Specify your branches here
-      - main # The 'main' branch
     tags:
       - "v*.*.*"
 
