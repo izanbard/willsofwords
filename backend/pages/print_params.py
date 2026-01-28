@@ -18,6 +18,7 @@ class PrintParams:
                 "TRANSPARENT_BACKGROUND": (0, 0, 0, 0),
                 "SOLID_BLACK": (0, 0, 0, 255),
                 "SOLID_WHITE": (255, 255, 255, 255),
+                "LIGHT_GREY": (192, 192, 192, 255),
             }
         else:
             self.mode = "LA"
@@ -25,6 +26,7 @@ class PrintParams:
                 "TRANSPARENT_BACKGROUND": (0, 0),
                 "SOLID_BLACK": (0, 255),
                 "SOLID_WHITE": (255, 255),
+                "LIGHT_GREY": (192, 192),
             }
 
         self.fonts: dict[str, ImageFont.FreeTypeFont] = {

@@ -26,6 +26,8 @@
   "page_number_offset_inches": 0.1,
   "solution_page_cols": 2,
   "solution_page_rows": 3,
+  "solution_page_banner_height_inches": 0.5,
+  "solution_page_banner_font_size_inches": 0.4,
   "max_density": 0.50,
   "min_density": 0.30,
   "max_placement_attempts": 10000,

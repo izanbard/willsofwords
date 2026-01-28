@@ -36,6 +36,8 @@ class ProjectConfig(BaseModel):
     page_number_offset_inches: float = Field(..., description="Page number offset in inches")
     solution_page_cols: int = Field(..., description="Number of columns for solution pages")
     solution_page_rows: int = Field(..., description="Number of rows for solution pages")
+    solution_page_banner_height_inches: float = Field(..., description="Banner height in inches for solution pages")
+    solution_page_banner_font_size_inches: float = Field(..., description="Banner font size in inches for solution pages")
 
     @property
     def page_height_pixels(self) -> int:
@@ -170,6 +172,14 @@ class ProjectConfig(BaseModel):
     @property
     def solution_per_page(self) -> int:
         return self.solution_page_rows * self.solution_page_cols
+
+    @property
+    def solution_page_banner_height_pixels(self) -> int:
+        return int(self.solution_page_banner_height_inches * self.dpi)
+
+    @property
+    def solution_page_banner_font_size_pixels(self) -> int:
+        return int(self.solution_page_banner_font_size_inches * self.dpi)
 
     max_density: float = Field(..., description="Maximum density for puzzle generation")
     min_density: float = Field(..., description="Minimum density for puzzle generation")

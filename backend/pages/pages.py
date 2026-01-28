@@ -122,6 +122,11 @@ class Pages(PrintParams):
                         puzzle_list=self.word_search_data.puzzles[n : n + self.config.solution_per_page],
                         project_config=self.config,
                         print_debug=self.print_debug,
+                        verso_page=len(self.puzzle_pages) % 2 == 1,
+                        puzzle_range=(
+                            n - 5,
+                            n + len(self.word_search_data.puzzles[n : n + self.config.solution_per_page]),
+                        ),
                     ).get_content_image(),
                     page_number=len(self.puzzle_pages) + 1,
                     project_config=self.config,

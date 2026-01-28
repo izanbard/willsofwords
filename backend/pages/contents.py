@@ -215,9 +215,20 @@ class ContentsPuzzleWordlist(Contents):
 
 
 class ContentsSolution(Contents):
-    def __init__(self, puzzle_list: list[Puzzle], project_config: ProjectConfig, print_debug: bool = False) -> None:
+    solution_title = " SOLUTIONS"
+
+    def __init__(
+        self,
+        puzzle_list: list[Puzzle],
+        project_config: ProjectConfig,
+        verso_page: bool,
+        puzzle_range: tuple[int, int],
+        print_debug: bool = False,
+    ) -> None:
         super().__init__(project_config=project_config, print_debug=print_debug)
         self.puzzle_list: list[Puzzle] = puzzle_list
+        self.verso_page: bool = verso_page
+        self.start, self.end = puzzle_range
 
     def _create_solution_thumbnail(self, puzzle: Puzzle) -> Image.Image:
         thumbnail: Image.Image = self._make_base_image()
@@ -240,8 +251,30 @@ class ContentsSolution(Contents):
 
     def get_content_image(self) -> Image.Image:
         Logger.get_logger().debug(f"Generating {self.__class__} image for puzzle solution with {len(self.puzzle_list)}")
-        col_width = self.config.content_width_pixels // self.config.solution_page_cols
-        row_height = self.config.content_height_pixels // self.config.solution_page_rows
+        self.draw.rectangle(
+            xy=[(0, 0), (self.size[0], self.config.solution_page_banner_height_pixels)], fill=self.colours["LIGHT_GREY"]
+        )
+        if self.verso_page:
+            text: ImageText.Text = ImageText.Text(text=self.solution_title, font=self.fonts["TITLE_FONT"])
+            self.draw.text(
+                xy=(0, (self.config.solution_page_banner_height_pixels // 2)),
+                anchor="lm",
+                text=text.text,
+                font=text.font,
+                fill=self.colours["SOLID_BLACK"],
+            )
+        else:
+            puzzle_numbers = f"{self.start}-{self.end} "
+            text: ImageText.Text = ImageText.Text(text=puzzle_numbers, font=self.fonts["TITLE_FONT"])
+            self.draw.text(
+                xy=(self.size[0], (self.config.solution_page_banner_height_pixels // 2)),
+                anchor="rm",
+                text=text.text,
+                font=text.font,
+                fill=self.colours["SOLID_BLACK"],
+            )
+        col_width = self.size[0] // self.config.solution_page_cols
+        row_height = (self.size[1] - self.config.solution_page_banner_height_pixels) // self.config.solution_page_rows
         for n, puzzle in enumerate(self.puzzle_list):
             solution_image: Image.Image = self._create_solution_thumbnail(puzzle)
             solution_thumbnail = ImageOps.contain(image=solution_image, size=(col_width, row_height))
@@ -249,19 +282,28 @@ class ContentsSolution(Contents):
             y = n // self.config.solution_page_cols
             self.base_image.paste(
                 im=solution_thumbnail,
-                box=((x * col_width) + (col_width // 2) - (solution_thumbnail.width // 2), y * row_height),
+                box=(
+                    (x * col_width) + (col_width // 2) - (solution_thumbnail.width // 2),
+                    (y * row_height) + self.config.solution_page_banner_height_pixels,
+                ),
                 mask=solution_thumbnail,
             )
         if self.print_debug:
             for x in range(1, self.config.solution_page_cols):
                 self.draw.line(
-                    xy=[(x * col_width, 0), (x * col_width, self.base_image.height)],
+                    xy=[
+                        (x * col_width, self.config.solution_page_banner_height_pixels),
+                        (x * col_width, self.size[1] + self.config.solution_page_banner_height_pixels),
+                    ],
                     fill=self.colours["DEBUG_BLUE"],
                     width=2,
                 )
             for y in range(1, self.config.solution_page_rows):
                 self.draw.line(
-                    xy=[(0, y * row_height), (self.base_image.width, y * row_height)],
+                    xy=[
+                        (0, (y * row_height) + self.config.solution_page_banner_height_pixels),
+                        (self.size[0], (y * row_height) + self.config.solution_page_banner_height_pixels),
+                    ],
                     fill=self.colours["DEBUG_BLUE"],
                     width=2,
                 )
