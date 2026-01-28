@@ -13,6 +13,7 @@ class ProjectConfig(BaseModel):
     outer_margin_inches: float = Field(..., description="Outer margin in inches")
     inner_margin_inches: float = Field(..., description="Inner margin in inches")
     title_box_height_inches: float = Field(..., description="Title box height in inches")
+    title_font_size_inches: float = Field(..., description="Title font size in inches")
     wordlist_box_height_inches: float = Field(..., description="Wordlist box height in inches")
     wordlist_font_size_inches: float = Field(..., description="Wordlist font size in inches")
     wordlist_line_spacing_inches: float = Field(..., description="Wordlist line spacing in inches")
@@ -74,7 +75,7 @@ class ProjectConfig(BaseModel):
 
     @property
     def title_font_size_pixels(self) -> int:
-        return int(self.title_box_height_pixels * 0.3)
+        return int(self.title_font_size_inches * self.dpi)
 
     @property
     def wordlist_box_height_pixels(self) -> int:
