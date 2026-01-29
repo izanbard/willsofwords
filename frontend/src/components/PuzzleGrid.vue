@@ -6,15 +6,7 @@ import axios from 'axios'
 import { ref } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import GridTile from '@/components/GridTile.vue'
-
-interface Cell {
-  loc_x: number
-  loc_y: number
-  value: string
-  is_answer: boolean
-  is_profane: boolean
-  direction: { NS: boolean; EW: boolean; NESW: boolean; NWSE: boolean }
-}
+import type { Cell } from '@/types/types.ts'
 
 const { project_name, puzzle_id, columns, rows } = defineProps<{
   project_name: string

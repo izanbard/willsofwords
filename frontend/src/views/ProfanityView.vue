@@ -10,7 +10,7 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import { useToast } from 'vue-toast-notification'
 
-const profanity_list = ref<[string]>([''])
+const profanity_list = ref<string[]>([''])
 const new_word = ref<string>('')
 const loading = ref<boolean>(true)
 const toast = useToast()

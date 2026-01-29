@@ -11,31 +11,7 @@ import PuzzleGrid from '@/components/PuzzleGrid.vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import CalloutBox from '@/components/CalloutBox.vue'
 import GridTile from '@/components/GridTile.vue'
-
-interface Cell {
-  loc_x: number
-  loc_y: number
-  value: string
-  is_answer: boolean
-  is_profane: boolean
-  direction: { NS: boolean; EW: boolean; NESW: boolean; NWSE: boolean }
-}
-
-interface PuzzleData {
-  project_config: Record<string, string | number | boolean>
-  puzzle_id: string
-  puzzle_title: string
-  display_title: string
-  input_word_list: string[]
-  long_fact: string
-  short_fact: string
-  rows: number
-  columns: number
-  cells: Cell[][]
-  puzzle_search_list: string[]
-  density: number
-  profanity: Record<string, (string | (string | number)[])[][]>
-}
+import type { Cell, PuzzleData } from '@/types/types.ts'
 
 const { project_name, puzzle_id } = defineProps<{ project_name: string; puzzle_id: string }>()
 const toast = useToast()
@@ -96,6 +72,21 @@ const rebuild_puzzle = async () => {
       toast.error('Error rebuilding puzzle:', error.message)
     })
 }
+const profanity_false_positive = async (line: string, index: number, state: boolean) => {
+  await axios
+    .patch(`/projects/project/${project_name}/puzzledata/puzzle/${puzzle_id}/accept_profanity/`, {
+      line: line,
+      index: index,
+      state: state,
+    })
+    .then(async () => {
+      toast.success('False positive updated successfully')
+      await load_puzzle_data()
+    })
+    .catch((error) => {
+      toast.error('Error updating false positive:', error.message)
+    })
+}
 </script>
 
 <template>
@@ -106,7 +97,7 @@ const rebuild_puzzle = async () => {
       <ButtonBox icon="save" text="Save Changes" colour="green" @pressed="save_puzzle" />
       <ButtonBox
         icon="change_circle"
-        text="Rebild Puzzle"
+        text="Rebuild Puzzle"
         colour="blue"
         @pressed="rebuild_puzzle"
       />
@@ -174,16 +165,23 @@ const rebuild_puzzle = async () => {
         <div class="label">On {{ line }}:</div>
         <div class="profanity_words">
           <template v-for="(single_word_list, index) in words_and_location_list" :key="index">
-            <div class="profanity_word">
+            <div class="profanity_word" :class="{ false_positive: single_word_list.accepted }">
               <WordTile
-                :word="single_word_list[0] as string"
+                :word="single_word_list.word as string"
                 :delete_button="false"
                 colour="var(--vt-c-red-trans-bkg)"
               />
-              <div v-if="single_word_list[1]">
-                {{ single_word_list[1][0] === 'F' ? 'forwards' : 'reversed' }} from char
-                {{ single_word_list[1][1] }} to char {{ single_word_list[1][2] }}
+              <div>
+                {{ single_word_list.direction === 'F' ? 'forwards' : 'reversed' }} from char
+                {{ single_word_list.word_range[0] }} to char {{ single_word_list.word_range[1] }}
               </div>
+              <InputBlock
+                type="bool"
+                v-model="single_word_list.accepted"
+                @change="profanity_false_positive(line, index, single_word_list.accepted)"
+              >
+                False Positive
+              </InputBlock>
             </div>
           </template>
         </div>
@@ -194,6 +192,9 @@ const rebuild_puzzle = async () => {
 </template>
 
 <style scoped>
+.false_positive {
+  opacity: 0.3;
+}
 .actions {
   display: flex;
   flex-direction: row;

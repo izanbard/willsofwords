@@ -7,12 +7,7 @@ import { useToast } from 'vue-toast-notification'
 import DividerLine from '@/components/DividerLine.vue'
 import PuzzleBlock from '@/components/PuzzleBlock.vue'
 import InputBlock from '@/components/InputBlock.vue'
-
-interface PuzzleBaseData {
-  title: string
-  puzzle_list: string[]
-  page_count: number
-}
+import type { PuzzleBaseData } from '@/types/types.ts'
 
 const loading = ref(true)
 const toast = useToast()
