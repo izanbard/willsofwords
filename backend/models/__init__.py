@@ -7,7 +7,7 @@ from .enums import (  # noqa: F401
     SizeEnum,
 )
 from .grid_size import GridSize  # noqa: F401
-from .profanity import ProfanityList  # noqa: F401
+from .profanity import ProfanityList, ProfanityPatch  # noqa: F401
 from .project_config import ProjectConfig  # noqa: F401
 from .projects import (  # noqa: F401
     ProjectCreate,

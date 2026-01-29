@@ -11,6 +11,7 @@ from backend.models import (
     PuzzleData,
     PuzzleLetter,
     Wordlist,
+    ProfanityPatch,
 )
 from backend.utils import clear_marker_file, set_marker_file
 
@@ -134,6 +135,28 @@ def delete_puzzle(
     puzzle_data.save_data(puzzle_data_path)
     load_puzzle_data.cache_clear()
     return None
+
+
+@ProjectPuzzleDataRouter.patch(
+    "/puzzle/{puzzle_id}/accept_profanity/",
+    summary="Accept a profanity list entry for this puzzle.",
+    description="Accept the profanity list entry for this puzzle.",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def accept_profanity(
+    puzzle_id: str,
+    target_profanity: ProfanityPatch,
+    puzzle_data_path: Annotated[FilePath, Depends(get_puzzle_data_path)],
+    puzzle_data: Annotated[PuzzleData, Depends(load_puzzle_data)],
+):
+    try:
+        puzzle = puzzle_data.get_puzzle_by_id(puzzle_id)
+    except KeyError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Puzzle {puzzle_id} not found")
+
+    puzzle.profanity[target_profanity.line][target_profanity.index]["accepted"] = target_profanity.state
+    puzzle_data.save_data(puzzle_data_path)
+    load_puzzle_data.cache_clear()
 
 
 @ProjectPuzzleDataRouter.put(

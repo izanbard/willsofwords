@@ -2,11 +2,11 @@
 import InputBlock from '@/components/InputBlock.vue'
 import TextBlock from '@/components/TextBlock.vue'
 import DividerLine from '@/components/DividerLine.vue'
-import type { Category } from '@/views/WordlistView.vue'
 import { ref } from 'vue'
 import ButtonBox from '@/components/ButtonBox.vue'
+import type { Category } from '@/types/types.ts'
 
-const {adding = false} = defineProps<{ adding?: boolean }>()
+const { adding = false } = defineProps<{ adding?: boolean }>()
 const category = defineModel<Category>({ required: false, default: null })
 defineEmits(['remove'])
 const word_to_add = ref('')
@@ -26,7 +26,13 @@ const addWord = () => {
 <template>
   <div class="category">
     <div class="actions">
-    <ButtonBox v-if="!adding" colour="red" text="Remove Category" icon="delete" @pressed="$emit('remove')" />
+      <ButtonBox
+        v-if="!adding"
+        colour="red"
+        text="Remove Category"
+        icon="delete"
+        @pressed="$emit('remove')"
+      />
     </div>
     <InputBlock type="text" v-model="category.category">Title:&nbsp;</InputBlock>
     <div class="input_list">

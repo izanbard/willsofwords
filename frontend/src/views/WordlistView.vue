@@ -10,22 +10,8 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import WordlistCategory from '@/components/WordlistCategory.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
-import { useRouter, useRoute } from 'vue-router'
-
-export interface Category {
-  category: string
-  word_list: string[]
-  short_fact: string
-  long_fact: string
-}
-
-interface Wordlist {
-  title: string
-  category_prompt: string
-  wordlist_prompt: string
-  creation_date: string
-  category_list: Category[]
-}
+import { useRoute, useRouter } from 'vue-router'
+import type { Category, Wordlist } from '@/types/types.ts'
 
 const props = defineProps<{ project_name: string; mode?: 'create' | 'edit' }>()
 const emit = defineEmits(['saved'])
@@ -188,10 +174,13 @@ watch(
     <DividerLine />
     <HeadingBlock :level="2">Categories</HeadingBlock>
     <template v-for="(category, index) in wordlist.category_list" :key="index">
-      <WordlistCategory v-model="wordlist.category_list[index]" @remove="wordlist.category_list.splice(index, 1)"/>
+      <WordlistCategory
+        v-model="wordlist.category_list[index]"
+        @remove="wordlist.category_list.splice(index, 1)"
+      />
     </template>
     <HeadingBlock :level="2">Add New Category</HeadingBlock>
-    <WordlistCategory v-model="new_category" :adding="true"/>
+    <WordlistCategory v-model="new_category" :adding="true" />
     <ButtonBox colour="green" text="Add Another" icon="add" @pressed="add_category" />
   </div>
 </template>

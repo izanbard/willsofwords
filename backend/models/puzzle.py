@@ -29,7 +29,7 @@ class Puzzle(BaseModel):
     )
     puzzle_search_list: list[str] = Field(default_factory=list, description="the words used in this puzzle")
     density: float = Field(default=0.0, description="the density of words in the puzzle")
-    profanity: dict[str, list[tuple[str, tuple[str, int, int]]]] = Field(
+    profanity: dict[str, list[dict[str, str | bool | tuple[int, int] | list[tuple[int, int]]]]] = Field(
         default_factory=dict, description="the profanity of scores for rows/cols/diags in puzzle"
     )
 
@@ -221,34 +221,37 @@ class Puzzle(BaseModel):
         raise ValueError("You fucked this, wills, you moron")
 
     def check_for_inadvertent_profanity(self):
+        if not self.project_config.enable_profanity_filter:
+            return
         self.reset_profanity()
-        grid_strings: dict[str, list[tuple[str, tuple[int, int]]]] = self._get_grid_strings()
+        grid_strings: dict[str, list[tuple[str, tuple[int, int] | list[tuple[int, int]]]]] = self._get_grid_strings()
         for name, grid_string in grid_strings.items():
             grid_string_substrings_forward = self._check_grid_string(grid_string)
             gird_string_substrings_backward = self._check_grid_string(grid_string[::-1], "R")
-            if len(grid_string_substrings_forward) > 0:
-                for coord_list in [x[2] for x in grid_string_substrings_forward]:
-                    for coord in coord_list:
-                        self.cells[coord[1]][coord[0]].is_profane = True
-            if len(gird_string_substrings_backward) > 0:
-                for coord_list in [x[2] for x in gird_string_substrings_backward]:
-                    for coord in coord_list:
-                        self.cells[coord[1]][coord[0]].is_profane = True
-            bad_words = [(x[0], x[1]) for x in grid_string_substrings_forward] + [
-                (x[0], x[1]) for x in gird_string_substrings_backward
-            ]
+            bad_words = grid_string_substrings_forward + gird_string_substrings_backward
             if len(bad_words) > 0:
+                for bad_word in bad_words:
+                    for coord in bad_word["coords"]:
+                        self.cells[coord[1]][coord[0]].is_profane = True
                 self.profanity[name] = bad_words
 
     def _check_grid_string(
         self, grid_string: list[tuple[str, tuple[int, int]]], direction: str = "F"
-    ) -> list[tuple[str, tuple[str, int, int], list[tuple[int, int]]]]:
+    ) -> list[dict[str, str | bool | tuple[int, int] | list[tuple[int, int]]]]:
         ret_var = []
         for i in range(len(grid_string)):
             for j in range(i + 1, len(grid_string) + 1):
                 word = "".join(letter[0] for letter in grid_string[i:j])
                 if self._check_a_word_against_profanity_list(word):
-                    ret_var.append((word, (direction, i, j), [letter[1] for letter in grid_string[i:j]]))
+                    ret_var.append(
+                        {
+                            "word": word,
+                            "accepted": False,
+                            "direction": direction,
+                            "word_range": (i, j),
+                            "coords": [letter[1] for letter in grid_string[i:j]],
+                        }
+                    )
         return ret_var
 
     @staticmethod
