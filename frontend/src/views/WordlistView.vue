@@ -13,42 +13,33 @@ import ButtonBox from '@/components/ButtonBox.vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Category, Wordlist } from '@/types/types.ts'
 
-const props = defineProps<{ project_name: string; mode?: 'create' | 'edit' }>()
+const props = defineProps<{ project_name: string }>()
 const emit = defineEmits(['saved'])
 const router = useRouter()
-const route = useRoute()
 const loading = ref(true)
 const wordlist = ref<Wordlist>({
+  topic: '',
   title: '',
-  category_prompt: '',
-  wordlist_prompt: '',
   creation_date: '',
-  category_list: [],
+  front_page_introduction: '',
+  categories: [],
 } as Wordlist)
 const toast = useToast()
 const new_category = ref<Category>({
-  category: '',
+  puzzle_topic: '',
   word_list: [],
-  short_fact: '',
-  long_fact: '',
+  did_you_know: '',
+  introduction: '',
 } as Category)
 
-const create_wordlist_according_to_mode = async () => {
-  if (props.mode !== 'create') {
-    await load_wordlist()
-    return
-  }
-  loading.value = false
-}
-
 onBeforeMount(async () => {
-  await create_wordlist_according_to_mode()
+  await load_wordlist()
 })
 
 const load_wordlist = async () => {
   loading.value = true
   await axios
-    .get(`/projects/project/${props.project_name}/wordlist`)
+    .get(`/projects/project/${props.project_name}/wordlist/`)
     .then((response) => {
       wordlist.value = response.data
     })
@@ -60,36 +51,41 @@ const load_wordlist = async () => {
 }
 const add_category = () => {
   if (
-    new_category.value.category.length === 0 ||
+    new_category.value.puzzle_topic.length === 0 ||
     new_category.value.word_list.length === 0 ||
-    new_category.value.long_fact.length === 0 ||
-    new_category.value.short_fact.length === 0
+    new_category.value.introduction.length === 0 ||
+    new_category.value.did_you_know.length === 0
   ) {
     toast.error('Category, word list, and both facts must be provided for new categories')
     return false
   }
-  wordlist.value.category_list.push(new_category.value)
-  new_category.value = { category: '', word_list: [], short_fact: '', long_fact: '' } as Category
+  wordlist.value.categories.push(new_category.value)
+  new_category.value = {
+    puzzle_topic: '',
+    word_list: [],
+    did_you_know: '',
+    introduction: '',
+  } as Category
   return true
 }
 
 const save_wordlist = async () => {
   if (
-    new_category.value.category.length > 0 ||
+    new_category.value.puzzle_topic.length > 0 ||
     new_category.value.word_list.length > 0 ||
-    new_category.value.long_fact.length > 0 ||
-    new_category.value.short_fact.length > 0
+    new_category.value.introduction.length > 0 ||
+    new_category.value.did_you_know.length > 0
   ) {
     const success = add_category()
     if (!success) return
   }
   if (
-    wordlist.value.category_list.some(
+    wordlist.value.categories.some(
       (category) =>
-        category.category.length === 0 ||
+        category.puzzle_topic.length === 0 ||
         category.word_list.length === 0 ||
-        category.long_fact.length === 0 ||
-        category.short_fact.length === 0,
+        category.introduction.length === 0 ||
+        category.did_you_know.length === 0,
     )
   ) {
     toast.error('All categories must have a name, word list, and both facts')
@@ -102,7 +98,7 @@ const save_wordlist = async () => {
       toast.success('Wordlist saved successfully')
       await router.push({
         name: 'edit-wordlist',
-        params: { project_name: props.project_name, mode: 'edit' },
+        params: { project_name: props.project_name },
       })
     })
     .catch((error) => {
@@ -111,23 +107,6 @@ const save_wordlist = async () => {
   emit('saved')
   loading.value = false
 }
-
-watch(
-  () => route.params.mode,
-  async (mode) => {
-    if (mode === 'edit') {
-      await load_wordlist()
-    } else {
-      wordlist.value = {
-        title: '',
-        category_prompt: '',
-        wordlist_prompt: '',
-        creation_date: '',
-        category_list: [],
-      } as Wordlist
-    }
-  },
-)
 </script>
 
 <template>
@@ -142,41 +121,22 @@ watch(
     <HeadingBlock :level="2">Base Data</HeadingBlock>
     <div class="actions">
       <ButtonBox colour="green" text="Save Changes" icon="save" @pressed="save_wordlist" />
-      <ButtonBox
-        v-if="mode === 'edit'"
-        text="Revert to Saved"
-        colour="indigo"
-        icon="cancel"
-        @pressed="load_wordlist"
-      />
+      <ButtonBox text="Revert to Saved" colour="indigo" icon="cancel" @pressed="load_wordlist" />
     </div>
     <div class="input_list">
-      <InputBlock type="text" v-model="wordlist.title">Book Title:&nbsp;</InputBlock>
-      <InputBlock
-        type="text"
-        v-model="wordlist.creation_date"
-        description="Not ued for now, but will form aprt of the AI audit process.  Feel free to leave it blank or otherwise unmolested."
-        >Created:&nbsp;
-      </InputBlock>
-      <InputBlock
-        type="text"
-        v-model="wordlist.wordlist_prompt"
-        description="Not currently used, here for future proofing the AI component."
-        >Prompt to Generate Categories:&nbsp;</InputBlock
-      >
-      <InputBlock
-        type="text"
-        v-model="wordlist.category_prompt"
-        description="Not currently used, here for future proofing the AI component."
-        >Prompt to Generate Puzzle Words:&nbsp;</InputBlock
+      <InputBlock type="text" v-model="wordlist.topic" readonly>Book Topic:</InputBlock>
+      <InputBlock type="text" v-model="wordlist.title">Book Title:</InputBlock>
+      <InputBlock type="text" v-model="wordlist.creation_date" readonly> Created: </InputBlock>
+      <InputBlock type="textarea" v-model="wordlist.front_page_introduction"
+        >Front Page Introduction:</InputBlock
       >
     </div>
     <DividerLine />
     <HeadingBlock :level="2">Categories</HeadingBlock>
-    <template v-for="(category, index) in wordlist.category_list" :key="index">
+    <template v-for="(category, index) in wordlist.categories" :key="index">
       <WordlistCategory
-        v-model="wordlist.category_list[index]"
-        @remove="wordlist.category_list.splice(index, 1)"
+        v-model="wordlist.categories[index]"
+        @remove="wordlist.categories.splice(index, 1)"
       />
     </template>
     <HeadingBlock :level="2">Add New Category</HeadingBlock>

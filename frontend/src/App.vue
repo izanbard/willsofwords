@@ -17,6 +17,7 @@ const icon_list: string[] = [
   'error',
   'folder_copy',
   'info',
+  'mindfulness',
   'save',
   'sentiment_stressed',
   'settings',

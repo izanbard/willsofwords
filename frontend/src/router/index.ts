@@ -8,6 +8,7 @@ import AboutView from '@/views/AboutView.vue'
 import ProjectView from '@/views/ProjectView.vue'
 import WordlistView from '@/views/WordlistView.vue'
 import PuzzleView from '@/views/PuzzleView.vue'
+import CreateWordlistView from '@/views/CreateWordlistView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,10 +58,16 @@ const router = createRouter({
           props: (route) => ({ project_name: route.params.project_name, mode: route.params.mode }),
         },
         {
-          path: 'wordlist/:mode',
+          path: 'wordlist/edit',
           name: 'edit-wordlist',
           component: WordlistView,
-          props: (route) => ({ project_name: route.params.project_name, mode: route.params.mode }),
+          props: true,
+        },
+        {
+          path: 'wordlist/create',
+          name: 'create-wordlist',
+          component: CreateWordlistView,
+          props: true,
         },
         {
           path: 'puzzledata',
@@ -69,6 +76,11 @@ const router = createRouter({
           props: true,
         },
       ],
+    },
+    {
+      path: '/experimental',
+      component: CreateWordlistView,
+      props: true,
     },
     {
       path: '/:pathMatch(.*)*',

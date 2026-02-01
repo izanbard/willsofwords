@@ -18,8 +18,8 @@ class AppConfig(BaseModel):
 class AIConfig(BaseModel):
     """Configuration settings for AI."""
 
-    model: str = Field(default="gemma3:12b", description="AI model to use for puzzle generation")
-    host: str = Field(default="http://localhost:11434/", description="AI host URL for puzzle generation")
+    model: str = Field(default="claude-haiku-4-5", description="AI model to use for puzzle generation")
+    api_key: str = Field(default="", description="API key for LLM")
 
 
 class Config(BaseSettings):

@@ -1,9 +1,10 @@
+import re
 import string
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path as FilePath
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from backend.utils import Logger, get_profanity_list
 
@@ -50,7 +51,7 @@ class WordlistBase(BaseModel, ABC):
         return get_profanity_list()
 
 
-class Category(WordlistBase):
+class PuzzleInput(WordlistBase):
     """
     Represents a category containing a title, facts, and a list of associated words.
 
@@ -59,21 +60,53 @@ class Category(WordlistBase):
     fact, and a list of associated words that can be validated for profanity and
     illegal characters. This ensures consistency and correctness in category data.
 
-    :ivar category: The title of the category. Must be between 3 and 80 characters.
-    :type category: str
+    :ivar puzzle_topic: The title of the category. Must be between 3 and 80 characters.
+    :type puzzle_topic: str
     :ivar word_list: The list of words associated with this category. Each word
         must be between 3 and 75 characters.
     :type word_list: list[str]
-    :ivar long_fact: The long fact of the category, providing a detailed description.
-    :type long_fact: str
-    :ivar short_fact: The short fact of the category, providing a brief description.
-    :type short_fact: str
+    :ivar introduction: The long fact of the category, providing a detailed description.
+    :type introduction: str
+    :ivar did_you_know: The short fact of the category, providing a brief description.
+    :type did_you_know: str
     """
 
-    category: str = Field(description="The title", min_length=3, max_length=80)
+    puzzle_topic: str = Field(description="The title", min_length=3, max_length=80)
     word_list: list[str] = Field(description="the list of words for this category", min_length=3, max_length=75)
-    long_fact: str = Field(description="The long fact of the category")
-    short_fact: str = Field(description="The short fact of the category")
+    introduction: str = Field(..., description="Introduction to the puzzle topic, should be engaging and informative")
+    did_you_know: str = Field(..., description="Short fact about the puzzle topic, should be concise and informative")
+
+    @field_validator("introduction", mode="after")
+    @classmethod
+    def check_introduction_length(cls, value):
+        if len(value.split()) > 250:
+            raise ValueError("Introduction should be less than 250 words")
+        return value
+
+    @field_validator("did_you_know", mode="after")
+    @classmethod
+    def check_did_you_know_length(cls, value):
+        if len(value.split()) > 25:
+            raise ValueError("Did you know fact should be less than 25 words")
+        return value
+
+    @field_validator("word_list", mode="after")
+    @classmethod
+    def check_word_list_length(cls, value):
+        exp = re.compile(
+            r"\b(?:XC|XL|LX{0,3}|X{1,3})(?:IX|IV|VI{0,3}|I{1,3})\b|\b(?:XC|XL|LX{0,3}|X{1,3})\b|\b(?:IX|IV|VI{0,3}|I{1,3})\b"
+        )
+        for word in value:
+            for char in word:
+                if not (char.isascii() and char.isalpha() or char == " " or char == "-"):
+                    raise ValueError(
+                        f"Words in the wordlist must not contain numbers or punctuation.  {word} violates this rule, please try again"
+                    )
+            if exp.search(word):
+                raise ValueError(
+                    f"Words in the wordlist must not contain roman numerals. {word} violates this rule, please try again"
+                )
+        return value
 
     def check_profanity(self):
         """
@@ -89,9 +122,9 @@ class Category(WordlistBase):
         :return: None
         """
         profanity = (
-            self._check_word_list(self.category.split())
-            + self._check_word_list(self.long_fact.split())
-            + self._check_word_list(self.short_fact.split())
+            self._check_word_list(self.puzzle_topic.split())
+            + self._check_word_list(self.introduction.split())
+            + self._check_word_list(self.did_you_know.split())
         )
         for phrase in self.word_list:
             profanity += self._check_word_list(phrase.split())
@@ -115,40 +148,40 @@ class Category(WordlistBase):
             for char in word:
                 if not (char.isascii() and char.isalpha() or char == " " or char == "-"):
                     illegal_chars.append(char)
-                    Logger.get_logger().warn(f"Validating Input: Illegal character found in word: {self.category} - {word}")
+                    Logger.get_logger().warn(
+                        f"Validating Input: Illegal character found in word: {self.puzzle_topic} - {word}"
+                    )
         return illegal_chars
 
 
-class Wordlist(WordlistBase):
-    """
-    Represents a word list with associated metadata and functionality to validate and
-    check for profanity within its elements.
-
-    This class is used to manage word lists with associated categories. It includes
-    functionality to validate and clean up various elements within the word list,
-    ensuring compliance with defined profanity and character constraints.
-
-    :ivar title: The title of the word list, with a minimum length of 3 characters
-        and a maximum length of 80 characters.
-    :type title: str
-    :ivar category_prompt: The prompt used to retrieve the category list.
-    :type category_prompt: str
-    :ivar wordlist_prompt: The prompt used to retrieve the word list.
-    :type wordlist_prompt: str
-    :ivar creation_date: The date the word list was created. Defaults to the current
-        datetime at the time of instantiation.
-    :type creation_date: datetime
-    :ivar category_list: The list of categories associated with the word list.
-    :type category_list: list[Category]
-    """
-
-    title: str = Field(description="The title", min_length=3, max_length=80)
-    category_prompt: str = Field(description="The prompt used to get the category list")
-    wordlist_prompt: str = Field(description="The prompt used to get the word list")
+class WordlistInput(WordlistBase):
+    topic: str = Field(description="The topic of the book of puzzles as provided by the user", min_length=3, max_length=80)
+    title: str = Field(description="The title of the book to be used on the front page and cover", min_length=3, max_length=80)
     creation_date: str = Field(
         default_factory=lambda: datetime.now().isoformat(timespec="seconds"), description="The date the word list was created"
     )
-    category_list: list[Category] = Field(description="The category list")
+    front_page_introduction: str = Field(
+        ..., description="Introduction to the book of puzzles, should be engaging and informative"
+    )
+    subtopic_list: list[str] = Field([], description="the list of subtopics to be used for the puzzle book")
+
+    def check_profanity(self):
+        profanity = self._check_word_list(self.title.split())
+        profanity += self._check_word_list(self.topic.split())
+        profanity += self._check_word_list(self.front_page_introduction.split())
+        return profanity
+
+
+class Wordlist(WordlistBase):
+    topic: str = Field(description="The topic of the book of puzzles as provided by the user", min_length=3, max_length=80)
+    title: str = Field(description="The title of the book to be used on the front page and cover", min_length=3, max_length=80)
+    creation_date: str = Field(
+        default_factory=lambda: datetime.now().isoformat(timespec="seconds"), description="The date the word list was created"
+    )
+    front_page_introduction: str = Field(
+        ..., description="Introduction to the book of puzzles, should be engaging and informative"
+    )
+    categories: list[PuzzleInput] = Field(description="The category list")
 
     def check_profanity(self):
         """
@@ -156,17 +189,15 @@ class Wordlist(WordlistBase):
 
         This method splits and evaluates specific text attributes of the object for
         inappropriate language using the `_check_word_list` method. Additionally, it
-        iterates through all objects in the `category_list` and invokes their
+        iterates through all objects in the `categories` and invokes their
         `check_profanity` method.
 
         :raises ValueError: If any profane words are detected in the text attributes.
         """
-        profanity = (
-            self._check_word_list(self.title.split())
-            + self._check_word_list(self.category_prompt.split())
-            + self._check_word_list(self.wordlist_prompt.split())
-        )
-        for category in self.category_list:
+        profanity = self._check_word_list(self.title.split())
+        profanity += self._check_word_list(self.topic.split())
+        profanity += self._check_word_list(self.front_page_introduction.split())
+        for category in self.categories:
             profanity += category.check_profanity()
         return profanity
 
@@ -185,7 +216,7 @@ class Wordlist(WordlistBase):
         """
         profanity = self.check_profanity()
         illegal_char_list = []
-        for category in self.category_list:
+        for category in self.categories:
             illegal_char_list += category.check_for_illegal_chars()
         return {"profanity": profanity, "illegal_chars": illegal_char_list}
 

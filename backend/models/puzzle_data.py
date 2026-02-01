@@ -10,7 +10,7 @@ from .enums import LayoutEnum
 from .grid_size import GridSize
 from .project_config import ProjectConfig
 from .puzzle import Puzzle
-from .wordlist import Category, Wordlist
+from .wordlist import PuzzleInput, Wordlist
 
 
 class PuzzleBaseData(BaseModel):
@@ -45,9 +45,9 @@ class PuzzleData(BaseModel):
 
     def create_puzzles(self, filename: FilePath) -> None:
         Logger.get_logger().info("Creating puzzles")
-        base = len(self.wordlist.category_list)
+        base = len(self.wordlist.categories)
         count = 0
-        for category in self.wordlist.category_list:
+        for category in self.wordlist.categories:
             self._add_a_puzzle(category)
             count += 1
             percentage = int(count / base * 90)
@@ -65,20 +65,20 @@ class PuzzleData(BaseModel):
         clear_marker_file(filename)
         Logger.get_logger().info(f"Done saving puzzles to {filename}")
 
-    def _add_a_puzzle(self, category: Category) -> None:
-        Logger.get_logger().debug(f"Creating puzzle: {category.category}")
+    def _add_a_puzzle(self, category: PuzzleInput) -> None:
+        Logger.get_logger().debug(f"Creating puzzle: {category.puzzle_topic}")
         len_words = sum(len(word) for word in category.word_list)
         size = GridSize(self.project_config, len_words, self.project_config.max_density)
         Logger.get_logger().debug(f"Puzzle Target Size: {size.columns}x{size.rows}")
         puzzle = Puzzle(
             project_config=self.project_config,
-            puzzle_id=category.category.strip()
+            puzzle_id=category.puzzle_topic.strip()
             .upper()
             .translate({ord(c): None for c in string.whitespace + string.digits + string.punctuation}),
-            puzzle_title=category.category,
+            puzzle_title=category.puzzle_topic,
             input_word_list=category.word_list,
-            long_fact=category.long_fact,
-            short_fact=category.short_fact,
+            long_fact=category.introduction,
+            short_fact=category.did_you_know,
             columns=size.columns,
             rows=size.rows,
         )

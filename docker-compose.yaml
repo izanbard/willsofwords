@@ -21,8 +21,8 @@ services:
       - VITE_API_BASE_URL=http://localhost:5000
 
         # Not currently used, but stand by
-      - AI__MODEL=gemma3:12b
-      - AI__HOST=http://localhost:11434/
+      - AI__MODEL=claude-haiku-4-5
+      - AI__API_KEY=${AI__API_KEY}
 
   dorothy:
     container_name: dorothy
