@@ -7,9 +7,4 @@ COPY ./frontend/package.json .
 RUN npm install
 COPY ./frontend .
 RUN npm run build
-
-FROM node:lts-alpine AS serve
-WORKDIR /app
-RUN npm install -g http-server
-COPY --from=build /app/dist /app/public
-CMD ["http-server", "/app/public", "-p", "5001", "--cors"]
+CMD ["npm", "run", "serve"]

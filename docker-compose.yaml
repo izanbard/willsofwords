@@ -29,10 +29,8 @@ services:
     image: gordywills/dorothy:latest
     pull_policy: always
     restart: "no"
-    volumes:
-      - .:/app
     ports:
       - "5001:5001"
-    working_dir: /app/frontend
+    working_dir: /app
     environment:
       - VITE_API_BASE_URL=localhost:5000
