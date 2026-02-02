@@ -12,4 +12,4 @@ FROM node:lts-alpine AS serve
 WORKDIR /app
 RUN npm install -g http-server
 COPY --from=build /app/dist /app/public
-CMD ["http-server", "./-al apublic", "-p", "5001", "--cors"]
+CMD ["http-server", "./public", "-p", "5001", "--cors"]
