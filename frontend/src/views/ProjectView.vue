@@ -87,17 +87,23 @@ const edit_project_settings = () => {
     params: { project_name: project_name, mode: 'edit' },
   })
 }
-const edit_wordlist = (mode: 'edit' | 'create') => {
+const edit_wordlist = () => {
   router.push({
     name: 'edit-wordlist',
-    params: { project_name: project_name, mode: mode },
+    params: { project_name: project_name, mode: 'edit' },
+  })
+}
+const create_wordlist = () => {
+  router.push({
+    name: 'create-wordlist',
+    params: { project_name: project_name },
   })
 }
 const delete_wordlist = async () => {
   await axios
     .delete(`/projects/project/${project_name}/wordlist`)
     .then(async () => {
-      edit_wordlist('create')
+      create_wordlist()
       await load_project_file_list()
     })
     .catch((error) => {
@@ -163,6 +169,7 @@ const view_manuscript = () => {
   //   params: { project_name: project_name },
   // })
   const pdfSource: string =
+    'http://' +
     import.meta.env.VITE_API_BASE_URL +
     '/projects/project/' +
     project_name +
@@ -192,9 +199,9 @@ const view_manuscript = () => {
         'delete',
         named_file_state(hero_files.project_settings)[0] === 'exists' ? 'create' : '',
       ]"
-      @edit="edit_wordlist('edit')"
+      @edit="edit_wordlist"
       @delete="delete_wordlist"
-      @create="edit_wordlist('create')"
+      @create="create_wordlist"
     />
     <ProjectFile
       hero_file_title="Puzzle Data"

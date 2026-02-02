@@ -34,10 +34,10 @@ const addWord = () => {
         @pressed="$emit('remove')"
       />
     </div>
-    <InputBlock type="text" v-model="category.category">Title:&nbsp;</InputBlock>
+    <InputBlock type="text" v-model="category.puzzle_topic">Title:&nbsp;</InputBlock>
     <div class="input_list">
-      <InputBlock type="textarea" v-model="category.short_fact">Short Form Fact:&nbsp;</InputBlock>
-      <InputBlock type="textarea" v-model="category.long_fact">Long Form Fact:&nbsp;</InputBlock>
+      <InputBlock type="textarea" v-model="category.did_you_know">Did You Know Fact:</InputBlock>
+      <InputBlock type="textarea" v-model="category.introduction">Introduction:</InputBlock>
     </div>
     <div class="wordlist">
       <TextBlock class="label">Words in this category:</TextBlock>

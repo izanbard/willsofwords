@@ -17,4 +17,4 @@ from .projects import (  # noqa: F401
 )
 from .puzzle import Puzzle, PuzzleLetter  # noqa: F401
 from .puzzle_data import PuzzleBaseData, PuzzleData  # noqa: F401
-from .wordlist import Category, Wordlist  # noqa: F401
+from .wordlist import PuzzleInput, Wordlist  # noqa: F401

@@ -6,9 +6,10 @@ from functools import lru_cache
 from pathlib import Path as FilePath
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Path
-from starlette import status
-from starlette.requests import Request
+from fastapi import Depends, HTTPException, Path, Request, status, WebSocket
+from pydantic_ai import Agent
+from pydantic_ai.models.anthropic import AnthropicModel
+from pydantic_ai.providers.anthropic import AnthropicProvider
 
 from ..models import (
     ProfanityList,
@@ -18,7 +19,9 @@ from ..models import (
     ProjectsList,
     PuzzleData,
     Wordlist,
+    PuzzleInput,
 )
+from ..models.wordlist import WordlistInput
 from ..utils import get_profanity_list
 
 
@@ -180,3 +183,80 @@ def dir_copy(src: FilePath, dst: FilePath):
         for directory in dirs:
             (dst / directory).mkdir(parents=True)
             dir_copy(root / directory, dst / directory)
+
+
+def convert_to_title_case(word: str) -> str:
+    """Converts a word or phrase to title case"""
+    return word.title()
+
+
+def get_a_timestamp() -> str:
+    return datetime.now().isoformat(timespec="seconds")
+
+
+def get_api_key(ws: WebSocket) -> str:
+    return ws.state.config.ai.api_key
+
+
+def get_ai_model(key: Annotated[str, Depends(get_api_key)], ws: WebSocket) -> AnthropicModel:
+    return AnthropicModel(
+        model_name=ws.state.config.ai.model,
+        provider=AnthropicProvider(api_key=key),
+    )
+
+
+def get_topic_agent(model: Annotated[AnthropicModel, Depends(get_ai_model)]) -> Agent:
+    return Agent(
+        model=model,
+        instructions="""
+Respond in the role of word search puzzle book author.
+
+Following these strict rules:
+1. Topic-specific sub-topics only - Every word must relate specifically to the main topic. No generic filler sub-topics.
+2. Maximum 40 characters per sub-topic - Example: "Flying Scotsman" = 16 characters.
+3. No profanity or offensive language - Proper names are always acceptable regardless of potential alternative meanings (e.g., "Billy Connolly" is fine).
+5. No word/phrase in the wordlist may contain numbers - No entries like "A4 Pacific", "B17", "11th September" etc. Find alternatives without numbers.
+6. No word/phrase in the wordlist may contain punctuation, except for hyphen "-" and space " " - No entries like "Scottish, Castle" or "Scottish! Castle".
+7. No word/phrase in the wordlist may contain roman numerals - No entries contain sub-strings like "I", "II", "III", "IV", "V", etc or words/phrases like "King George V", "James VI". Find alternatives without roman numerals.
+8. Every puzzle must be unique - No duplication or near duplication of subtopics. Don't have both "Scottish Castles" and "Historic Scottish Fortresses".
+9. Use UK English - British spelling and terminology throughout (colour, honour, recognise, localise, etc.).
+10. Sub-topics should be presented in title case (capitalize first letter of each word, lowercase the rest) and avoid contractions.
+11. The book title must end with the words "Word Search Puzzles".
+12. The front page introduction should be engaging and informative, and should not exceed 200 words.
+13. The front page introduction should include a brief overview of the topic and its significance.
+14. the front page introduction should include a call to action to play the puzzles - for example "So, grab a pen and prepare to explore the bonnie banks and heather-clad moors".
+
+Each response should consist of a book title for the main topic, a front page introduction to the topic, and a list of subtopics of the length specified.
+""",
+        output_type=WordlistInput,
+        tools=[convert_to_title_case, get_a_timestamp],
+        output_retries=3,
+    )
+
+
+def get_puzzle_input_agent(model: Annotated[AnthropicModel, Depends(get_ai_model)]) -> Agent:
+    return Agent(
+        model=model,
+        instructions="""
+Respond in the role of word search puzzle book author.
+
+Following these strict rules:
+1. Topic-specific words/phrases only in the wordlist - Every word must relate specifically to the topic and subtopic.
+2. Words/phrases should NOT be generic filler words like "traditional", "famous", "popular", "beautiful" etc.
+3. Minimum of 4 and maximum of 20 characters per word/phrase (excluding spaces) in the wordlist - Count only letters and punctuation, not spaces. Example: "Flying Scotsman" = 15 characters (excluding the space).
+4. Remove repetitive words from subtopic context - If the subtopic is "Scottish Castles," don't include "Castle" in each entry. "Edinburgh Castle" becomes just "Edinburgh." If the subtopic is "Scottish Lochs," "Loch Ness" becomes just "Ness."
+5. No profanity or offensive language - Proper names are always acceptable regardless of potential alternative meanings (e.g., "Billy Connolly" is fine).
+6. No word/phrase in the wordlist may contain numbers - No entries like "A4 Pacific", "B17", "11th September" etc. Find alternatives without numbers.
+7. No word/phrase in the wordlist may contain punctuation, except for hyphen "-" and space " " - No entries like "Scottish, Castle" or "Scottish! Castle".
+8. No word/phrase in the wordlist may contain roman numerals - No entries contain sub-strings like "I", "II", "III", "IV", "V", etc or words/phrases like "King George V", "James VI". Find alternatives without roman numerals.
+9. Words/phrases in wordlist should be presented in title case (capitalize first letter of each word, lowercase the rest) and avoid contractions.
+10. Use UK English - British spelling and terminology throughout (colour, honour, recognise, localise, etc.).
+11. Introduction should be engaging and informative, providing a brief overview of the subtopic. It should not exceed 250 words. It should not require and context from the did you know fact.
+12. Did you know fact should be engaging, informative and if possible amusing, citing a little known fact about the subtopic. It should not exceed 25 words. It should not require and context from the introduction.
+
+Each response should include a wordlist with the specified number of entries, a short introduction paragraph, and a did you know fact.
+""",
+        output_type=PuzzleInput,
+        tools=[convert_to_title_case, get_a_timestamp],
+        output_retries=5,
+    )

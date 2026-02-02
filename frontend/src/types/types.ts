@@ -38,16 +38,38 @@ export interface PuzzleBaseData {
 }
 
 export interface Category {
-  category: string
+  puzzle_topic: string
   word_list: string[]
-  short_fact: string
-  long_fact: string
+  did_you_know: string
+  introduction: string
 }
 
 export interface Wordlist {
+  topic: string
   title: string
-  category_prompt: string
-  wordlist_prompt: string
   creation_date: string
-  category_list: Category[]
+  front_page_introduction: string
+  categories: Category[]
+}
+
+export interface WordlistInput {
+  topic: string
+  title: string
+  creation_date: string
+  front_page_introduction: string
+  subtopic_list: string[]
+}
+
+export interface AICommand {
+  command: string
+  main_topic?: string
+  number_of_puzzles?: number
+  entries_per_puzzle?: number
+  subtopic_list?: string[]
+  wordlist_input?: WordlistInput
+}
+
+export interface AIResponse {
+  response: string
+  payload: Record<string, string> | Record<string, WordlistInput> | Record<string, Category>
 }

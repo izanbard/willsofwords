@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from backend.models.wordlist import Category, Wordlist
+from backend.models.wordlist import PuzzleInput, Wordlist
 
 from ...utils import get_profanity_list
 from ..test_utils import TestUtils
@@ -13,49 +13,48 @@ class TestCategory(TestUtils):
     @pytest.fixture
     def valid_category_data(self):
         return {
-            "category": "Animals",
+            "puzzle_topic": "Animals",
             "word_list": ["Cat", "Dog", "Elephant"],
-            "long_fact": "Animals are diverse and critical to ecosystems.",
-            "short_fact": "Animals are vital.",
+            "introduction": "Animals are diverse and critical to ecosystems.",
+            "did_you_know": "Animals are vital.",
         }
 
     def test_category_initialization_valid(self, valid_category_data):
-        category = Category(**valid_category_data)
-        assert category.category == "Animals"
+        category = PuzzleInput(**valid_category_data)
+        assert category.puzzle_topic == "Animals"
         assert category.word_list == ["Cat", "Dog", "Elephant"]
-        assert category.long_fact == "Animals are diverse and critical to ecosystems."
+        assert category.introduction == "Animals are diverse and critical to ecosystems."
 
     def test_category_initialization_invalid_length(self, valid_category_data):
-        valid_category_data["category"] = "An"  # Less than 3 characters
+        valid_category_data["puzzle_topic"] = "An"  # Less than 3 characters
         with pytest.raises(ValidationError):
-            Category(**valid_category_data)
+            PuzzleInput(**valid_category_data)
 
     def test_category_check_profanity(self, profanity_mocks, logger_mock):
 
         category_data = {
-            "category": "Category with BADWORD",
+            "puzzle_topic": "Category with BADWORD",
             "word_list": ["Clean word", "BADWORD", "Another BADWORD", "More"],
-            "long_fact": "This contains a BADWORD.",
-            "short_fact": "No profanity here.",
+            "introduction": "This contains a BADWORD.",
+            "did_you_know": "No profanity here.",
         }
-        category = Category(**category_data)
+        category = PuzzleInput(**category_data)
         result = category.check_profanity()
         assert logger_mock.call_count == 4
         assert result == ["BADWORD", "BADWORD.", "BADWORD", "BADWORD"]
 
     def test_category_check_for_illegal_chars(self, valid_category_data):
         valid_category_data["word_list"] = ["Cat", "D&g", "Eleph@nt"]
-        category = Category(**valid_category_data)
-        result = category.check_for_illegal_chars()
-        assert set(result) == {"@", "&"}
+        with pytest.raises(ValidationError):
+            PuzzleInput(**valid_category_data)
 
 
 class TestWordlist(TestUtils):
     @pytest.fixture
     def mock_category(self, mocker):
         return mocker.Mock(
-            Category,
-            category="Animals",
+            PuzzleInput,
+            puzzle_topic="Animals",
             check_for_illegal_chars=mocker.Mock(return_value=[]),
             check_profanity=mocker.Mock(return_value=[]),
         )
@@ -63,17 +62,18 @@ class TestWordlist(TestUtils):
     @pytest.fixture
     def valid_wordlist_data(self, mock_category):
         return {
+            "topic": "Test Wordlist",
             "title": "Test Wordlist",
-            "category_prompt": "List of categories",
-            "wordlist_prompt": "Words to include in the wordlist",
             "creation_date": datetime.now().isoformat(),
-            "category_list": [mock_category, mock_category],
+            "front_page_introduction": "This is a test introduction.",
+            "did_you_know": "This is a test did you know.",
+            "categories": [mock_category, mock_category],
         }
 
     def test_wordlist_initialization_valid(self, valid_wordlist_data):
         wordlist = Wordlist(**valid_wordlist_data)
         assert wordlist.title == "Test Wordlist"
-        assert len(wordlist.category_list) == 2
+        assert len(wordlist.categories) == 2
 
     def test_wordlist_initialization_invalid_title_length(self, valid_wordlist_data):
         valid_wordlist_data["title"] = "AB"
@@ -82,7 +82,7 @@ class TestWordlist(TestUtils):
 
     def test_wordlist_check_profanity(self, profanity_mocks, logger_mock, mock_category):
         wordlist = Wordlist(
-            title="Title BADWORD", category_prompt="Clean", wordlist_prompt="BADWORD", category_list=[mock_category]
+            topic="Topic BADWORD", title="Title BADWORD", front_page_introduction="", categories=[mock_category]
         )
         result = wordlist.check_profanity()
         assert logger_mock.call_count == 2
@@ -91,7 +91,7 @@ class TestWordlist(TestUtils):
     def test_wordlist_validate_word_lists(self, profanity_mocks, logger_mock, mock_category):
 
         wordlist = Wordlist(
-            title="Title BADWORD", category_prompt="Clean", wordlist_prompt="BADWORD", category_list=[mock_category]
+            topic="Topic BADWORD", title="Title BADWORD", front_page_introduction="", categories=[mock_category]
         )
         result = wordlist.validate_word_lists()
         assert logger_mock.call_count == 2
