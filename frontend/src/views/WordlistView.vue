@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onBeforeMount, ref, watch } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { useToast } from 'vue-toast-notification'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import HeadingBlock from '@/components/HeadingBlock.vue'
@@ -10,7 +10,7 @@ import DividerLine from '@/components/DividerLine.vue'
 import InputBlock from '@/components/InputBlock.vue'
 import WordlistCategory from '@/components/WordlistCategory.vue'
 import ButtonBox from '@/components/ButtonBox.vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import type { Category, Wordlist } from '@/types/types.ts'
 
 const props = defineProps<{ project_name: string }>()

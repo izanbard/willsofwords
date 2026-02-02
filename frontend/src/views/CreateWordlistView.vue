@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useIntervalFn, useWebSocket } from '@vueuse/core'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toast-notification'
 import type { AICommand, AIResponse, Category, Wordlist, WordlistInput } from '@/types/types.ts'
@@ -40,7 +40,7 @@ const make_message = (command: string): AICommand => {
   throw new Error(`Unknown command: ${command}`)
 }
 
-const { status, data, send, open, close, ws } = useWebSocket(
+const { status, send } = useWebSocket(
   `ws://${import.meta.env.VITE_API_BASE_URL}/projects/project/${props.project_name}/wordlist/ws`,
   {
     autoReconnect: true,
@@ -96,7 +96,7 @@ const update_data = (data: string) => {
         toast.error('Ahhgghg received puzzle response before topic_list')
         return
       }
-      let puzzle = response.payload.puzzle as Category
+      const puzzle = response.payload.puzzle as Category
       wordlist.value.categories.push(puzzle)
       return
     default:
@@ -187,7 +187,7 @@ const save_wordlist = async () => {
     </CalloutBox>
     <DividerLine />
     <div class="seed_block_container">
-      <LoadingSpinner :loading="loading" local/>
+      <LoadingSpinner :loading="loading" local />
       <HeadingBlock :level="2">Seed Data</HeadingBlock>
       <div class="actions">
         <ButtonBox :colour="status === 'OPEN' ? 'green' : 'red'" :text="`AI State: ${ai_state}`" />
@@ -205,7 +205,14 @@ const save_wordlist = async () => {
           @pressed="create_base_data"
         />
       </div>
-      <template v-if="wordlist_input && wordlist_input.subtopic_list.length > 0 && wordlist && wordlist.categories.length === 0">
+      <template
+        v-if="
+          wordlist_input &&
+          wordlist_input.subtopic_list.length > 0 &&
+          wordlist &&
+          wordlist.categories.length === 0
+        "
+      >
         <div>
           <CalloutBox type="info">
             <TextBlock>
@@ -246,29 +253,35 @@ const save_wordlist = async () => {
     </div>
     <DividerLine />
     <div>
-    <template v-if="wordlist">
-      <HeadingBlock :level="2">Base Data</HeadingBlock>
-      <div class="actions">
-        <ButtonBox v-if="wordlist && wordlist.categories.length > 0 && !loading" colour="green" text="Save Changes" icon="save" @pressed="save_wordlist" />
-      </div>
-      <div class="input_list">
-        <InputBlock type="text" v-model="wordlist.topic" readonly>Book Topic:</InputBlock>
-        <InputBlock type="text" v-model="wordlist.title">Book Title:</InputBlock>
-        <InputBlock type="text" v-model="wordlist.creation_date" readonly> Created: </InputBlock>
-        <InputBlock type="textarea" v-model="wordlist.front_page_introduction">
-          Front Page Introduction:
-        </InputBlock>
-      </div>
-      <DividerLine />
-      <HeadingBlock :level="2">Categories</HeadingBlock>
-      <template v-for="(category, index) in wordlist.categories" :key="index">
-        <WordlistCategory
-          v-model="wordlist.categories[index]"
-          @remove="wordlist.categories.splice(index, 1)"
-        />
+      <template v-if="wordlist">
+        <HeadingBlock :level="2">Base Data</HeadingBlock>
+        <div class="actions">
+          <ButtonBox
+            v-if="wordlist && wordlist.categories.length > 0 && !loading"
+            colour="green"
+            text="Save Changes"
+            icon="save"
+            @pressed="save_wordlist"
+          />
+        </div>
+        <div class="input_list">
+          <InputBlock type="text" v-model="wordlist.topic" readonly>Book Topic:</InputBlock>
+          <InputBlock type="text" v-model="wordlist.title">Book Title:</InputBlock>
+          <InputBlock type="text" v-model="wordlist.creation_date" readonly> Created: </InputBlock>
+          <InputBlock type="textarea" v-model="wordlist.front_page_introduction">
+            Front Page Introduction:
+          </InputBlock>
+        </div>
+        <DividerLine />
+        <HeadingBlock :level="2">Categories</HeadingBlock>
+        <template v-for="(category, index) in wordlist.categories" :key="index">
+          <WordlistCategory
+            v-model="wordlist.categories[index]"
+            @remove="wordlist.categories.splice(index, 1)"
+          />
+        </template>
       </template>
-    </template>
-  </div>
+    </div>
   </div>
 </template>
 
