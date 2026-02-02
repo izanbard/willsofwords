@@ -15,8 +15,6 @@ jobs:
       pull-requests: write
       checks: write
       security-events: write
-    env:
-      VITE_API_BASE_URL: localhost:5000
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -55,6 +53,8 @@ jobs:
       pull-requests: write
       checks: write
       security-events: write
+    env:
+      VITE_API_BASE_URL: localhost:5000
     steps:
       - name: Checkout
         uses: actions/checkout@v6
