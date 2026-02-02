@@ -9,7 +9,7 @@ import 'vue-toast-notification/dist/theme-default.css'
 
 const app = createApp(App)
 
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
+axios.defaults.baseURL = 'http://'+import.meta.env.VITE_API_BASE_URL
 app.use(ToastPlugin, {
   position: 'bottom-right',
 })

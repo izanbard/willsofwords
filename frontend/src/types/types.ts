@@ -66,6 +66,7 @@ export interface AICommand {
   number_of_puzzles?: number
   entries_per_puzzle?: number
   subtopic_list?: string[]
+  wordlist_input?: WordlistInput
 }
 
 export interface AIResponse {

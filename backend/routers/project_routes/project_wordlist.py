@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from pydantic_ai import Agent
 from starlette import status
-from starlette.websockets import WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from backend.models import Wordlist
 from backend.models.aiagent import AIAgent, AICommand, AIResponse
@@ -112,9 +112,11 @@ async def create_wordlist(
                 case "puzzles":
                     try:
                         await websocket.send_json(AIResponse(response="thinking").model_dump())
-                        puzzle_list = instructions.subtopic_list or []
+                        puzzle_list = instructions.wordlist_input.subtopic_list or []
                         for puzzle_topic in puzzle_list:
-                            puzzle = await ai_agent.get_puzzle_input(puzzle_topic, instructions.entries_per_puzzle)
+                            puzzle = await ai_agent.get_puzzle_input(
+                                puzzle_topic, instructions.entries_per_puzzle, instructions.wordlist_input
+                            )
                             await websocket.send_json(AIResponse(response="puzzle", payload={"puzzle": puzzle}).model_dump())
                             Logger.get_logger().info(f"Created puzzle for {puzzle_topic}")
                         await websocket.send_json(AIResponse(response="not_thinking").model_dump())
@@ -127,4 +129,5 @@ async def create_wordlist(
                     )
                     Logger.get_logger().warn(f"Received unknown command: {instructions.command}")
     finally:
-        await websocket.close()
+        if websocket.client_state == WebSocketState.CONNECTED:
+            await websocket.close(code=1000, reason="Client disconnected")

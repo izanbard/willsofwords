@@ -20,10 +20,10 @@ const router = useRouter()
 const loading = ref(false)
 const toast = useToast()
 const wordlist = ref<Wordlist>()
+const wordlist_input = ref<WordlistInput>()
 const main_topic = ref<string>('')
 const number_of_puzzles = ref<number>(0)
 const entries_per_puzzle = ref<number>(0)
-const subtopic_list = ref<string[]>([])
 const ai_state = ref<'OPEN' | 'CLOSED' | 'THINKING'>('OPEN')
 const topic_to_add = ref('')
 
@@ -34,14 +34,14 @@ const make_message = (command: string): AICommand => {
       main_topic: main_topic.value,
       number_of_puzzles: number_of_puzzles.value,
       entries_per_puzzle: entries_per_puzzle.value,
-      subtopic_list: subtopic_list.value,
+      wordlist_input: wordlist_input.value,
     } as AICommand
   }
   throw new Error(`Unknown command: ${command}`)
 }
 
 const { status, data, send, open, close, ws } = useWebSocket(
-  `ws://localhost:5000/projects/project/Pepper/wordlist/ws`,
+  `ws://${import.meta.env.VITE_API_BASE_URL}/projects/project/${props.project_name}/wordlist/ws`,
   {
     autoReconnect: true,
     heartbeat: {
@@ -78,15 +78,14 @@ const update_data = (data: string) => {
         toast.error('Ahhgghg received topic_list response without the correct data')
         return
       }
-      let base_data = response.payload.base_data as WordlistInput
+      wordlist_input.value = response.payload.base_data as WordlistInput
       wordlist.value = {
-        topic: base_data.topic,
-        title: base_data.title,
-        creation_date: base_data.creation_date,
-        front_page_introduction: base_data.front_page_introduction,
+        topic: wordlist_input.value.topic,
+        title: wordlist_input.value.title,
+        creation_date: wordlist_input.value.creation_date,
+        front_page_introduction: wordlist_input.value.front_page_introduction,
         categories: [],
       }
-      subtopic_list.value = base_data.subtopic_list
       return
     case 'puzzle':
       if (!response.payload.puzzle) {
@@ -120,8 +119,8 @@ const create_base_data = async () => {
   send_message('create')
 }
 
-const add_topic = (topic: string) => {
-  subtopic_list.value.push(topic)
+const add_topic = () => {
+  wordlist_input.value?.subtopic_list.push(topic_to_add.value)
   topic_to_add.value = ''
 }
 
@@ -130,7 +129,7 @@ const create_puzzles = async () => {
     toast.error('Please enter a positive number of puzzles and entries per puzzle')
     return
   }
-  if (subtopic_list.value.length === 0) {
+  if (wordlist_input.value?.subtopic_list.length === 0) {
     toast.error('Please enter at least one subtopic')
     return
   }
@@ -206,21 +205,21 @@ const save_wordlist = async () => {
           @pressed="create_base_data"
         />
       </div>
-      <template v-if="subtopic_list.length > 0 && wordlist && wordlist.categories.length === 0">
+      <template v-if="wordlist_input && wordlist_input.subtopic_list.length > 0 && wordlist && wordlist.categories.length === 0">
         <div>
           <CalloutBox type="info">
             <TextBlock>
               Edit these sub topic until you are satisfied and then click create puzzles.
             </TextBlock>
           </CalloutBox>
-          <template v-for="(_, index) in subtopic_list" :key="index">
+          <template v-for="(_, index) in wordlist_input.subtopic_list" :key="index">
             <InputBlock
               type="text"
-              v-model="subtopic_list[index]"
+              v-model="wordlist_input.subtopic_list[index]"
               withButton
               buttonIcon="delete"
               buttonColor="red"
-              @pressed="subtopic_list.splice(index, 1)"
+              @pressed="wordlist_input.subtopic_list.splice(index, 1)"
             />
           </template>
           <InputBlock
